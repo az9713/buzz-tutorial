@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is Nostr? — and what Buzz does with it</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;
+  counter-reset:figc}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:0}
+pre code{background:none;padding:0;font-size:1em}
+.codewrap{position:relative;margin:1.1rem 0}
+.copybtn{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;
+  gap:5px;background:var(--card);border:1px solid var(--rule);color:var(--muted);
+  border-radius:5px;padding:4px 8px;font:500 11px/1 ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer}
+.copybtn:hover{color:var(--fg)}
+.copybtn svg{width:12px;height:12px}
+figure{margin:1.8rem 0;padding:0;counter-increment:figc}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{color:var(--muted);font-size:.86rem;line-height:1.5;margin-top:.6rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+figcaption::before{content:"Fig. " counter(figc) ". ";font-weight:600;color:var(--fg)}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.defn{background:var(--card);border:1px solid var(--rule);border-radius:6px;
+  padding:11px 15px;margin:1rem 0;font-size:.94rem}
+.defn b{color:var(--accent2)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.res{border:1px solid var(--rule);border-radius:7px;padding:12px 16px;margin:.8rem 0;
+  background:var(--card)}
+.res h4{margin:0 0 4px;font-size:1rem}
+.res .who{font-size:.86rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+<h1>What is Nostr? — and what Buzz does with it</h1>
+<p class="sub">You installed Buzz and something told you it runs on "a Nostr relay." This explains
+what that means from zero — no cryptography background assumed — and then exactly how Buzz uses
+it, including the places where Buzz deliberately does not follow the protocol's usual shape.</p>
+</header>
+
+<div class="toc">
+<strong>Contents</strong>
+<ol>
+<li><a href="#p1">Part one — Nostr from zero</a>
+  <ol style="list-style:lower-alpha">
+  <li><a href="#s1">The problem it exists to solve</a></li>
+  <li><a href="#s2">Primitive one: a keypair is the identity</a></li>
+  <li><a href="#s3">Primitive two: an event is a signed JSON object</a></li>
+  <li><a href="#s4">Primitive three: a relay is a dumb server</a></li>
+  <li><a href="#s5">The wire protocol</a></li>
+  <li><a href="#s6">NIPs, and how the spec process works</a></li>
+  <li><a href="#s7">The honest downsides</a></li>
+  </ol></li>
+<li><a href="#p2">Part two — how Buzz uses it</a>
+  <ol style="list-style:lower-alpha">
+  <li><a href="#s8">The payoff: agents and humans are the same thing</a></li>
+  <li><a href="#s9">Which standard NIPs Buzz implements</a></li>
+  <li><a href="#s10">Kind ranges, and why an app needs its own</a></li>
+  <li><a href="#s11">Where Buzz had to extend the protocol</a></li>
+  <li><a href="#s12">Blossom: files are not events</a></li>
+  <li><a href="#s13">The honest tension: one relay, not a mesh</a></li>
+  </ol></li>
+<li><a href="#s14">Where to learn more</a></li>
+</ol>
+</div>
+
+<p class="small">A companion document, <a href="how-buzz-works.html">How Buzz works — and how
+you'd design it from scratch</a>, goes deeper on the architecture: the event pipeline, the crate
+layout, the storage design, and the reasoning behind each. This one is about the protocol
+underneath. Definitions here match <code>buzz/docs/key-concepts.md</code>.</p>
+
+<!-- ══════════════════════ PART ONE ══════════════════════ -->
+<h2 id="p1">Part one — Nostr from zero</h2>
+
+<h3 id="s1">The problem it exists to solve</h3>
+
+<p>Think about what your account on any normal service actually is. It is a row in a company's
+database. Your username, your password hash, your posts, your contacts, your history — all of it
+lives inside infrastructure you do not control, and your ability to be <em>you</em> on that
+service exists entirely at the company's discretion.</p>
+
+<p>Three things follow from that, and they are not hypothetical:</p>
+
+<ul>
+<li><strong>Your identity is not portable.</strong> If you leave, you leave as a stranger. Your
+followers, your reputation, your handle — none of it comes with you, because none of it was ever
+yours in a technical sense. It was a foreign key.</li>
+<li><strong>Your data is not portable either.</strong> Export features, where they exist, give you
+a zip file, not a working identity. You cannot take your posts to a competitor and have them still
+be <em>your</em> posts, verifiably.</li>
+<li><strong>The company can revoke both.</strong> Suspension, deletion, a pricing change, an
+acquisition, a shutdown. The failure mode is total and you have no recourse, because the thing
+that made you <em>you</em> was a record in their table.</li>
+</ul>
+
+<p>The usual response to this is federation — many servers that talk to each other, so you can at
+least choose which company hosts you. That helps, but it does not solve the core problem: your
+identity still lives on <em>a</em> server, and moving between servers still means changing who you
+are.</p>
+
+<p>Nostr takes a different swing. It asks: what if your identity were not stored on a server at
+all? What if it were something you hold, mathematically, that no server issued and no server can
+revoke — and servers became interchangeable, replaceable, unimportant?</p>
+
+<figure>
+<svg viewBox="0 0 740 300" role="img" aria-label="Account-on-a-server identity versus keypair identity">
+  <defs>
+    <marker id="n1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">The normal web</text>
+    <rect x="20" y="38" width="316" height="200" rx="7" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+    <rect x="40" y="58" width="276" height="90" rx="6" fill="currentColor" fill-opacity=".07" stroke="currentColor" stroke-opacity=".45"/>
+    <text x="178" y="80" text-anchor="middle" font-weight="700" fill="currentColor">company's database</text>
+    <rect x="60" y="92" width="236" height="42" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    <text x="178" y="110" text-anchor="middle" fill="currentColor" font-size="10.5">users: id · email · password_hash</text>
+    <text x="178" y="126" text-anchor="middle" fill="currentColor" font-size="10.5">posts: id · user_id · body</text>
+    <text x="178" y="172" text-anchor="middle" fill="currentColor" font-size="10.5">"you" = a row they own</text>
+    <text x="178" y="192" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10.5">they can delete it, price it, lose it</text>
+    <text x="178" y="212" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10.5">leaving means starting over</text>
+
+    <line x1="352" y1="138" x2="396" y2="138" stroke="currentColor" stroke-opacity=".55" marker-end="url(#n1a)"/>
+
+    <text x="410" y="24" font-size="12.5" font-weight="700" fill="currentColor">Nostr</text>
+    <rect x="410" y="38" width="310" height="200" rx="7" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+    <rect x="430" y="58" width="270" height="62" rx="6" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="565" y="80" text-anchor="middle" font-weight="700" fill="currentColor">your keypair</text>
+    <text x="565" y="100" text-anchor="middle" fill="currentColor" font-size="10.5">a number you hold — nobody issued it</text>
+    <text x="565" y="114" text-anchor="middle" fill="currentColor" font-size="10.5">nobody can revoke it</text>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".4">
+      <rect x="430" y="140" width="82" height="40" rx="5"/>
+      <rect x="524" y="140" width="82" height="40" rx="5"/>
+      <rect x="618" y="140" width="82" height="40" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="10.5">
+      <text x="471" y="165">relay A</text>
+      <text x="565" y="165">relay B</text>
+      <text x="659" y="165">relay C</text>
+    </g>
+    <g stroke="currentColor" stroke-opacity=".35">
+      <line x1="500" y1="120" x2="471" y2="140"/>
+      <line x1="565" y1="120" x2="565" y2="140"/>
+      <line x1="630" y1="120" x2="659" y2="140"/>
+    </g>
+    <text x="565" y="204" text-anchor="middle" fill="currentColor" font-size="10.5">servers hold copies, not the identity</text>
+    <text x="565" y="222" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10.5">any of them can vanish; you are unaffected</text>
+
+    <text x="370" y="270" text-anchor="middle" fill="currentColor" fill-opacity=".72" font-size="11">
+      The inversion: identity moves out of the server and into your hands. Servers become interchangeable.
+    </text>
+    <text x="370" y="288" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10.5">
+      Everything else in the protocol is a consequence of that one move.
+    </text>
+  </g>
+</svg>
+<figcaption>The core idea. On the left, your identity is a record inside a company. On the right,
+it is a key you hold, and servers hold only copies of things you signed. Losing a server is an
+inconvenience rather than an erasure.</figcaption>
+</figure>
+
+<p>Fig. 1 is that inversion in one picture. The name is an acronym, and a slightly silly one: <strong>Notes and Other Stuff Transmitted by
+Relays</strong>. The silliness is telling. Nostr is deliberately small — it is not a social
+network, it is a way of moving signed messages around, and the "other stuff" is whatever anyone
+decides to build with it.</p>
+
+<h3 id="s2">Primitive one: a keypair is the identity</h3>
+
+<p>There are no accounts in Nostr. No signup form, no password, no email verification, no
+"forgot my password" link. There is a keypair, and the keypair <em>is</em> you.</p>
+
+<div class="defn">
+<b>Keypair.</b> Two very large numbers that are mathematically linked. The <b>private key</b> is
+a secret you keep; the <b>public key</b> is derived from it and can be shared freely. The link
+runs one way only: the public key is easy to compute from the private key, and computing the
+private key from the public key is not feasible with any known technique. Nostr uses the
+<b>secp256k1</b> curve, the same elliptic curve Bitcoin uses.
+</div>
+
+<p>What makes a keypair useful is that it can do two things no password can.</p>
+
+<p><strong>Signing.</strong> Given any piece of data and your private key, you can produce a
+<b>signature</b> — a short value that anyone holding your public key can check. If the check
+passes, they know two things with mathematical certainty: the data was signed by whoever holds
+that private key, and the data has not been altered by so much as one character since. Nostr uses
+<b>Schnorr signatures</b>, a specific well-studied signing scheme.</p>
+
+<p><strong>Being addressable.</strong> Your public key is a name that is globally unique without
+any registry assigning it. Nobody had to check whether it was taken. There is no naming authority
+to petition, no collision to resolve, no server to ask.</p>
+
+<p>In practice you will see keys in two encodings. Raw hex is what appears inside events —
+64 characters of <code>0-9a-f</code>. For humans, Nostr uses a friendlier text format that starts
+with a recognizable prefix: <code>npub1…</code> for a public key and <code>nsec1…</code> for a
+private key. The prefixes exist mostly so that software can warn you when you have pasted the
+wrong one — and so that you can tell at a glance which is which. Buzz's admin tools accept either
+form: <code>buzz-admin add-member</code> takes an <code>npub1…</code> or a 64-character hex
+string.</p>
+
+<div class="callout warn">
+<span class="lab">Read this twice</span>
+Your private key is not a password. A password is a claim checked against a server's record, so a
+server can reset it. A private key is the mathematical basis of your identity, and no server has
+a copy. <strong>If you lose it, it is gone — there is no recovery, ever.</strong> If someone else
+obtains it, they are indistinguishable from you and you cannot lock them out. This is the single
+most important practical fact about Nostr and it is covered again in <a href="#s7">§1g</a>.
+</div>
+
+<h3 id="s3">Primitive two: an event is a signed JSON object</h3>
+
+<p>Everything in Nostr is an <b>event</b>. A post is an event. A profile is an event. A reaction,
+a deletion, a private message, a channel's membership list — all events. There is exactly one data
+structure, and it has seven fields.</p>
+
+<figure>
+<svg viewBox="0 0 740 366" role="img" aria-label="Anatomy of a Nostr event, field by field">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">The seven fields of every Nostr event</text>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".45">
+      <rect x="20" y="38" width="700" height="40" rx="5"/>
+      <rect x="20" y="82" width="700" height="40" rx="5"/>
+      <rect x="20" y="126" width="700" height="40" rx="5"/>
+      <rect x="20" y="170" width="700" height="40" rx="5"/>
+      <rect x="20" y="214" width="700" height="40" rx="5"/>
+      <rect x="20" y="258" width="700" height="40" rx="5"/>
+      <rect x="20" y="302" width="700" height="40" rx="5"/>
+    </g>
+    <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11.5" fill="currentColor" font-weight="700">
+      <text x="34" y="63">id</text>
+      <text x="34" y="107">pubkey</text>
+      <text x="34" y="151">created_at</text>
+      <text x="34" y="195">kind</text>
+      <text x="34" y="239">tags</text>
+      <text x="34" y="283">content</text>
+      <text x="34" y="327">sig</text>
+    </g>
+    <g fill="currentColor" font-size="10.5">
+      <text x="132" y="57">a SHA-256 hash of the other fields, serialized in a fixed canonical order</text>
+      <text x="132" y="72" fill-opacity=".68">so the id is not assigned by anyone — it is computed, and anyone can recompute it</text>
+      <text x="132" y="101">the author's public key, 64 hex characters</text>
+      <text x="132" y="116" fill-opacity=".68">this is the whole of "who wrote this" — no username lookup, no user table</text>
+      <text x="132" y="145">a Unix timestamp in seconds, claimed by the author</text>
+      <text x="132" y="160" fill-opacity=".68">note "claimed" — nothing stops an author lying about it; relays may reject implausible values</text>
+      <text x="132" y="189">an integer naming the type of thing this is</text>
+      <text x="132" y="204" fill-opacity=".68">1 = a note, 7 = a reaction, 9 = a group chat message, 0 = a profile … this is the dispatch switch</text>
+      <text x="132" y="233">a list of lists of strings, carrying structured metadata</text>
+      <text x="132" y="248" fill-opacity=".68">["e", …] references another event · ["p", …] references a person · ["h", …] names a group</text>
+      <text x="132" y="277">the payload — plain text, or JSON, or ciphertext</text>
+      <text x="132" y="292" fill-opacity=".68">what it means is entirely determined by the kind</text>
+      <text x="132" y="321">a Schnorr signature over the id, made with the author's private key</text>
+      <text x="132" y="336" fill-opacity=".68">check it against the pubkey and you know the event is genuine and unmodified</text>
+    </g>
+  </g>
+</svg>
+<figcaption>Every Nostr event, without exception, has exactly these seven fields. A chat message
+and a git patch differ only in <code>kind</code>, <code>tags</code>, and <code>content</code> —
+the envelope is identical. Field list per NIP-01, as summarized in
+<code>ARCHITECTURE.md §2</code>.</figcaption>
+</figure>
+
+<p>Fig. 2 lists those seven fields. Here is a real one — a Buzz chat message. The hex values are truncated with an ellipsis for
+readability; in a genuine event they are 64 and 128 characters.</p>
+
+<div class="codewrap">
+<button class="copybtn" onclick="copyCode(this)" aria-label="Copy code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+<pre><code>{
+  "id":         "3f2a9c1e…",
+  "pubkey":     "8b17d0a4…",
+  "created_at": 1785312044,
+  "kind":       9,
+  "tags": [
+    ["h", "6f1c2d88-4b0e-4a71-9c3d-2ea55f9b7c10"],
+    ["e", "9d4e77b2…", "", "reply"]
+  ],
+  "content":    "Rolling back the deploy — see thread.",
+  "sig":        "c07be51f…"
+}</code></pre>
+</div>
+
+<p>Read it as a sentence: <em>the person holding key <code>8b17d0a4…</code> said "Rolling back
+the deploy" in channel <code>6f1c2d88…</code>, as a reply to event <code>9d4e77b2…</code>, at that
+moment, and here is the proof.</em> Everything an application needs is in the object.</p>
+
+<h4 style="font-size:1.03rem;margin:2rem 0 .5rem">Why the id-and-signature arrangement is the
+whole trick</h4>
+
+<p>Look closely at the relationship between three of those fields, because everything else in
+Nostr falls out of it.</p>
+
+<p>The <code>id</code> is not a database key handed out by a server. It is a
+<b>hash</b> — a fixed-length fingerprint computed from the content — over a canonical
+serialization of the other fields. <em>Canonical</em> means everyone serializes in exactly the
+same byte-for-byte way: same field order, same escaping, no whitespace variation. That matters
+because a hash changes completely if the input changes by one byte, so two implementations that
+disagree about spacing would compute different ids for the same event.</p>
+
+<p>The <code>sig</code> then signs that hash. So the chain is: content determines the id, the id
+is signed, and the signature is checkable against the public key that is <em>also</em> inside the
+event.</p>
+
+<figure>
+<svg viewBox="0 0 740 300" role="img" aria-label="How an event verifies itself: content to hash to signature, and the two independent checks a receiver runs">
+  <defs>
+    <marker id="n3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="22" font-size="12" font-weight="700" fill="currentColor">Making the event (author, once)</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".5">
+      <rect x="20" y="34" width="176" height="46" rx="5"/>
+      <rect x="250" y="34" width="150" height="46" rx="5"/>
+      <rect x="454" y="34" width="176" height="46" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle">
+      <text x="108" y="54">pubkey, created_at,</text><text x="108" y="70">kind, tags, content</text>
+      <text x="325" y="54" font-weight="700">SHA-256</text><text x="325" y="70" fill-opacity=".7">of the canonical bytes</text>
+      <text x="542" y="54" font-weight="700">id</text><text x="542" y="70" fill-opacity=".7">a 64-hex fingerprint</text>
+    </g>
+    <line x1="196" y1="57" x2="248" y2="57" stroke="currentColor" stroke-opacity=".5" marker-end="url(#n3a)"/>
+    <line x1="400" y1="57" x2="452" y2="57" stroke="currentColor" stroke-opacity=".5" marker-end="url(#n3a)"/>
+
+    <path d="M542 80 L542 108 L325 108 L325 132" fill="none" stroke="currentColor" stroke-opacity=".5" marker-end="url(#n3a)"/>
+    <rect x="230" y="134" width="190" height="46" rx="5" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="325" y="154" text-anchor="middle" font-weight="700" fill="currentColor">sign with private key</text>
+    <text x="325" y="170" text-anchor="middle" fill="currentColor" fill-opacity=".7">Schnorr over secp256k1</text>
+    <line x1="420" y1="157" x2="472" y2="157" stroke="currentColor" stroke-opacity=".5" marker-end="url(#n3a)"/>
+    <rect x="474" y="134" width="156" height="46" rx="5" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="552" y="160" text-anchor="middle" font-weight="700" fill="currentColor">sig</text>
+
+    <line x1="20" y1="200" x2="720" y2="200" stroke="currentColor" stroke-opacity=".25"/>
+
+    <text x="20" y="222" font-size="12" font-weight="700" fill="currentColor">Checking the event (every receiver, every time)</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".55">
+      <rect x="20" y="234" width="336" height="52" rx="5"/>
+      <rect x="384" y="234" width="336" height="52" rx="5"/>
+    </g>
+    <g fill="currentColor">
+      <text x="34" y="254" font-weight="700">1 · recompute the hash</text>
+      <text x="34" y="270" fill-opacity=".75">serialize the fields yourself; does it equal the stated id?</text>
+      <text x="398" y="254" font-weight="700">2 · verify the signature</text>
+      <text x="398" y="270" fill-opacity=".75">does sig check out against id and pubkey?</text>
+    </g>
+  </g>
+</svg>
+<figcaption>The event authenticates itself. The two checks are independent: the first catches
+tampering with any field, the second catches forgery of authorship. Buzz runs both on every
+incoming event before storing it — the pipeline step its architecture doc calls
+<em>VERIFY</em>.</figcaption>
+</figure>
+
+<p>Fig. 3 traces both directions — making the event once, and checking it every time it arrives. The consequence is worth stating slowly, because it is the reason the rest of the design
+works:</p>
+
+<div class="callout">
+<span class="lab">The property everything depends on</span>
+<strong>You trust an event because the mathematics checks out, not because of which server handed
+it to you.</strong> A malicious relay cannot alter a message, cannot forge one from you, and
+cannot fabricate a reaction in your name — any tampering breaks the hash, and any forgery breaks
+the signature. The worst a hostile relay can do is <em>withhold</em> events or serve stale ones.
+</div>
+
+<p>That is why servers can be interchangeable. If a message is self-proving, it does not matter
+which machine you got it from — so you can get it from several, or move to a different one, and
+nothing about your identity or your history depends on the choice. Remove self-authentication and
+Nostr collapses back into ordinary federation, where you have to trust whichever server you are
+talking to.</p>
+
+<h3 id="s4">Primitive three: a relay is a dumb server</h3>
+
+<div class="defn">
+<b>Relay.</b> A server that accepts signed events, stores them, and forwards them to clients that
+have subscribed to matching criteria. Clients connect over a <b>WebSocket</b> — a network
+connection that, unlike an ordinary web request, stays open in both directions, so the server can
+push data to the client the moment it arrives.
+</div>
+
+<p>That is genuinely the whole job. A minimal relay verifies signatures, writes rows, matches
+subscriptions, and pushes. It has no idea what a "thread" is, or a "follow," or a "like." Those
+are meanings the <em>client</em> assigns to kinds and tags. A relay storing kind 7 events does not
+know it is storing reactions.</p>
+
+<figure>
+<svg viewBox="0 0 740 340" role="img" aria-label="A client subscribing to a relay: REQ with a filter, stored events, EOSE, then live events">
+  <defs>
+    <marker id="n4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".65"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <rect x="20" y="28" width="150" height="40" rx="5" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="95" y="53" text-anchor="middle" font-weight="700" fill="currentColor">client (smart)</text>
+    <rect x="500" y="28" width="150" height="40" rx="5" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="575" y="53" text-anchor="middle" font-weight="700" fill="currentColor">relay (dumb)</text>
+
+    <line x1="95" y1="68" x2="95" y2="300" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="3 3"/>
+    <line x1="575" y1="68" x2="575" y2="300" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="3 3"/>
+
+    <g stroke="currentColor" stroke-opacity=".6">
+      <line x1="95" y1="92" x2="571" y2="92" marker-end="url(#n4a)"/>
+      <line x1="575" y1="140" x2="99" y2="140" marker-end="url(#n4a)"/>
+      <line x1="575" y1="168" x2="99" y2="168" marker-end="url(#n4a)"/>
+      <line x1="575" y1="196" x2="99" y2="196" marker-end="url(#n4a)"/>
+      <line x1="575" y1="240" x2="99" y2="240" marker-end="url(#n4a)"/>
+      <line x1="95" y1="284" x2="571" y2="284" marker-end="url(#n4a)"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10.5">
+      <text x="335" y="86">["REQ", "sub1", {"kinds":[9], "#h":["6f1c2d88…"], "limit":50}]</text>
+      <text x="335" y="134">["EVENT", "sub1", { …stored event… }]</text>
+      <text x="335" y="162">["EVENT", "sub1", { …stored event… }]</text>
+      <text x="335" y="190">["EOSE", "sub1"]</text>
+      <text x="335" y="234">["EVENT", "sub1", { …a brand-new event… }]</text>
+      <text x="335" y="278">["CLOSE", "sub1"]</text>
+    </g>
+    <g fill="currentColor" fill-opacity=".62" text-anchor="middle" font-size="10">
+      <text x="335" y="104">"send me chat messages in this channel"</text>
+      <text x="335" y="208">"end of stored events" — the backlog is done, the rest is live</text>
+      <text x="335" y="252">pushed the instant someone posts it, no polling</text>
+      <text x="335" y="296">subscription cancelled</text>
+    </g>
+    <text x="335" y="322" text-anchor="middle" fill="currentColor" fill-opacity=".72" font-size="10.5">
+      One subscription serves both history and live updates. The relay never decides what any of it means.
+    </text>
+  </g>
+</svg>
+<figcaption>A subscription's whole life. The client asks a question with a filter, gets the
+matching history, gets an end-of-stored-events marker, and then receives new matches live on the
+same connection until it closes the subscription.</figcaption>
+</figure>
+
+<p>Fig. 4 shows a subscription's whole life. This is an inversion of how web applications are normally built, and it is worth dwelling on.
+In a conventional app the server is the smart part: it holds the business logic, decides what a
+"thread" is, renders the timeline, enforces the rules, and the client is a thin viewer. In Nostr
+the relay holds almost no logic at all, and the client does the interpreting — assembling threads
+from <code>e</code> tags, counting reactions, resolving profiles, deciding what to display.</p>
+
+<div class="callout">
+<span class="lab">Why the inversion matters</span>
+A dumb relay is a <em>replaceable</em> relay. If relays contained the business logic, switching
+relays would mean switching products, and you would be right back to being locked into whoever
+hosts you. Keeping relays simple is what keeps them interchangeable — and it is also why writing
+a Nostr relay is a weekend project while writing a good Nostr client is genuinely hard. The
+complexity did not vanish; it moved to where it does not trap you.
+</div>
+
+<h3 id="s5">The wire protocol</h3>
+
+<p>The conversation between a client and a relay is deliberately tiny. Every message in both
+directions is a JSON array whose first element is a string naming the message type. There is no
+REST API, no GraphQL, no versioned endpoints — just a handful of array shapes over one WebSocket.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Direction</th><th>Message</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>client → relay</td><td><code>["EVENT", &lt;event&gt;]</code></td><td>Here is a signed event; please store and forward it.</td></tr>
+<tr><td>client → relay</td><td><code>["REQ", &lt;sub_id&gt;, &lt;filter&gt;, …]</code></td><td>Open a subscription named <code>sub_id</code> matching these filters.</td></tr>
+<tr><td>client → relay</td><td><code>["CLOSE", &lt;sub_id&gt;]</code></td><td>Cancel that subscription.</td></tr>
+<tr><td>client → relay</td><td><code>["AUTH", &lt;event&gt;]</code></td><td>Answer the relay's authentication challenge (NIP-42).</td></tr>
+<tr><td>relay → client</td><td><code>["EVENT", &lt;sub_id&gt;, &lt;event&gt;]</code></td><td>An event matching that subscription.</td></tr>
+<tr><td>relay → client</td><td><code>["EOSE", &lt;sub_id&gt;]</code></td><td>End of stored events — the backlog is finished; anything further is live.</td></tr>
+<tr><td>relay → client</td><td><code>["OK", &lt;event_id&gt;, true|false, "reason"]</code></td><td>Whether your submitted event was accepted, and why not if it was not.</td></tr>
+<tr><td>relay → client</td><td><code>["CLOSED", &lt;sub_id&gt;, "reason"]</code></td><td>Your subscription was refused or terminated.</td></tr>
+<tr><td>relay → client</td><td><code>["NOTICE", "message"]</code></td><td>A human-readable message from the relay.</td></tr>
+<tr><td>relay → client</td><td><code>["AUTH", &lt;challenge&gt;]</code></td><td>Please authenticate; here is a random challenge string.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The interesting one is <code>REQ</code>, because the <b>filter</b> is the entire query language.
+A filter is a JSON object whose fields are all ANDed together, and within any field the listed
+values are ORed. Several filters in one <code>REQ</code> are ORed with each other.</p>
+
+<div class="codewrap">
+<button class="copybtn" onclick="copyCode(this)" aria-label="Copy code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+<pre><code>["REQ", "sub1", {
+  "kinds":   [9, 7],
+  "#h":      ["6f1c2d88-4b0e-4a71-9c3d-2ea55f9b7c10"],
+  "authors": ["8b17d0a4…", "1c93be07…"],
+  "since":   1785225600,
+  "limit":   100
+}]</code></pre>
+</div>
+
+<p>Read as English: <em>give me chat messages or reactions, in this one channel, written by either
+of these two people, no older than this timestamp, at most a hundred of them — then keep sending
+me new ones as they arrive.</em></p>
+
+<p>A few conventions are worth knowing because they show up constantly. Any filter field beginning
+with <code>#</code> matches on tags: <code>#h</code> matches events carrying an <code>h</code> tag
+with one of the listed values, <code>#p</code> matches events mentioning one of the listed people,
+<code>#e</code> matches events referencing one of the listed events. And there is an edge case that
+trips up nearly everyone the first time: an <em>absent</em> <code>kinds</code> field means "any
+kind," but an explicitly <em>empty</em> <code>kinds: []</code> means "nothing matches." Absent and
+empty are different, and Buzz's subscription registry handles them differently on purpose.</p>
+
+<h3 id="s6">NIPs, and how the spec process works</h3>
+
+<div class="defn">
+<b>NIP.</b> A <b>Nostr Implementation Possibility</b> — a numbered specification defining one
+piece of the protocol. NIP-01 is the base: the event format and the wire messages above.
+Everything else is optional and additive. The name is a deliberate softening of the usual "…
+Proposal"; a NIP describes something you <em>may</em> implement, not something you must.
+</div>
+
+<p>The process is unusually informal: NIPs live as Markdown files in one public Git repository,
+numbered in hexadecimal, and are proposed and revised by pull request. There is no standards body,
+no membership fee, no formal vote. A NIP becomes real by being implemented — if clients and relays
+adopt it, it is part of the protocol in practice; if nobody does, it quietly is not.</p>
+
+<p>That has genuine consequences in both directions. It is very cheap to specify something new,
+which is why the protocol grows quickly and why an application like Buzz can write its own
+extensions without asking permission. It also means the numbering is a shared namespace with no
+authority policing it, that adoption is uneven, and that "does relay X support NIP-Y?" is a real
+question you have to ask rather than assume. This is why relays publish a self-description
+document — NIP-11 — advertising which NIPs they speak.</p>
+
+<p>Two mechanisms in the base spec matter enough to name here, because they explain why Nostr
+does not drown in stale data.</p>
+
+<p><strong>Replaceable events.</strong> Some kinds are defined so that a relay keeps only the
+newest event per author. Your profile is the obvious example: you do not want a hundred historical
+profile events, you want the current one. <strong>Addressable events</strong> extend this — the
+relay keeps the newest per combination of author, kind, and a <code>d</code> tag, so one author
+can maintain many independently-updatable documents of the same type. And <strong>ephemeral
+events</strong> are the opposite: kinds that relays forward but never store at all, for things
+like "I am typing" where persistence would be pure noise. Which behavior applies is determined
+entirely by which numeric range the kind falls in — a scheme <a href="#s10">§2c</a> returns to,
+because it is central to how Buzz is organized.</p>
+
+<h3 id="s7">The honest downsides</h3>
+
+<p>Nostr solves a real problem and creates several new ones. Anyone who tells you otherwise is
+selling something. These are the four that will actually affect you.</p>
+
+<div class="callout warn">
+<span class="lab">1 · Key loss is permanent and total</span>
+There is no password reset because there is no password, and no server holds a copy of your
+private key to reset it against. Lose it and your identity is unrecoverable: not suspended, not
+locked — gone, along with every relationship and every signature that pointed at it. Have it
+stolen and the attacker <em>is</em> you, permanently, with no way to lock them out, because
+"locking out" would require an authority and the entire design is that there isn't one. The
+protocol has no built-in rotation or revocation story. This is the price of an identity nobody
+can take away: nobody can give it back either.
+</div>
+
+<p>The mitigations that exist are all workarounds rather than fixes: keeping the key in a
+dedicated signer application rather than pasting it into clients, hardware signing devices, and
+splitting a key across multiple shares. In Buzz specifically, keys are held in the desktop app's
+OS keychain rather than typed into a web page, which removes the most common way people lose
+them — but it does not change the underlying arithmetic.</p>
+
+<p><strong>2 · Spam is structurally harder.</strong> Every anti-abuse mechanism you are used to
+leans on accounts being costly to create: email verification, phone numbers, CAPTCHAs at signup,
+rate limits per account, IP reputation, banning. Nostr keypairs are free and infinite — generating
+ten million identities costs a few minutes of CPU. So per-account defenses do nothing, and relays
+fall back on other tools: allowlists of permitted keys, requiring payment to publish,
+web-of-trust filtering based on who your contacts follow, and proof-of-work stamps on events.
+None of these is as effective as the account-based approach they replace, and each imposes its own
+cost on legitimate users. Buzz sidesteps this entirely by being membership-gated — which is one
+of the reasons it narrows the protocol the way <a href="#s13">§2f</a> describes.</p>
+
+<p><strong>3 · Somebody has to want to run a relay.</strong> Relays cost money — bandwidth,
+storage that only ever grows, moderation attention — and the protocol gives them no revenue.
+Public relays are largely volunteer-run or hobbyist-funded, which means they go down, fill up,
+start rejecting old events, quietly limit retention, or simply disappear. "Just publish to several
+relays" is the standard answer, and it works, but it converts a reliability problem into a cost
+and coordination problem rather than removing it. In a self-hosted product like Buzz the question
+has a clean answer — your organization runs it — but that answer is only clean because you have
+given up the multi-relay redundancy that made public Nostr resilient in the first place.</p>
+
+<p><strong>4 · Metadata leaks even when content does not.</strong> This is the subtlest one and
+the easiest to underestimate. Encrypting message content hides <em>what</em> you said. It does not
+hide that an event exists, roughly how big it is, when it was published, or — depending on the
+scheme — which key it is addressed to. A relay sees the shape of your social graph and your
+activity pattern even if it can read none of your words.</p>
+
+<figure>
+<svg viewBox="0 0 740 250" role="img" aria-label="What a relay can and cannot see about an encrypted message">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">An encrypted message, as the relay sees it</text>
+
+    <rect x="20" y="40" width="344" height="180" rx="7" fill="none" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="36" y="62" font-weight="700" fill="currentColor">Hidden ✓</text>
+    <g fill="currentColor" fill-opacity=".8">
+      <text x="36" y="86">the words you wrote</text>
+      <text x="36" y="108">any attachment's contents</text>
+      <text x="36" y="130">the subject, the intent, the tone</text>
+    </g>
+    <rect x="36" y="148" width="312" height="56" rx="5" fill="currentColor" fill-opacity=".07" stroke="currentColor" stroke-opacity=".3"/>
+    <text x="50" y="168" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="currentColor" fill-opacity=".75">"content": "AqM7f2Xk9pQz1vLbN4hR8t…"</text>
+    <text x="50" y="190" fill="currentColor" fill-opacity=".6" font-size="10">ciphertext — meaningless without the key</text>
+
+    <rect x="380" y="40" width="340" height="180" rx="7" fill="none" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="396" y="62" font-weight="700" fill="currentColor">Still visible ✗</text>
+    <g fill="currentColor" fill-opacity=".8">
+      <text x="396" y="86">that a message happened at all</text>
+      <text x="396" y="108">exactly when — to the second</text>
+      <text x="396" y="130">roughly how long it was</text>
+      <text x="396" y="152">how often you two exchange messages</text>
+      <text x="396" y="174">the rhythm of your day and your absences</text>
+      <text x="396" y="196">and usually: who it is addressed to</text>
+    </g>
+    <text x="370" y="242" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10.5">
+      Traffic analysis is a real attack. Encryption is necessary and it is not sufficient.
+    </text>
+  </g>
+</svg>
+<figcaption>The gap between content privacy and metadata privacy. Nostr's private-message schemes
+work hard to shrink the right-hand column — NIP-17 "gift wrapping" hides the sender and the real
+timestamp behind a throwaway key — but no scheme hides the existence and timing of traffic from
+the server carrying it.</figcaption>
+</figure>
+
+<p>Fig. 5 separates what encryption hides from what it does not. There are smaller frictions too, worth a sentence each. There is no global view, so "search all
+of Nostr" is not a thing anyone can offer — you can only search relays you are connected to.
+Deletion is a request, not a guarantee: you publish a "please delete this" event and relays may or
+may not honor it, and any relay that already served the event to someone cannot unsend it.
+Timestamps are self-reported and can be lied about. And because clients hold the logic, two
+clients can render the same events differently, so features are unevenly supported across the
+ecosystem.</p>
+
+<p>None of this makes Nostr a bad choice. It makes it a set of specific tradeoffs — mostly trading
+convenience and central control for portability and self-authentication — and a product built on
+it should be clear-eyed about which side of each trade it lands on. Which brings us to Buzz.</p>
+
+<!-- ══════════════════════ PART TWO ══════════════════════ -->
+<h2 id="p2">Part two — how Buzz uses it</h2>
+
+<p>Buzz is a self-hostable team workspace: channels, threads, direct messages, canvases, media,
+search, git hosting, voice huddles, workflow automation. Underneath, it is a Nostr relay, and
+every one of those things is a signed event in one log.</p>
+
+<h3 id="s8">The payoff: agents and humans are the same kind of participant</h3>
+
+<p>This is the reason Buzz is built on Nostr rather than on a conventional stack, and it follows
+directly from <a href="#s2">§1b</a>. Hold that section in mind: identity is a keypair, and a
+keypair is free, self-issued, and needs no registry.</p>
+
+<p>Now ask what an AI agent is, in a normal product. It is a special case. It gets a bot API, or a
+service account, or an integration token — a parallel system with its own permissions, its own
+rate limits, its own quirks, and its own bugs. The bot is a second-class citizen with a separate
+code path, which means a second set of security decisions and a second thing to keep in sync with
+the first.</p>
+
+<p>In Buzz the agent generates a keypair, and it is done. It has an identity indistinguishable in
+kind from yours. It appears in the channel member list. Its messages are signed events in the same
+log, matched by the same subscriptions, gated by the same membership check, and recorded in the
+same audit trail. Adding an agent to a channel is the same operation as adding a person; removing
+it is the same operation too.</p>
+
+<div class="callout">
+<span class="lab">Trace it back to the primitives</span>
+<strong>No accounts</strong> means no signup flow an agent needs a human to complete.
+<strong>Identity is a keypair</strong> means an agent can mint its own with no registry's
+permission. <strong>Events are self-authenticating</strong> means the log proves which agent did
+what without trusting any intermediary. <strong>Membership is the only gate</strong> means agents
+are scoped exactly the way teammates are. Buzz's <code>README</code> puts it as "Scoped by
+identity, not by permission flags — the same way you'd scope a teammate," and
+<code>docs/key-concepts.md</code> says the same from the other end: an event is trusted "because
+its signature verifies, not because of where it came from. That property is what lets Buzz treat
+a human and an AI agent identically: both are just keypairs."
+</div>
+
+<p>The database reflects this rather than fighting it. Channel members carry a role — the roles
+are <code>Owner</code>, <code>Admin</code>, <code>Member</code>, <code>Guest</code>, and
+<code>Bot</code> — so an agent is <em>labelled</em> differently for the interface's benefit, while
+travelling the same code path as everyone else. That is the difference between a distinction the
+UI makes and a distinction the security model makes.</p>
+
+<p>It is worth being precise about what this does and does not buy. It does not make an agent
+trustworthy, and it does not constrain what an agent does once it is in the room. What it buys is
+that agents are <em>governable with the tools you already have</em>: the same membership, the same
+audit log, the same search, the same removal procedure. The architecture companion,
+<a href="how-buzz-works.html">How Buzz works</a>, goes further into what changes when your users
+can act at machine speed — mainly that every affordance needs an explicit bound.</p>
+
+<h3 id="s9">Which standard NIPs Buzz implements</h3>
+
+<p>Buzz does not implement "Nostr" in the abstract; it implements a specific set of NIPs. Here is
+what is actually referenced in the Rust source and documented in the repository's
+<code>NOSTR.md</code>, with what each one buys you as a user. Counts in parentheses are how many
+times each NIP is named across <code>crates/**/*.rs</code>, as a rough measure of how central it
+is to the implementation.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>NIP</th><th>What it is</th><th>What it buys you in Buzz</th></tr></thead>
+<tbody>
+<tr><td><strong>NIP-01</strong> (86)</td><td>The base: event format, <code>EVENT</code>/<code>REQ</code>/<code>CLOSE</code>, filters</td><td>Everything. This is the wire format described in <a href="#s3">§1c</a> and <a href="#s5">§1e</a>.</td></tr>
+<tr><td><strong>NIP-98</strong> (197)</td><td>HTTP auth via a signed <code>kind:27235</code> event</td><td>The most-referenced NIP in the codebase. It authenticates every REST call — media upload, git, workflow hooks, the CLI — with the same key that signs your messages, so there are no API passwords to manage.</td></tr>
+<tr><td><strong>NIP-42</strong> (95)</td><td>WebSocket auth by signed challenge</td><td>When you connect, the relay immediately sends a random challenge and you sign it. Proves you hold the private key without ever transmitting it.</td></tr>
+<tr><td><strong>NIP-43</strong> (95)</td><td>Relay access metadata and membership</td><td>Relay-level membership: who may connect to this workspace at all, managed with <code>buzz-admin</code> and published as a roster event clients can subscribe to.</td></tr>
+<tr><td><strong>NIP-29</strong> (74)</td><td>Relay-based groups</td><td>Channels. Group creation, add/remove member, edit metadata, leave, admin deletion, and the group-discovery events that let a client list the rooms it can see.</td></tr>
+<tr><td><strong>NIP-11</strong> (72)</td><td>Relay information document</td><td>How a client discovers what this relay supports before committing to it — and where Buzz serves the workspace icon.</td></tr>
+<tr><td><strong>NIP-44</strong> (68)</td><td>Encrypted payloads</td><td>The encryption used for private content, including agent memory and per-turn cost records encrypted to their owner.</td></tr>
+<tr><td><strong>NIP-34</strong> (66)</td><td>Git repositories, patches, and status as events</td><td>Patches, repo announcements, and CI status become events — so a code review and the conversation about it are in the same log and the same search index.</td></tr>
+<tr><td><strong>NIP-05</strong> (46)</td><td>Human-readable <code>name@domain</code> identifiers</td><td>A readable handle instead of 64 hex characters. Buzz canonicalizes these to the relay's own domain and silently clears off-domain or colliding handles.</td></tr>
+<tr><td><strong>NIP-09</strong> (43)</td><td>Event deletion</td><td>Deleting your own messages. Buzz validates that you authored the target; admin deletion is a separate NIP-29 kind, and deleted events remain in the audit log.</td></tr>
+<tr><td><strong>NIP-33</strong> (99)</td><td>Parameterized replaceable (addressable) events</td><td>The mechanism behind anything with a stable address that gets updated in place — personas, projects, read state, reminders.</td></tr>
+<tr><td><strong>NIP-50</strong> (34)</td><td>Search</td><td>Full-text search expressed as a <code>REQ</code> with a <code>search</code> field. Buzz answers these as one-shot queries that return relevance-sorted results and then end.</td></tr>
+<tr><td><strong>NIP-23</strong> (25)</td><td>Long-form content</td><td>Documents and long-form notes alongside chat.</td></tr>
+<tr><td><strong>NIP-10</strong> (23)</td><td>Threading conventions</td><td>Replies. A reply carries an <code>e</code> tag marked <code>reply</code>, and Buzz records thread metadata atomically on ingest — rejecting replies to parents it has never seen.</td></tr>
+<tr><td><strong>NIP-70</strong> (20)</td><td>Protected events</td><td>Marks relay-authored events so third parties cannot rebroadcast them elsewhere.</td></tr>
+<tr><td><strong>NIP-56</strong> (19)</td><td>Reporting</td><td>Reporting an event, person, or file to moderators as a <code>kind:1984</code> event.</td></tr>
+<tr><td><strong>NIP-51</strong> (16)</td><td>Lists and sets</td><td>Curated collections — used with NIP-65 for social lists.</td></tr>
+<tr><td><strong>NIP-25</strong> (15)</td><td>Reactions</td><td>Emoji reactions as <code>kind:7</code> events. Note the hardening: Buzz derives the channel from the target event rather than trusting the client's tag, and rejects reactions to events it does not know.</td></tr>
+<tr><td><strong>NIP-16</strong> (9)</td><td>Replaceable events</td><td>Keep-only-the-latest semantics for things like your profile.</td></tr>
+<tr><td><strong>NIP-45</strong> (8)</td><td><code>COUNT</code></td><td>Counting matching events without transferring them — behind Buzz's <code>/count</code> endpoint.</td></tr>
+<tr><td><strong>NIP-38</strong> (8)</td><td>User statuses</td><td>Presence and status strings.</td></tr>
+<tr><td><strong>NIP-19</strong> (5)</td><td>bech32 identifiers</td><td>The <code>npub1…</code> / <code>nsec1…</code> / <code>naddr1…</code> encodings from <a href="#s2">§1b</a>.</td></tr>
+<tr><td><strong>NIP-17</strong> (4)</td><td>Gift-wrapped private messages</td><td>Direct messages. The outer envelope is a <code>kind:1059</code> event signed with a throwaway key, hiding the real sender, content, and timestamp. Buzz stores these unindexed and delivers them only to <code>#p</code>-filtered subscriptions.</td></tr>
+<tr><td><strong>NIP-65</strong> (6) · <strong>NIP-40</strong> (4) · <strong>NIP-02</strong> (4)</td><td>Relay lists · expiration · contact lists</td><td>Supporting cast, referenced but peripheral to the workspace experience.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two things stand out in that list. First, <strong>authentication is the densest area of the
+code</strong> — NIP-98 and NIP-42 together account for nearly three hundred references — which
+makes sense for a product whose entire access model is "prove you hold this key, then check
+membership." Second, <strong>NIP-29 groups are doing the heaviest conceptual lifting</strong>:
+vanilla Nostr has no notion of a private room, so the group NIP is what turns a public-by-default
+protocol into something with channels you can be inside or outside of.</p>
+
+<div class="callout">
+<span class="lab">A consequence worth knowing</span>
+Because Buzz speaks these as real NIPs rather than as a private API, <em>other people's Nostr
+clients can connect to your Buzz relay.</em> <code>NOSTR.md</code> documents this path in detail
+and the repository's own end-to-end tests drive it with <code>nak</code>, a general-purpose Nostr
+command-line tool that knows nothing about Buzz. What works and what does not is covered honestly
+in <a href="#s13">§2f</a>.
+</div>
+
+<h3 id="s10">Kind ranges, and why an app needs its own</h3>
+
+<p>Recall from <a href="#s3">§1c</a> that <code>kind</code> is the integer naming what an event
+is, and from <a href="#s6">§1f</a> that the numeric <em>range</em> a kind falls in determines how
+relays treat it. Buzz leans on both facts hard, so this is worth getting straight.</p>
+
+<p>The problem an application faces is a naming one. Buzz needs event types nobody else has
+defined: a canvas edit, an agent job request, a workflow execution step, a forum post. Nostr's kind
+space is a flat, globally shared set of integers with no central registry. Picking numbers at
+random risks colliding with a standard kind or with another application's, and a collision is not
+a cosmetic problem — a relay or client would treat your canvas edit as whatever the standard
+assigns that number.</p>
+
+<p>The answer is to partition the space and stay inside your partition. Buzz reserves
+40000–49999.</p>
+
+<figure>
+<svg viewBox="0 0 740 320" role="img" aria-label="Nostr kind number ranges, their storage behavior, and where Buzz's custom range sits">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">The kind space — the range decides the storage behavior</text>
+
+    <rect x="20" y="42" width="128" height="36" rx="4" fill="currentColor" fill-opacity=".05" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="152" y="42" width="128" height="36" rx="4" fill="currentColor" fill-opacity=".05" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="284" y="42" width="128" height="36" rx="4" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".6"/>
+    <rect x="416" y="42" width="128" height="36" rx="4" fill="currentColor" fill-opacity=".05" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="548" y="42" width="172" height="36" rx="4" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-opacity=".75" stroke-width="1.5"/>
+
+    <g fill="currentColor" text-anchor="middle" font-weight="700">
+      <text x="84" y="65">0 – 9 999</text>
+      <text x="216" y="65">10 000 – 19 999</text>
+      <text x="348" y="65">20 000 – 29 999</text>
+      <text x="480" y="65">30 000 – 39 999</text>
+      <text x="634" y="65">40 000 – 49 999</text>
+    </g>
+    <g fill="currentColor" fill-opacity=".78" text-anchor="middle" font-size="10">
+      <text x="84" y="94">standard kinds</text>
+      <text x="216" y="94">replaceable</text>
+      <text x="348" y="94">ephemeral</text>
+      <text x="480" y="94">addressable</text>
+      <text x="634" y="94">BUZZ CUSTOM</text>
+      <text x="84" y="109">defined by NIPs</text>
+      <text x="216" y="109">keep newest per author</text>
+      <text x="348" y="109">never stored at all</text>
+      <text x="480" y="109">newest per author + d tag</text>
+      <text x="634" y="109">Buzz's own event types</text>
+    </g>
+
+    <line x1="20" y1="126" x2="720" y2="126" stroke="currentColor" stroke-opacity=".2"/>
+
+    <text x="20" y="148" font-size="11" font-weight="700" fill="currentColor" fill-opacity=".7">EXAMPLES BUZZ ACTUALLY USES</text>
+    <g fill="currentColor" font-size="10" text-anchor="middle">
+      <text x="84" y="170">0 profile</text>
+      <text x="84" y="186">5 deletion</text>
+      <text x="84" y="202">7 reaction</text>
+      <text x="84" y="218">9 chat message</text>
+      <text x="84" y="234">1059 gift-wrap DM</text>
+      <text x="84" y="250">9007 create group</text>
+      <text x="84" y="266">9030–9033 admin</text>
+
+      <text x="216" y="170">13534 relay roster</text>
+
+      <text x="348" y="170">20001 presence</text>
+      <text x="348" y="186">20002 typing</text>
+
+      <text x="480" y="170">30174 agent memory</text>
+      <text x="480" y="186">30175 persona</text>
+      <text x="480" y="202">30300 reminder</text>
+      <text x="480" y="218">30617 repo announce</text>
+      <text x="480" y="234">30621 project</text>
+      <text x="480" y="250">39000 channel metadata</text>
+      <text x="480" y="266">39001/39002 admins/members</text>
+
+      <text x="634" y="170">40002/40003 message v2 / edit</text>
+      <text x="634" y="186">40100 canvas</text>
+      <text x="634" y="202">43001 agent job request</text>
+      <text x="634" y="218">44100/44101 member added/removed</text>
+      <text x="634" y="234">44200 agent turn metrics</text>
+      <text x="634" y="250">45001/45003 forum post/comment</text>
+      <text x="634" y="266">46001–46012 workflow steps</text>
+    </g>
+
+    <text x="370" y="296" text-anchor="middle" fill="currentColor" fill-opacity=".72" font-size="10.5">
+      buzz-core defines 81 kind constants; ALL_KINDS exports 80 — kind 22242 (AUTH) is excluded because it is never stored.
+    </text>
+    <text x="370" y="312" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10">
+      An event landing in 20 000–29 999 skips the database, the audit chain, and the search index on the strength of its number alone.
+    </text>
+  </g>
+</svg>
+<figcaption>Where Buzz's own event types sit relative to the standard ones. Note that Buzz uses
+all five bands, not just its own: it borrows standard kinds where a standard exists (reactions,
+deletions, profiles), uses the addressable band for anything that gets updated in place, and
+reserves 40000–49999 for concepts Nostr has no opinion about. Ranges from
+<code>ARCHITECTURE.md §2</code> and <code>docs/key-concepts.md</code>.</figcaption>
+</figure>
+
+<p>Two things in Fig. 6 are easy to miss and both are deliberate.</p>
+
+<p><strong>The range is a behavior, not a label.</strong> Choosing a range for a new feature is
+choosing whether it is stored forever, replaced on each update, or never persisted at all. Typing
+indicators are ephemeral because a permanent record of every keystroke flurry would be absurd;
+personas are addressable because you edit them in place; chat messages are permanent because the
+whole point is that the log remembers. Get the range wrong and you have chosen the wrong storage
+semantics, which is a much bigger mistake than choosing an awkward number.</p>
+
+<p><strong>Buzz reuses standard kinds wherever one exists.</strong> Reactions are kind 7, the
+standard NIP-25 reaction, not a Buzz-specific reaction. Deletions are kind 5. Profiles are kind 0.
+This is what lets a third-party Nostr client show a Buzz reaction correctly without knowing what
+Buzz is — and it is the discipline that separates "built on a protocol" from "using a protocol's
+JSON shape."</p>
+
+<div class="callout warn">
+<span class="lab">The gotcha, as the repo records it</span>
+Buzz uses <strong>kind 39000 for channel metadata, not kind 41</strong>. NIP-01 nominally assigns
+41 to channel metadata, but that kind belongs to an older, superseded channel scheme that Buzz
+does not use — its <code>AGENTS.md</code> lists this first in "Common Gotchas": <em>"Kind 39000
+for channel metadata, not 41 — kind 41 is NIP-01 (unused). All kinds defined in
+<code>buzz-core/src/kind.rs</code>."</em> 39000 is the NIP-29 group-metadata kind, which is the
+scheme Buzz actually implements. If you are writing a client against a Buzz relay and you query
+kind 41, you will get nothing, correctly, and be confused. This is exactly the kind of collision
+hazard a shared flat namespace with no registry produces.
+</div>
+
+<h3 id="s11">Where Buzz had to extend the protocol</h3>
+
+<p>The interesting part of any protocol-based product is the seam — the place where the standard
+stopped and the application had to invent. In Buzz that seam is unusually visible, because rather
+than adding private fields to events, the project writes specifications and keeps them in the
+repository at <code>docs/nips/</code>.</p>
+
+<p>There are <strong>15 draft NIPs</strong> in that directory. Every one carries the header tags
+<code>draft optional</code>, and the ones that require the relay to do something also carry
+<code>relay</code> and a <em>Depends on</em> line naming the standard NIPs they build on.</p>
+
+<p><strong>Six of the fifteen are about agents</strong> — a striking concentration, and the single
+most informative fact in this document about where Nostr stopped being enough.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Agent drafts (6 of 15)</th><th>The gap it fills</th></tr></thead>
+<tbody>
+<tr><td><strong>NIP-OA</strong> — Owner Attestation</td><td>How an owner's key authorizes an agent's key to publish <em>under the agent's own authorship</em>. It explicitly rejects reusing NIP-26 delegation, because NIP-26 semantically assigns the event to the delegator — so the log would say the human did it. For agent provenance you need the opposite: the agent did it, with the human visible as the authorizer.</td></tr>
+<tr><td><strong>NIP-AA</strong> — Agent Authentication</td><td>An agent whose owner is a relay member can gain access by presenting its NIP-OA credential during NIP-42 authentication, instead of being separately enrolled. Buzz targets tens of thousands of agents; manual enrolment does not scale to that.</td></tr>
+<tr><td><strong>NIP-AP</strong> — Agent Personas</td><td>A public, addressable blueprint (<code>kind:30175</code>) for spawning an agent: display name, avatar, system prompt, model, runtime, name pool — plus a shareable team-catalog projection.</td></tr>
+<tr><td><strong>NIP-AE</strong> — Agent Engrams</td><td>Persistent agent memory as encrypted <code>kind:30174</code> events, using the symmetric agent↔owner conversation key. The symmetry is the point: "the owner can always read everything the agent remembers."</td></tr>
+<tr><td><strong>NIP-AM</strong> — Agent Turn Metrics</td><td>Per-turn token usage and estimated cost as encrypted <code>kind:44200</code> events, so an owner can do cost accounting "without the relay — or any third party — learning what the agent did or what it cost."</td></tr>
+<tr><td><strong>NIP-AO</strong> — Agent Observability</td><td>Ephemeral encrypted telemetry streamed from a running agent to its owner's client: tool invocations, protocol frames, intermediate reasoning.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>The other nine</th><th>The gap it fills</th></tr></thead>
+<tbody>
+<tr><td><strong>NIP-CW</strong> — Channel Window</td><td>Nostr filters are good at "the last N events" and bad at "page through a threaded channel in stable order." This defines relay-computed cursor paging served as ordinary signed events through an extended filter.</td></tr>
+<tr><td><strong>NIP-MP</strong> — Multi-Repository Projects</td><td><code>kind:30621</code>: a signed, named grouping of NIP-34 repositories referenced by coordinate, so a project can span repos owned by different people and a repo can belong to several projects.</td></tr>
+<tr><td><strong>NIP-GS</strong> — Git Object Signing</td><td>Signing git commits and tags with your Nostr key, through git's pluggable signing-program interface. Your <code>npub</code> signs your pushes.</td></tr>
+<tr><td><strong>NIP-PL</strong> — Push Leases</td><td>The authority model for push notifications. The most heavily verified thing in the repository: its models check lease acceptance across all 5 040 orderings of one address's candidate events, and prove the notification body stays byte-identical to a fixed constant under every input, so a push cannot leak message content.</td></tr>
+<tr><td><strong>NIP-RS</strong> — Read State Sync</td><td>Encrypted, cross-device "I have read this channel up to time T," so your unread badges agree between desktop and phone without the relay learning your reading habits.</td></tr>
+<tr><td><strong>NIP-ER</strong> — Event Reminders</td><td>Encrypted author-only reminders (<code>kind:30300</code>) with a public <code>not_before</code> tag. Elegant split: "the relay learns that an author has a reminder due at a time. It does not learn what the reminder is about."</td></tr>
+<tr><td><strong>NIP-DV</strong> — DM Visibility</td><td>Hiding a DM conversation from your sidebar without leaving it, exposed as a relay-signed replaceable event so that even a generic Nostr client can filter hidden conversations out.</td></tr>
+<tr><td><strong>NIP-IA</strong> — Identity Archival</td><td>Hiding a departed person's key from member lists and autocomplete on this relay, while preserving their history and implying nothing about them globally.</td></tr>
+<tr><td><strong>NIP-WP</strong> — Workspace Profile</td><td>Setting the workspace icon with an admin-signed <code>kind:9033</code> command; the relay serves it in the standard NIP-11 <code>icon</code> field, so any client can read it and only admins can set it.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Step back and the shape of the seam is clear. The nine non-agent drafts are mostly
+<em>workspace ergonomics</em> — paging, read state, hiding things, icons — the accumulated small
+requirements of a product people use at work, which a protocol designed for public broadcasting
+never needed. The six agent drafts are a different category: they address a question Nostr had no
+vocabulary for at all, which is <em>what it means for a process to act on behalf of a person</em>,
+and who can then see its memory, its costs, and its reasoning.</p>
+
+<p>Notice also what the agent drafts have in common: four of the six are fundamentally about
+<em>the owner's visibility into their own agent</em>. Memory encrypted so the owner can read it,
+costs encrypted to the owner, telemetry streamed to the owner, and authorship attributed to the
+agent with the owner named as authorizer. That is a considered position — an agent should be
+legible to the person responsible for it — and it had to be specified because no standard
+provided it.</p>
+
+<h3 id="s12">Blossom: files are not events</h3>
+
+<p>Everything so far has been events, and events have a hard limit. Buzz caps a WebSocket frame at
+65 536 bytes — 64 KB. A screenshot does not fit. A short video certainly does not. And even if you
+raised the cap, putting large binaries in the event log would be a bad idea: it would bloat the
+database every query touches, and it would mean every relay storing your text also had to store
+your video.</p>
+
+<p>So files go somewhere else, and Nostr's ecosystem answer is <b>Blossom</b>.</p>
+
+<div class="defn">
+<b>Blossom.</b> A small HTTP protocol for storing and fetching binary files ("blobs"), where each
+file is addressed by the SHA-256 hash of its own contents and uploads are authenticated with your
+Nostr key. Its features are numbered <b>BUDs</b> — Blossom Upgrade Documents — the same way
+Nostr's are numbered NIPs. Buzz implements BUD-01 (retrieval) and BUD-02 (upload), backed by S3 or
+MinIO, with a 50 MB limit per file.
+</div>
+
+<p>The content-addressing is what makes this fit the Nostr model rather than being a bolt-on. If a
+file's name <em>is</em> the hash of its contents, then a link to it is self-verifying in exactly
+the way an event is: download the bytes, hash them, compare. If they match, you have the right
+file, regardless of which server gave it to you. The same "trust the math, not the server"
+property from <a href="#s3">§1c</a>, applied to bytes.</p>
+
+<figure>
+<svg viewBox="0 0 740 280" role="img" aria-label="An event carries a reference to a blob; the blob lives in object storage addressed by its hash">
+  <defs>
+    <marker id="n8a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">Two stores, two jobs</text>
+
+    <rect x="20" y="40" width="322" height="150" rx="7" fill="none" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="36" y="62" font-weight="700" fill="currentColor">The event log — small, signed, queryable</text>
+    <rect x="36" y="74" width="290" height="98" rx="5" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".3"/>
+    <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="currentColor">
+      <text x="50" y="94">"kind": 9,</text>
+      <text x="50" y="110">"content": "here's the trace",</text>
+      <text x="50" y="126">"tags": [</text>
+      <text x="50" y="142">  ["imeta", "url …/4c9f2b7e….png",</text>
+      <text x="50" y="158">           "x 4c9f2b7e…"]  ]</text>
+    </g>
+
+    <line x1="342" y1="120" x2="396" y2="120" stroke="currentColor" stroke-opacity=".6" marker-end="url(#n8a)"/>
+    <text x="369" y="110" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="9.5">points at</text>
+
+    <rect x="398" y="40" width="322" height="150" rx="7" fill="none" stroke="currentColor" stroke-opacity=".55"/>
+    <text x="414" y="62" font-weight="700" fill="currentColor">Blob storage — large, opaque, cheap</text>
+    <rect x="414" y="74" width="290" height="98" rx="5" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".3"/>
+    <text x="559" y="100" text-anchor="middle" fill="currentColor" font-size="10.5">S3 or MinIO bucket</text>
+    <text x="559" y="122" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="currentColor">4c9f2b7e….png</text>
+    <text x="559" y="142" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10">the filename is the SHA-256 of the bytes</text>
+    <text x="559" y="160" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="10">so a wrong or tampered file is detectable</text>
+
+    <text x="370" y="220" text-anchor="middle" fill="currentColor" fill-opacity=".78" font-size="10.5">
+      The event is the record — signed, searchable, permanent, tiny. The blob is the payload — unsigned, unsearchable, big.
+    </text>
+    <text x="370" y="240" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10">
+      Deleting the event does not delete the blob; the blob has no idea an event mentions it. Lifecycles are separate on purpose.
+    </text>
+    <text x="370" y="262" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10">
+      In Buzz: PUT /media/upload (BUD-02, 50 MB cap) · GET /media/{sha256}.{ext} (BUD-01) · thumbnails generated server-side
+    </text>
+  </g>
+</svg>
+<figcaption>How a shared file actually works. The event carries a reference and a hash; the bytes
+live in object storage under a name derived from those bytes. Because both halves are
+content-addressed, neither requires trusting the server that served it.</figcaption>
+</figure>
+
+<p>Fig. 7 shows the split. The practical differences from events are worth being explicit about, because they surprise
+people. A blob is <strong>not signed</strong> — the <em>upload</em> is authenticated with your key,
+but the stored file carries no signature, only the guarantee that its name matches its contents. A
+blob is <strong>not searchable</strong>: full-text search runs over event content, so the message
+"here's the trace" is findable and the image is not. And blob and event lifecycles are
+<strong>independent</strong> — deleting the message does not delete the file, which is a
+deliberate design choice with an obvious compliance consequence you should be aware of rather than
+discover.</p>
+
+<h3 id="s13">The honest tension: one relay, not a mesh</h3>
+
+<p>This is the section to read if you read only one part of the second half, because it is where
+Buzz departs from Nostr's usual shape — deliberately, and with real costs on both sides.</p>
+
+<p>Everything in <a href="#p1">part one</a> described a protocol built for a <em>mesh</em>. The
+canonical Nostr posture is: you publish each event to several relays at once, you read from
+several relays at once, you keep a list of which relays you use, and you assume any individual
+relay may go down, censor you, or lie by omission. Redundancy is the defense, and it works because
+events are self-authenticating — it does not matter which relay a message comes from, so getting
+it from any of five is as good as getting it from a specific one. That is the sense in which Nostr
+is censorship-resistant: to silence someone you would have to reach every relay that might carry
+them, and anyone can start another.</p>
+
+<p><strong>Buzz does not work that way.</strong> Its architecture document is blunt: the relay is
+the single source of truth, and "there is no peer-to-peer event exchange, no gossip, no
+replication — just clients connecting to one relay over WebSocket." The URL <em>is</em> the
+workspace: <code>docs/key-concepts.md</code> defines a community as "the workspace a user reaches
+by URL," resolved from the request host before any request is handled, with unknown hosts rejected
+rather than defaulted. One URL, one community, one authoritative relay.</p>
+
+<figure>
+<svg viewBox="0 0 740 340" role="img" aria-label="Vanilla Nostr's multi-relay mesh compared with Buzz's single authoritative relay">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12" font-weight="700" fill="currentColor">Vanilla Nostr — publish everywhere, trust nobody</text>
+    <rect x="20" y="34" width="330" height="240" rx="7" fill="none" stroke="currentColor" stroke-opacity=".45"/>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".45">
+      <circle cx="90" cy="90" r="26"/>
+      <circle cx="185" cy="70" r="26"/>
+      <circle cx="280" cy="98" r="26"/>
+      <circle cx="112" cy="182" r="26"/>
+      <circle cx="255" cy="190" r="26"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="9.5">
+      <text x="90" y="93">relay</text><text x="185" y="73">relay</text><text x="280" y="101">relay</text>
+      <text x="112" y="185">relay</text><text x="255" y="193">relay</text>
+    </g>
+    <g stroke="currentColor" stroke-opacity=".45">
+      <line x1="185" y1="240" x2="90" y2="116"/>
+      <line x1="185" y1="240" x2="185" y2="96"/>
+      <line x1="185" y1="240" x2="280" y2="124"/>
+      <line x1="185" y1="240" x2="112" y2="208"/>
+      <line x1="185" y1="240" x2="255" y2="216"/>
+    </g>
+    <circle cx="185" cy="248" r="9" fill="currentColor" fill-opacity=".7"/>
+    <text x="185" y="268" text-anchor="middle" fill="currentColor" font-size="10">you</text>
+
+    <text x="410" y="24" font-size="12" font-weight="700" fill="currentColor">Buzz — one relay is the workspace</text>
+    <rect x="390" y="34" width="330" height="240" rx="7" fill="none" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="470" y="76" width="170" height="88" rx="7" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".7"/>
+    <text x="555" y="102" text-anchor="middle" font-weight="700" fill="currentColor">your relay</text>
+    <text x="555" y="122" text-anchor="middle" fill="currentColor" fill-opacity=".75" font-size="10">acme.example.com</text>
+    <text x="555" y="140" text-anchor="middle" fill="currentColor" fill-opacity=".75" font-size="10">= exactly one community</text>
+    <text x="555" y="156" text-anchor="middle" fill="currentColor" fill-opacity=".75" font-size="10">source of truth</text>
+
+    <g stroke="currentColor" stroke-opacity=".5">
+      <line x1="470" y1="200" x2="520" y2="164"/>
+      <line x1="530" y1="205" x2="547" y2="164"/>
+      <line x1="600" y1="203" x2="570" y2="164"/>
+      <line x1="655" y1="198" x2="600" y2="164"/>
+    </g>
+    <g fill="currentColor" fill-opacity=".7">
+      <circle cx="466" cy="206" r="7"/><circle cx="528" cy="211" r="7"/>
+      <circle cx="604" cy="209" r="7"/><circle cx="660" cy="204" r="7"/>
+    </g>
+    <text x="555" y="240" text-anchor="middle" fill="currentColor" font-size="10">your teammates and their agents</text>
+    <text x="555" y="260" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10">members of one gated workspace</text>
+
+    <text x="370" y="304" text-anchor="middle" fill="currentColor" fill-opacity=".78" font-size="10.5">
+      Same event format. Same signatures. Opposite topology — and the topology is where all the tradeoffs live.
+    </text>
+    <text x="370" y="324" text-anchor="middle" fill="currentColor" fill-opacity=".62" font-size="10">
+      Buzz uses Nostr's format and identity model without adopting its redundancy model.
+    </text>
+  </g>
+</svg>
+<figcaption>The departure, drawn. Vanilla Nostr spreads the same signed events across many
+interchangeable relays; Buzz points a workspace at exactly one. Everything gained and lost in
+this section follows from that single difference.</figcaption>
+</figure>
+
+<h4 style="font-size:1.03rem;margin:1.8rem 0 .5rem">What narrowing it buys</h4>
+
+<p>Fig. 8 puts the two topologies side by side. Four things follow from choosing the right-hand one.</p>
+
+<p><strong>Coherent membership.</strong> "Who is in this workspace?" has a definite answer, because
+one relay holds the roster. In a mesh, membership would be a per-relay opinion, and two relays could
+disagree about whether you are a member — which makes a private channel meaningless.</p>
+
+<p><strong>Moderation that means something.</strong> Removing someone, deleting a message, or
+archiving an identity actually takes effect, because there is one authority. In a mesh, deletion is
+a polite request that other relays may ignore, and a removed member could still be receiving your
+channel from a relay that never got the memo.</p>
+
+<p><strong>Tenant isolation you can prove.</strong> Because the boundary is a single relay resolved
+from the URL, it is a boundary you can reason about formally — and Buzz does, with machine-checked
+models of the isolation and authorization properties. In a mesh, "isolation" has no home to be
+proven in.</p>
+
+<p><strong>One search index and one audit chain.</strong> Full-text search over everything, and a
+tamper-evident record of everything, both require a single complete copy of the log. Split the log
+across relays that each hold a subset and neither is possible — you cannot search what you do not
+have, and you cannot hash-chain a history you only partly saw.</p>
+
+<h4 style="font-size:1.03rem;margin:1.8rem 0 .5rem">What it gives up</h4>
+
+<p><strong>Redundancy.</strong> If your relay is down, your workspace is down. There is no second
+relay quietly holding the same events. This is ordinary self-hosted-software risk — the same as
+running your own anything — but it is worth naming, because a reader who came from part one might
+reasonably have assumed the mesh was protecting them. It is not, because there is no mesh.</p>
+
+<p><strong>Censorship resistance in the Nostr sense.</strong> Whoever operates your relay can
+refuse events, remove members, and decline to serve history. In public Nostr the defense against
+that is to publish elsewhere; in Buzz there is no elsewhere within the workspace. That is a
+feature when the operator is your own organization and a limitation the moment it is not — and it
+is precisely the trade a corporate tool has to make, since a workspace nobody can moderate is not
+a workspace anyone would deploy.</p>
+
+<p><strong>Cross-relay identity continuity.</strong> Your keypair is portable — that part still
+holds — but nothing else travels with it. As <code>NOSTR.md</code> puts it, a pubkey can join
+several communities and repost its profile in each, but "DMs and profiles do not inherit across
+community domains." You are the same person on two Buzz relays in the sense that you hold the same
+key; you are not the same person in the sense of carrying your history over.</p>
+
+<div class="callout">
+<span class="lab">The clean way to think about it</span>
+Buzz adopts Nostr's <strong>data model</strong> — self-authenticating signed events, keypair
+identity, kinds, filters — and declines its <strong>distribution model</strong>. The first is what
+makes agents and humans equivalent, makes the audit trail meaningful, and makes third-party
+clients possible. The second is what makes public Nostr censorship-resistant, and it is
+fundamentally incompatible with a private, membership-gated, moderated, formally isolated
+workspace. You cannot have both, and Buzz picked the half that matches what a team needs. Just do
+not conclude from "it's Nostr" that your workspace inherits Nostr's resilience properties. It
+inherits its integrity properties.
+</div>
+
+<h4 style="font-size:1.03rem;margin:1.8rem 0 .5rem">What third-party clients can actually do</h4>
+
+<p>Because Buzz speaks real NIPs, a generic Nostr client can connect. The repository's
+<code>NOSTR.md</code> documents exactly how far that goes, and it is more than a demo and less
+than a full experience. Reported faithfully:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Works</th><th>Partly works</th><th>Does not</th></tr></thead>
+<tbody>
+<tr><td>Group chat (kind 9) with an <code>h</code> tag naming the channel; reactions; deletions; profiles; group creation, add/remove member, metadata edits, leaving, admin deletion; group discovery (39000/39001/39002); membership notifications; presence and typing; NIP-42 auth; NIP-11 relay info; Blossom media; NIP-50 search; NIP-10 threads; NIP-17 gift-wrapped DMs and DM discovery; join requests to open channels.</td>
+<td>Buzz's own message formats — rich content (40002) and edits (40003) — travel correctly on the wire but no standard client knows how to render them. Invite creation (9009) is accepted and stored but its side effect is deferred, so it does nothing yet.</td>
+<td>Group roles (39003) are defined in the kind registry but never emitted. NIP-04 and NIP-44 direct messages are not implemented (only NIP-17 gift wraps), and the DM relay list kind is deferred.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Verified in the repository's own automated tests: the full NIP-29 flow, NIP-50 search, NIP-10
+threads, and NIP-17 gift wraps, driven by Buzz's Rust test client. Verified manually with
+<code>nak</code>. The docs also list two clients — Chachi and 0xchat — as <em>expected</em> to
+work based on their NIP-29 support but explicitly "not verified in-repo," which is the right way
+to report an untested claim.</p>
+
+<p>Some constraints will bite a third-party client author, and they are all consequences of
+privacy decisions rather than oversights. A subscription that could match private kinds — DM
+gift wraps, membership notifications — must carry a <code>#p</code> filter whose every value is
+your own pubkey, or the relay refuses it, so you cannot watch other people's membership changes or
+mail. Group discovery events are stored channel-scoped, so you find rooms by querying history
+rather than by a live global subscription. And per Buzz's own gotcha list, a query that omits
+<code>kinds</code> entirely hits the same privacy gate and is rejected — always name the kinds you
+want.</p>
+
+<!-- ══════════════════════ RESOURCES ══════════════════════ -->
+<h2 id="s14">Where to learn more</h2>
+
+<div class="callout warn">
+<span class="lab">Links rot — read this first</span>
+The Nostr ecosystem moves fast and its links do not age well. Clients are abandoned, relay lists
+go stale, hosted services quietly stop paying their bills, and repositories get renamed out from
+under their URLs. Every link below was fetched and confirmed to resolve on <strong>31 July
+2026</strong>; if you are reading this much later, expect some of them to have moved. Where a
+project has already been renamed, the current address is given rather than the redirect.
+</div>
+
+<p>Eight pointers, chosen so that each one does a job the others do not.</p>
+
+<div class="res">
+<h4><a href="https://nostr.how/">nostr.how</a></h4>
+<p class="who">For: a complete newcomer who wants the human version. A multi-language guide
+covering keys, relays, clients, and handles without assuming you can read a spec. The bare domain
+redirects to its English "what is Nostr" page, which is normal. Start here if part one of this
+document went too fast.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://github.com/nostr-protocol/nips/blob/master/01.md">NIP-01, the base specification</a></h4>
+<p class="who">For: anyone who wants the authoritative version of <a href="#s3">§1c</a> and
+<a href="#s5">§1e</a>. It is short, readable, and defines the event structure, the signing rules,
+and every client-to-relay message. If you read one specification, read this one.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://github.com/nostr-protocol/nips">The NIPs repository</a></h4>
+<p class="who">For: implementers and the curious. Every numbered specification in one place,
+proposed and revised by pull request — this <em>is</em> the standards process described in
+<a href="#s6">§1f</a>. Actively maintained. Browse it to see how much of Nostr is optional.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://nostrapps.com/">nostrapps.com</a></h4>
+<p class="who">For: seeing what people actually build with this. A filterable directory of clients
+and applications by category and platform. Useful mostly as evidence that "one protocol, many
+clients" is real rather than aspirational.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://damus.io/">Damus</a></h4>
+<p class="who">For: actually trying Nostr in ten minutes. A well-known open-source client for iOS,
+Android, and desktop. Generate a key, connect to some public relays, and watch the ideas in part
+one behave — particularly the part where your identity is not attached to the app.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://nostr.watch/">nostr.watch</a></h4>
+<p class="who">For: understanding relays as real infrastructure. A live explorer showing which
+public relays exist, which are up, and how they perform. It makes the economics from
+<a href="#s7">§1g</a> concrete — you can see relays come and go. Note it is a browser application,
+so it needs an actual browser rather than a fetch.</p>
+</div>
+
+<div class="res">
+<h4>Reference libraries and tooling —
+<a href="https://github.com/nbd-wtf/nostr-tools">nostr-tools</a> (JavaScript/TypeScript) ·
+<a href="https://github.com/nostrdevkit/nostr">nostrdevkit/nostr</a> (Rust) ·
+<a href="https://github.com/fiatjaf/nak">nak</a> (command line)</h4>
+<p class="who">For: building or debugging something. The first is the reference JS/TS library for
+clients; the second is the Rust implementation — Buzz depends on the <code>nostr</code> crate from
+it rather than implementing NIP-01 itself, and note the project moved from
+<code>rust-nostr</code> to <code>nostrdevkit</code>, so older links redirect. The third is the CLI
+that generates keys, builds and signs events, and queries relays from a terminal — it is what
+Buzz's own documentation and tests use, and the fastest way to see the wire protocol with your own
+eyes.</p>
+</div>
+
+<div class="res">
+<h4><a href="https://github.com/hzrd149/blossom">The Blossom specification</a></h4>
+<p class="who">For: anyone who cares how files work, per <a href="#s12">§2e</a>. The BUD documents
+defining hash-addressed blob storage authenticated with Nostr keys. Smaller and slower-moving than
+the NIPs repository, but alive.</p>
+</div>
+
+<p class="small">Buzz itself lives at <a href="https://github.com/block/buzz">github.com/block/buzz</a>,
+Apache-2.0, by Block, Inc. Its <code>NOSTR.md</code> is the definitive statement of what
+third-party Nostr clients can do against a Buzz relay, and <code>docs/nips/</code> holds the 15
+in-tree drafts from <a href="#s11">§2d</a>.</p>
+
+<hr>
+
+<h3>The short version</h3>
+
+<p>Nostr replaces the account with a keypair, the record with a signed event, and the platform with
+a relay so simple it can be replaced. Because an event proves its own authorship and integrity, you
+trust it for mathematical reasons rather than institutional ones — and that single property is what
+lets identity be portable, servers be interchangeable, and any participant holding a key be a
+first-class one. The costs are real and permanent: a lost key cannot be recovered, spam is harder
+without accounts, someone must fund the relays, and metadata leaks even when content does not.</p>
+
+<p>Buzz takes the half of that it needs. It keeps the data model in full — keypair identity, signed
+events, kinds, filters, and roughly two dozen standard NIPs — which is what makes an AI agent and a
+human the same kind of participant, with the same signing, the same membership, and the same audit
+trail. It declines the distribution model, pointing each workspace at exactly one authoritative
+relay so that membership, moderation, isolation, search, and audit can each have a definite answer.
+And where the standards stopped — mostly around what it means for a process to act on a person's
+behalf — it wrote 15 specifications and put them in the repository rather than inventing private
+fields. For how all of that is actually built, continue to
+<a href="how-buzz-works.html">How Buzz works</a>.</p>
+
+<p class="small">Sources: <code>buzz/docs/key-concepts.md</code> (including its <em>Nostr</em> and
+<em>NIP</em> entries), <code>ARCHITECTURE.md</code> §2–§4 and §6–§8, <code>NOSTR.md</code>,
+<code>README.md</code>, <code>VISION.md</code>, <code>AGENTS.md</code> ("Common Gotchas"),
+<code>docs/nips/</code> (15 drafts, read individually), and NIP references counted across
+<code>crates/**/*.rs</code>. External links verified 31 July 2026.</p>
+
+<script>
+function copyCode(btn){
+  var code = btn.parentElement.querySelector('code');
+  var text = code.textContent;
+  var done = function(){
+    var old = btn.lastChild.nodeValue;
+    btn.lastChild.nodeValue = 'Copied!';
+    setTimeout(function(){ btn.lastChild.nodeValue = old; }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+</script>
+
+</div>
+</body>
+</html>

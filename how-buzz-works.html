@@ -1,0 +1,1974 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Buzz Works — and how you'd design it from scratch</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{font-size:1rem;margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:0}
+pre code{background:none;padding:0;font-size:1em}
+.codewrap{position:relative;margin:1.1rem 0}
+.copybtn{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;
+  gap:5px;background:var(--card);border:1px solid var(--rule);color:var(--muted);
+  border-radius:5px;padding:4px 8px;font:500 11px/1 ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer}
+.copybtn:hover{color:var(--fg)}
+.copybtn svg{width:12px;height:12px}
+figure{margin:1.8rem 0;padding:0}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{color:var(--muted);font-size:.86rem;line-height:1.5;margin-top:.6rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+figcaption::before{content:"Fig. " counter(figc) ". ";font-weight:600;color:var(--fg)}
+body{counter-reset:figc}
+figure{counter-increment:figc}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.defn{background:var(--card);border:1px solid var(--rule);border-radius:6px;
+  padding:11px 15px;margin:1rem 0;font-size:.94rem}
+.defn b{color:var(--accent2)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.v{font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+<h1>How Buzz works — and how you'd design it from scratch</h1>
+<p class="sub">A self-hostable Nostr relay that is also a team workspace, where AI agents
+are members rather than bots. This is the reasoning, not the API surface: which decisions are
+load-bearing, which are reversible, and what order you would think in if you were building it
+yourself.</p>
+</header>
+
+<div class="toc">
+<strong>Contents</strong>
+<ol>
+<li><a href="#s0">The problem, before any architecture</a></li>
+<li><a href="#s1">The one bet</a></li>
+<li><a href="#s2">Top-down or bottom-up? A real answer</a></li>
+<li><a href="#s3">Why adopt Nostr instead of inventing a protocol</a></li>
+<li><a href="#s4">The architecture, layer by layer</a></li>
+<li><a href="#s5">The agent surface</a></li>
+<li><a href="#s6">Tech stack, and what you could substitute</a></li>
+<li><a href="#s7">Build order</a></li>
+<li><a href="#s8">What's actually hard</a></li>
+</ol>
+</div>
+
+<div class="callout">
+<span class="lab">How to read the sourcing</span>
+Everything factual here is traceable to the Buzz repository — <code>README.md</code>,
+<code>ARCHITECTURE.md</code>, <code>NOSTR.md</code>, the <code>VISION*.md</code> set,
+<code>docs/nips/</code>, <code>docs/spec/</code>, and the workspace <code>Cargo.toml</code>.
+Where I am reporting what the project states, I say <em>the docs say</em>. Where I am supplying
+rationale the repo does not spell out, the paragraph is marked
+<span class="tag" style="color:var(--accent);border-color:var(--accent)">my read</span>.
+Keeping those apart matters: the first is checkable, the second is an argument you are free to
+reject.
+</div>
+
+<!-- ══════════════════════════ SECTION 0 ══════════════════════════ -->
+<h2 id="s0">1. The problem, before any architecture</h2>
+
+<p>A software team's memory is scattered across roughly seven systems. The conversation about
+why a change was made lives in Slack. The change itself lives in GitHub. Whether it passed lives
+in CI. Who approved it lives in the pull request. The runbook lives in Notion. The alert that
+started it lives in PagerDuty. The search that would connect them lives nowhere, because each
+system indexes only itself.</p>
+
+<p>None of these systems can answer a question that spans them. "Why does this code exist?" is a
+join across seven databases you do not own, with no shared identity, no shared clock, and no
+shared notion of what an event even is. Teams paper over the gap with bots, webhooks, and a
+person who remembers.</p>
+
+<p>Then you add AI agents, and the gap gets worse rather than better. An agent that can only see
+one of the seven systems is a chatbot. An agent that can see all seven needs seven API
+integrations, seven credential sets, and seven different permission models — and there is still
+no audit trail that says what it did, in order, verifiably.</p>
+
+<figure>
+<svg viewBox="0 0 760 300" role="img" aria-label="Seven disconnected tools on the left versus one signed event log on the right">
+  <defs>
+    <marker id="f1arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">The seven-tab team</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".45">
+      <rect x="20" y="42" width="92" height="30" rx="5"/>
+      <rect x="20" y="82" width="92" height="30" rx="5"/>
+      <rect x="20" y="122" width="92" height="30" rx="5"/>
+      <rect x="20" y="162" width="92" height="30" rx="5"/>
+      <rect x="20" y="202" width="92" height="30" rx="5"/>
+      <rect x="128" y="62" width="92" height="30" rx="5"/>
+      <rect x="128" y="142" width="92" height="30" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle">
+      <text x="66" y="61">chat</text>
+      <text x="66" y="101">forge</text>
+      <text x="66" y="141">CI</text>
+      <text x="66" y="181">review</text>
+      <text x="66" y="221">docs</text>
+      <text x="174" y="81">paging</text>
+      <text x="174" y="161">search</text>
+    </g>
+    <g stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3">
+      <path d="M112 57 L128 77"/><path d="M112 97 L128 77"/>
+      <path d="M112 137 L128 157"/><path d="M112 177 L128 157"/>
+      <path d="M112 217 L128 162"/>
+    </g>
+    <text x="120" y="258" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10.5">
+      glue code, bots, webhooks
+    </text>
+    <text x="120" y="274" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10.5">
+      no shared identity or index
+    </text>
+
+    <g color="currentColor">
+      <line x1="248" y1="150" x2="300" y2="150" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f1arrow)"/>
+    </g>
+
+    <text x="330" y="24" font-size="12.5" font-weight="700" fill="currentColor">One signed event log</text>
+    <rect x="330" y="42" width="404" height="196" rx="7" fill="none" stroke="currentColor" stroke-opacity=".55"/>
+    <g fill="none" stroke="currentColor" stroke-opacity=".35">
+      <rect x="346" y="60" width="176" height="26" rx="4"/>
+      <rect x="346" y="94" width="176" height="26" rx="4"/>
+      <rect x="346" y="128" width="176" height="26" rx="4"/>
+      <rect x="346" y="162" width="176" height="26" rx="4"/>
+      <rect x="346" y="196" width="176" height="26" rx="4"/>
+      <rect x="540" y="60" width="176" height="26" rx="4"/>
+      <rect x="540" y="94" width="176" height="26" rx="4"/>
+      <rect x="540" y="128" width="176" height="26" rx="4"/>
+      <rect x="540" y="162" width="176" height="26" rx="4"/>
+      <rect x="540" y="196" width="176" height="26" rx="4"/>
+    </g>
+    <g fill="currentColor" font-size="10.5">
+      <text x="356" y="77">kind 9 · chat message</text>
+      <text x="356" y="111">kind 7 · reaction</text>
+      <text x="356" y="145">kind 30617 · repo announce</text>
+      <text x="356" y="179">kind 1617 · patch</text>
+      <text x="356" y="213">kind 40100 · canvas edit</text>
+      <text x="550" y="77">kind 46001 · workflow step</text>
+      <text x="550" y="111">kind 45001 · forum post</text>
+      <text x="550" y="145">kind 20001 · presence</text>
+      <text x="550" y="179">kind 44100 · member added</text>
+      <text x="550" y="213">kind 43001 · agent job</text>
+    </g>
+    <text x="532" y="258" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10.5">
+      one identity model · one index · one audit chain
+    </text>
+    <text x="532" y="274" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10.5">
+      humans and agents sign the same way
+    </text>
+  </g>
+</svg>
+<figcaption>The problem Buzz is answering. On the left, seven systems that each index only
+themselves, joined by glue. On the right, the same information as one stream of signed,
+typed records — where a cross-cutting question becomes an ordinary query. Kind numbers shown
+are real Buzz kinds; the full registry is 81 constants in <code>buzz-core</code>.</figcaption>
+</figure>
+
+<p>Fig. 1 is the whole thesis in one picture. The Buzz <code>README</code> puts the ambition plainly: "one community can do what teams
+currently fake with chat, forges, bots, CI dashboards, release tools, search indexes, and a pile
+of glue code… with one substrate instead of seven tabs pretending they know about each other."
+Every design decision downstream is in service of collapsing that join.</p>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<h2 id="s1">2. The one bet</h2>
+
+<p>Buzz makes a single bet, and almost every other decision is downstream of it:</p>
+
+<div class="callout">
+<span class="lab">The bet</span>
+Chat, git, CI, code review, workflow automation, canvases, presence, voice, and search are not
+seven different kinds of thing that need integrating. They are <em>one</em> kind of thing — a
+signed, typed, append-only record — differing only by a type tag. And an AI agent is not a
+special integration surface; it is another keypair with the same affordances as a human.
+</div>
+
+<p>Before that sentence can mean anything, three terms need defining.</p>
+
+<div class="defn">
+<b>Event.</b> The universal unit. A JSON object with exactly six fields:
+<code>id</code> (SHA-256 of a canonical serialization of the other fields),
+<code>pubkey</code> (a secp256k1 public key in hex — the author),
+<code>kind</code> (an unsigned integer type tag),
+<code>tags</code> (an array of string arrays carrying structured metadata),
+<code>content</code> (a string, often JSON), and
+<code>sig</code> (a Schnorr signature over <code>id</code>). This is the
+<a href="https://github.com/nostr-protocol/nips/blob/master/01.md">Nostr NIP-01</a> format,
+described in <code>ARCHITECTURE.md §2</code>.
+</div>
+
+<div class="defn">
+<b>Kind.</b> A <code>u32</code> integer naming the event's type. The docs are unambiguous that it
+is doing the heavy lifting: "the <code>kind</code> integer is the only dispatch switch." The relay
+routes, stores, and fans out by kind; clients subscribe by kind. <code>buzz-core</code> defines
+81 kind constants and exports <code>ALL_KINDS</code> with 80 of them (the auth kind, 22242, is
+excluded because it is never stored).
+</div>
+
+<div class="defn">
+<b>Relay.</b> The server process (<code>buzz-relay</code>) and the single source of truth. All
+reads and writes go through it. The docs are explicit about the negative space here: "There is no
+peer-to-peer event exchange, no gossip, no replication — just clients connecting to one relay
+over WebSocket."
+</div>
+
+<figure>
+<svg viewBox="0 0 720 306" role="img" aria-label="Anatomy of a signed Nostr event and how each field is used">
+  <g font-family="ui-sans-serif,system-ui,sans-serif">
+    <rect x="18" y="16" width="330" height="272" rx="7" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="34" y="40" font-size="12" font-weight="700" fill="currentColor">One event, six fields</text>
+    <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11.5" fill="currentColor">
+      <text x="34" y="70">id</text>
+      <text x="34" y="106">pubkey</text>
+      <text x="34" y="142">kind</text>
+      <text x="34" y="178">tags</text>
+      <text x="34" y="214">content</text>
+      <text x="34" y="250">sig</text>
+    </g>
+    <g fill="currentColor" fill-opacity=".62" font-size="10.5">
+      <text x="118" y="70">sha256 of canonical bytes</text>
+      <text x="118" y="106">secp256k1 author key</text>
+      <text x="118" y="142">u32 type tag</text>
+      <text x="118" y="178">[["h","&lt;channel&gt;"],["p",…]]</text>
+      <text x="118" y="214">payload (text or JSON)</text>
+      <text x="118" y="250">Schnorr signature over id</text>
+    </g>
+
+    <g stroke="currentColor" stroke-opacity=".3">
+      <path d="M348 66 L400 66" fill="none"/>
+      <path d="M348 102 L400 102" fill="none"/>
+      <path d="M348 138 L400 138" fill="none"/>
+      <path d="M348 174 L400 174" fill="none"/>
+      <path d="M348 210 L400 210" fill="none"/>
+      <path d="M348 246 L400 246" fill="none"/>
+    </g>
+
+    <g>
+      <rect x="400" y="52" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="400" y="88" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="400" y="124" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="400" y="160" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="400" y="196" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="400" y="232" width="300" height="28" rx="4" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+    </g>
+    <g fill="currentColor" font-size="10.8">
+      <text x="412" y="70">dedup key — insert is ON CONFLICT DO NOTHING</text>
+      <text x="412" y="106">identity — human or agent, no distinction</text>
+      <text x="412" y="142">routing, storage class, search eligibility</text>
+      <text x="412" y="178">channel scoping (h), recipients (p), threads (e)</text>
+      <text x="412" y="214">what the user sees; indexed into search_tsv</text>
+      <text x="412" y="250">the audit story — verified before storage</text>
+    </g>
+    <text x="550" y="284" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10.5">
+      every subsystem reads a different field of the same record
+    </text>
+  </g>
+</svg>
+<figcaption>Why one record type can serve seven subsystems. Storage keys on <code>id</code>,
+access control keys on the <code>h</code> tag, fan-out keys on <code>(channel, kind)</code>,
+search keys on <code>content</code> filtered by <code>kind</code>, audit keys on
+<code>pubkey</code> and <code>sig</code>. No subsystem needs to know what a "message" or a
+"patch" <em>is</em>.</figcaption>
+</figure>
+
+<h3>What the bet buys you</h3>
+
+<p>Fig. 2 shows why one record type can carry all of that. <strong>Extension without migration.</strong> The docs state the payoff directly: "Adding a
+new feature means defining a new kind number; existing clients see nothing and break nothing."
+This is the version-tolerance property of tagged unions applied at the system level. A client
+subscribed to kinds 9 and 7 is structurally incapable of being broken by the introduction of kind
+30621 (a multi-repository project, per <code>docs/nips/NIP-MP.md</code>). Compare the normal path
+— a new feature means a new table, a new endpoint, a new client version, and a deployment
+ordering constraint between them.</p>
+
+<p><strong>One search index, one audit chain, one permission check.</strong> Because git patches
+and chat messages are the same row shape in the same table, "search the conversation, the patch,
+the workflow run, and the approval in one place" (README) is not an integration project. It is a
+<code>WHERE</code> clause. The audit log covers all of them by construction rather than by seven
+separate implementations, and the channel-membership check that gates a message also gates the
+patch.</p>
+
+<p><strong>Agents get parity for free.</strong> If authorship is "whichever keypair signed it,"
+then an agent is a member the same way a person is: it has its own key, its own channel
+memberships, its own audit trail. The README's framing — "Scoped by identity, not by permission
+flags — the same way you'd scope a teammate" — is a consequence of the event model, not an
+additional feature. There is no bot API to build, because there is no bot.</p>
+
+<p><strong>Third-party interoperability without an SDK.</strong> Because the wire format is
+standard Nostr, <code>NOSTR.md</code> documents connecting arbitrary NIP-29 clients straight to
+the relay, and the repo's own tests drive it with <code>nak</code>, a generic Nostr CLI. Your
+protocol gets clients you did not write.</p>
+
+<h3>What the bet costs you</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Cost</th><th>Where it shows up in the repo</th></tr></thead>
+<tbody>
+<tr><td><strong>Signature verification on every write.</strong> Schnorr verification is CPU-bound and unavoidable — you cannot trust the client.</td>
+<td><code>verify_event()</code> is called under <code>spawn_blocking</code> in the event pipeline specifically so it does not stall the async runtime.</td></tr>
+<tr><td><strong>Relational queries get awkward.</strong> A generic event table is a poor fit for "show me this channel's top-level timeline, paged."</td>
+<td>They wrote a whole NIP for it — <code>NIP-CW</code>, "Channel Window": a relay-computed, cursor-paged view served as ordinary signed events through an extended NIP-01 filter.</td></tr>
+<tr><td><strong>Access control is not in the protocol.</strong> NIP-01 has no notion of a private room; the relay must impose one and get it right at every entry point.</td>
+<td>The REQ handler must check channel access <em>before</em> registering a subscription, and channel-scoped events are explicitly excluded from global subscriptions — both called out as deliberate security boundaries.</td></tr>
+<tr><td><strong>Client-supplied tags cannot be trusted.</strong> The <code>h</code> tag says which channel; a malicious client can lie.</td>
+<td>Reactions ignore the client's <code>h</code> tag entirely and derive the channel from the target event's <code>e</code> tag, failing closed on unknown targets. Kinds 44100/44101 are rejected unless signed by the relay's own key.</td></tr>
+<tr><td><strong>Privacy has to be designed per kind.</strong> A single log with full-text search will index things it should not.</td>
+<td>The <code>search_tsv</code> generated column contains <code>CASE WHEN kind IN (1059, 30300, 30622) THEN NULL</code> — gift-wrapped DMs and reminders are made unsearchable at the storage layer, because a <code>NULL</code> tsvector can never match.</td></tr>
+<tr><td><strong>You inherit someone else's protocol politics.</strong> Kind numbers are a shared namespace with no registry authority.</td>
+<td>Buzz carves 40000–49999 as its own range and publishes 15 draft NIPs in <code>docs/nips/</code> rather than silently squatting numbers.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+The sharpest cost is one the repo does not name as a cost: <strong>the relay must be trusted, and
+the bet quietly depends on that.</strong> "Every event is signed" sounds like it removes trust,
+but signatures only prove authorship — they say nothing about whether the relay showed you all
+the events, or the right ones. <code>VISION.md</code> confirms the model: TLS in transit, at-rest
+encryption delegated to the storage layer, "server-managed encryption covers every channel, every
+DM, every event — eDiscovery works on everything," and end-to-end encryption for DMs listed only
+as a future consideration. That is a deliberate, coherent choice for a corporate workspace, where
+discoverability is a legal requirement. But it means Buzz is <em>self-hostable</em> rather than
+<em>trustless</em>, and if you build something like it, you should decide which of those two
+words you actually meant before you write a line of code.
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<h2 id="s2">3. Top-down or bottom-up? A real answer</h2>
+
+<p>"A bit of both" is the answer people give when they have not identified which decisions are
+load-bearing. Here is a real one.</p>
+
+<div class="callout myread">
+<span class="lab">my read — the claim</span>
+<strong>Exactly two things must be settled top-down, before any code: the event/identity model,
+and the tenancy boundary.</strong> Everything else — every crate, every storage engine, every
+client, every feature — should be built bottom-up, discovered by implementing the smallest real
+thing and letting the seams emerge. The reason is not taste. It is that those two decisions are
+the only ones that are <em>simultaneously</em> global (every component depends on them) and
+irreversible (changing them invalidates data you have already signed and stored).
+</div>
+
+<h3>Why the protocol and identity model has to be first</h3>
+
+<p>An event's <code>id</code> is a hash over its own canonical serialization, and its
+<code>sig</code> is a signature over that hash. That means the serialization rules are frozen in
+the data. Change how an event is canonicalized and every historical event's id stops verifying.
+There is no migration for that; there is only "declare the old log unverifiable." Contrast a
+schema change in a conventional app: add a column, backfill, ship. Cheap. The signature makes the
+format decision qualitatively different in kind, not just in cost.</p>
+
+<p>The same logic applies to identity. The choice of secp256k1 with Schnorr signatures propagates
+into git commit signing (<code>NIP-GS</code> defines a signature format for git objects using
+Nostr keys through git's pluggable <code>gpg.x509.program</code> interface), into
+credential helpers (<code>git-credential-nostr</code>), into the auth handshake, into the pairing
+protocol, and into every audit entry. Buzz's own vision doc says the quiet part: "Humans and
+agents get the same thing: secp256k1 keypair, NIP-05 handle, Schnorr auth." Swapping the curve
+later is not a refactor; it is a fork.</p>
+
+<h3>Why tenancy is the other one</h3>
+
+<p>This is the decision most projects get wrong by deferring, and Buzz is a live case study —
+because it appears to have made the move <em>after</em> shipping.</p>
+
+<div class="defn">
+<b>Community.</b> The tenant boundary: one workspace, one URL, one isolated world of channels,
+members, profiles, DMs, repos, and search. The relay resolves a <code>TenantContext</code> from
+the request host <em>before</em> any handler can observe tenant data — the step
+<code>ARCHITECTURE.md</code> calls "Step 0: Community Binding." An unknown host is rejected
+generically and never falls through to a default tenant.
+</div>
+
+<p>The formal spec is candid about what changed: "Today a Buzz relay <em>process</em> is the
+security boundary: one <code>DATABASE_URL</code>, one relay keypair, one relay-global
+<code>relay_members</code> table… The model proven here demotes the relay process to stateless
+compute and elevates a new <strong>community</strong> entity to the tenant/security boundary,
+carried as a <code>community_id</code> on every scoped row. That move collapses a process-level
+boundary into a row-level one."</p>
+
+<p>Collapsing a process boundary into a row boundary is exactly the retrofit that is expensive:
+every table, every cache key, every search filter, every audit chain, and every error string
+becomes a place where the boundary can leak. The tell is how much work it took to be confident it
+had not: a TLA+ model of the serving layer, a Tamarin model of the authorization protocol under a
+Dolev-Yao adversary, and a mutation test on every invariant. That is not typical multi-tenancy
+work. That is the price of adding a boundary late.</p>
+
+<div class="callout">
+<span class="lab">the docs say</span>
+The spec is honest that the <em>pattern</em> is unremarkable: "row-level multi-tenancy with a
+discriminator column and row-level security (RLS) is established practice… The contribution is
+the <strong>formal treatment</strong>." It also states what it deliberately does not prove:
+liveness, performance, Postgres's own correctness, the cryptographic primitives, physical-resource
+isolation, and client-side leakage above the relay's interface.
+</div>
+
+<h3>The decision map</h3>
+
+<figure>
+<svg viewBox="0 0 740 380" role="img" aria-label="Decisions plotted by how global they are versus how reversible they are">
+  <defs>
+    <marker id="f3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">
+    <line x1="70" y1="330" x2="700" y2="330" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f3a)"/>
+    <line x1="70" y1="330" x2="70" y2="34" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f3a)"/>
+    <text x="385" y="360" text-anchor="middle" fill="currentColor" fill-opacity=".8" font-size="11.5">
+      how hard to change later  →
+    </text>
+    <text x="26" y="180" fill="currentColor" fill-opacity=".8" font-size="11.5"
+      transform="rotate(-90 26 180)" text-anchor="middle">how many components depend on it  →</text>
+
+    <line x1="390" y1="34" x2="390" y2="330" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="4 4"/>
+    <line x1="70" y1="182" x2="700" y2="182" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="4 4"/>
+
+    <rect x="396" y="40" width="298" height="136" rx="6" fill="currentColor" fill-opacity=".05" stroke="currentColor" stroke-opacity=".35"/>
+    <text x="545" y="60" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">DECIDE TOP-DOWN, FIRST</text>
+
+    <g fill="currentColor">
+      <circle cx="612" cy="96" r="4.5"/><text x="602" y="90" text-anchor="end">event format + canonical id</text>
+      <circle cx="576" cy="126" r="4.5"/><text x="566" y="120" text-anchor="end">signature scheme / key type</text>
+      <circle cx="530" cy="156" r="4.5"/><text x="520" y="150" text-anchor="end">tenancy boundary (community)</text>
+      <circle cx="430" cy="212" r="4.5"/><text x="442" y="216">kind-range partitioning</text>
+      <circle cx="452" cy="252" r="4.5"/><text x="464" y="256">audit hash-chain shape</text>
+      <circle cx="196" cy="118" r="4.5"/><text x="208" y="122">relay-is-source-of-truth</text>
+      <circle cx="168" cy="228" r="4.5"/><text x="180" y="232">Postgres as event store</text>
+      <circle cx="146" cy="268" r="4.5"/><text x="158" y="272">Redis for fan-out</text>
+      <circle cx="128" cy="300" r="4.5"/><text x="140" y="304">FTS engine choice</text>
+      <circle cx="252" cy="292" r="4.5"/><text x="264" y="296">crate seams</text>
+      <circle cx="300" cy="256" r="4.5"/><text x="312" y="260">client framework</text>
+      <circle cx="336" cy="308" r="4.5"/><text x="348" y="312">workflow DSL surface</text>
+    </g>
+    <text x="230" y="60" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor" fill-opacity=".75">
+      DISCOVER BOTTOM-UP
+    </text>
+  </g>
+</svg>
+<figcaption>The two axes that matter. Only the top-right quadrant justifies deciding before
+building — decisions that everything depends on <em>and</em> that you cannot undo. Note where
+"Postgres as event store" sits: heavily depended-on but genuinely swappable behind the
+<code>buzz-db</code> seam, so it does not belong in the top-down set. Positions are my
+assessment, not a repo artifact.</figcaption>
+</figure>
+
+<h3>Irreversible versus cheap, concretely</h3>
+
+<p>Fig. 3 plots the decisions on the two axes that matter; the table below is the same judgement stated case by case.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Decision</th><th>Verdict</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Event canonical serialization &amp; id derivation</td><td><strong>Irreversible</strong></td>
+<td>Frozen into every stored signature. No migration exists.</td></tr>
+<tr><td>secp256k1 / Schnorr identity</td><td><strong>Irreversible</strong></td>
+<td>Propagates into git signing, credential helpers, pairing, NIP-05 handles, audit entries.</td></tr>
+<tr><td>Tenancy = host-derived community, resolved before any handler</td><td><strong>Irreversible in practice</strong></td>
+<td>Retrofitting it turned into a formal-verification project. Adding <code>community_id</code> to a live schema touches every query.</td></tr>
+<tr><td>Kind-range partitioning (ephemeral 20000–29999, custom 40000–49999)</td><td><strong>Sticky</strong></td>
+<td>Storage class is derived from the range, so moving a kind changes whether history exists. Reserving ranges early is nearly free; renumbering later is not.</td></tr>
+<tr><td>Relay is the single source of truth (no gossip, no P2P)</td><td><strong>Sticky</strong></td>
+<td>Not data-frozen, but every consistency assumption in the codebase leans on it. Adding replication later means confronting ordering you never had to think about.</td></tr>
+<tr><td>Audit hash-chain field set</td><td><strong>Sticky</strong></td>
+<td>Changing which fields the hash covers breaks <code>verify_chain()</code> across the boundary; you can re-genesis, but you lose continuity.</td></tr>
+<tr><td>Postgres vs. another event store</td><td>Cheap-ish</td>
+<td>Confined to <code>buzz-db</code>. The interface — insert, query by filter, get by id — is small.</td></tr>
+<tr><td>Redis for pub/sub and presence</td><td>Cheap</td>
+<td><code>buzz-pubsub</code> is a leaf crate; presence is a key with a TTL and typing is a sorted set. Both are a week of work to reimplement.</td></tr>
+<tr><td>Postgres FTS vs. Elasticsearch/Meili</td><td>Cheap</td>
+<td>The docs put permission filtering <em>outside</em> search on purpose: <code>buzz-search</code> returns candidate hits and "the relay re-authorizes each one." The engine is behind that seam.</td></tr>
+<tr><td>Desktop framework, mobile framework, CLI ergonomics</td><td>Cheap</td>
+<td>All are clients of a documented wire protocol. Buzz already has four (desktop, web, admin-web, Flutter mobile) plus third-party Nostr clients.</td></tr>
+<tr><td>Workflow DSL (triggers, actions, template syntax)</td><td>Cheap</td>
+<td>Stored as canonical JSON in a table; 4 triggers and 7 actions today, two of them still returning <code>NotImplemented</code>. Additive by design.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>The practical rule</h3>
+
+<p>The test for "must this be top-down?" is not "is it important?" — everything feels important.
+It is: <em>if I get this wrong, does the fix require rewriting data I have already committed to,
+or only code?</em> Code is cheap. Signed history is not. A schema you can migrate is not
+load-bearing in this sense; a hash you have already published is.</p>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+There is a second, softer reason the protocol goes first, and it is organizational rather than
+technical. <code>VISION.md</code> describes the build model as "Agent swarms build in parallel,
+integrating at the event store boundary." Parallel construction only works if the integration
+contract is fixed in advance. The event format is not just the data model — it is the interface
+that lets 26 crates and four clients be written by different workers without a coordination
+meeting. Deciding it top-down buys you the ability to do everything else bottom-up and
+concurrently. That is the actual return on the decision.
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<h2 id="s3">4. Why adopt Nostr instead of inventing a protocol</h2>
+
+<p>If you have decided the unit of everything is a signed typed record, you now face a choice
+that looks like a formality and is not: design that record yourself, or adopt someone else's.
+Buzz adopted Nostr NIP-01. Understanding why is the most transferable part of the design.</p>
+
+<div class="defn">
+<b>Nostr.</b> "Notes and Other Stuff Transmitted by Relays" — a minimal open protocol where
+clients publish signed events to relays over WebSocket. The specifications are numbered NIPs
+(<em>Nostr Implementation Possibilities</em>). The ones that matter here:
+<b>NIP-01</b> the event format and the <code>EVENT</code>/<code>REQ</code>/<code>CLOSE</code>
+wire messages; <b>NIP-42</b> WebSocket authentication by signed challenge;
+<b>NIP-98</b> HTTP authentication by a signed <code>kind:27235</code> event;
+<b>NIP-29</b> relay-based groups (rooms with membership);
+<b>NIP-34</b> git repositories, patches, and status as events;
+<b>NIP-11</b> a relay's self-description document;
+<b>NIP-17</b> gift-wrapped private messages;
+<b>NIP-25</b> reactions; <b>NIP-50</b> search; <b>NIP-05</b> human-readable
+<code>name@domain</code> handles.
+</div>
+
+<h3>What Nostr gives you free</h3>
+
+<p><strong>A frozen, battle-tested serialization.</strong> Recall from <a href="#s2">§3</a> that
+the canonicalization rules are the one thing you can never change. Adopting an existing spec means
+that decision is already made, already reviewed by people who found the edge cases, and already
+implemented in libraries — Buzz pulls in the <code>nostr</code> crate (0.44) rather than writing
+its own. The single highest-consequence, lowest-differentiation decision in the whole system is
+one you get to skip.</p>
+
+<p><strong>Identity and auth as a solved subproblem.</strong> NIP-42 gives a challenge–response
+handshake; NIP-98 gives the HTTP analogue; NIP-05 gives human-readable handles. Buzz implements
+all three rather than inventing session tokens. The payoff is uniformity: the same keypair that
+authenticates a WebSocket also signs a git commit (via <code>NIP-GS</code>) and authenticates a
+CLI call.</p>
+
+<p><strong>Free clients and free tests.</strong> <code>NOSTR.md</code> documents third-party
+NIP-29 clients connecting directly, lists what works kind-by-kind, and shows the exact
+<code>nak</code> commands to send a message, react, delete, create a group, run a NIP-50 search,
+reply in a NIP-10 thread, and fetch NIP-17 DMs. An independent implementation of your protocol,
+which you did not write and cannot accidentally co-design with your server, is the best
+conformance test available.</p>
+
+<p><strong>A pre-solved namespace problem.</strong> Kind ranges already carry storage semantics
+across the ecosystem, so Buzz inherits a scheme instead of arguing about one.</p>
+
+<figure>
+<svg viewBox="0 0 740 250" role="img" aria-label="Nostr kind number line showing which ranges mean what and where Buzz's custom kinds sit">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="26" font-size="12.5" font-weight="700" fill="currentColor">The kind-number line — storage class is derived from the range</text>
+
+    <rect x="20" y="46" width="128" height="34" rx="4" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="152" y="46" width="128" height="34" rx="4" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="284" y="46" width="128" height="34" rx="4" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-opacity=".6"/>
+    <rect x="416" y="46" width="128" height="34" rx="4" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".45"/>
+    <rect x="548" y="46" width="172" height="34" rx="4" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-opacity=".6"/>
+
+    <g fill="currentColor" text-anchor="middle" font-size="10.5">
+      <text x="84" y="67">0 – 9 999</text>
+      <text x="216" y="67">10 000 – 19 999</text>
+      <text x="348" y="67">20 000 – 29 999</text>
+      <text x="480" y="67">30 000 – 39 999</text>
+      <text x="634" y="67">40 000 – 49 999</text>
+    </g>
+    <g fill="currentColor" fill-opacity=".7" text-anchor="middle" font-size="10">
+      <text x="84" y="98">standard kinds</text>
+      <text x="216" y="98">replaceable</text>
+      <text x="348" y="98">ephemeral</text>
+      <text x="480" y="98">addressable</text>
+      <text x="634" y="98">Buzz custom range</text>
+      <text x="84" y="112">(NIP-01 and friends)</text>
+      <text x="216" y="112">(latest per kind+pubkey)</text>
+      <text x="348" y="112">never stored, never audited</text>
+      <text x="480" y="112">latest per kind+pubkey+d</text>
+      <text x="634" y="112">no collision with the ecosystem</text>
+    </g>
+
+    <g stroke="currentColor" stroke-opacity=".28">
+      <line x1="84" y1="126" x2="84" y2="146"/>
+      <line x1="348" y1="126" x2="348" y2="146"/>
+      <line x1="480" y1="126" x2="480" y2="146"/>
+      <line x1="634" y1="126" x2="634" y2="146"/>
+    </g>
+
+    <g fill="currentColor" font-size="10" text-anchor="middle">
+      <text x="84" y="160">7 reaction</text>
+      <text x="84" y="174">9 chat message</text>
+      <text x="84" y="188">5 deletion</text>
+      <text x="84" y="202">1059 gift-wrap DM</text>
+      <text x="348" y="160">20001 presence</text>
+      <text x="348" y="174">20002 typing</text>
+      <text x="480" y="160">30174 agent engram</text>
+      <text x="480" y="174">30175 persona</text>
+      <text x="480" y="188">30617 repo announce</text>
+      <text x="480" y="202">30621 project</text>
+      <text x="634" y="160">40100 canvas</text>
+      <text x="634" y="174">43001 agent job</text>
+      <text x="634" y="188">45001 forum post</text>
+      <text x="634" y="202">46001–46012 workflow</text>
+    </g>
+    <text x="370" y="234" text-anchor="middle" fill="currentColor" fill-opacity=".62" font-size="10.5">
+      81 kind constants live in buzz-core; ALL_KINDS exports 80 — kind 22242 (AUTH) is excluded because it is never stored
+    </text>
+  </g>
+</svg>
+<figcaption>Kind ranges are not documentation — they are dispatch. An event in 20000–29999 skips
+the database, the audit chain, and the search indexer entirely, on the strength of its number
+alone. Choosing the right range for a new feature <em>is</em> choosing its storage semantics.
+Ranges and examples from <code>ARCHITECTURE.md §2</code> and <code>docs/key-concepts.md</code>.</figcaption>
+</figure>
+
+<h3>What Nostr forces you to work around</h3>
+
+<p>Fig. 4 shows how much of that namespace discipline you inherit for free. Nostr is designed for a public, censorship-resistant, many-relay world. A corporate workspace
+is a private, single-relay, membership-gated world. Most of the friction traces to that mismatch.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>What Nostr assumes</th><th>What Buzz needs</th><th>How the gap is closed</th></tr></thead>
+<tbody>
+<tr><td>Events are public; relays are dumb pipes</td><td>Private channels; membership as the only gate</td>
+<td>The relay imposes access control the protocol has no vocabulary for: REQ checks channel access before registering the subscription, and channel-scoped events are excluded from global subscriptions.</td></tr>
+<tr><td>Clients hold events; relays may lie or vanish</td><td>One relay as the single source of truth</td>
+<td>Explicitly accepted: no P2P, no gossip, no replication. Buzz uses the format without the topology.</td></tr>
+<tr><td>Subscriptions are cheap and open-ended</td><td>Bounded server resources</td>
+<td>Hard caps: 65 536-byte frames, 1 024 subscriptions per connection, 500 historical results per filter, 1 024 concurrent handlers, plus a connection semaphore and a slow-client grace counter of 3.</td></tr>
+<tr><td>Anyone may publish anything</td><td>Relay-authored facts clients must not forge</td>
+<td>Relay-signed kinds — 39000/39001/39002 group discovery, 44100/44101 membership notices, 13534 roster. Client-submitted 44100/44101 are rejected outright.</td></tr>
+<tr><td>Metadata leakage is tolerable</td><td>You must not be able to watch other people's membership changes or DMs</td>
+<td>Global subscriptions that could match p-gated kinds (44100, 44101, 1059) must carry a <code>#p</code> filter whose every value equals the authenticated pubkey, or the subscription is refused.</td></tr>
+<tr><td>Deletion is advisory</td><td>Enforced authorship rules and an audit trail</td>
+<td>Kind 5 deletions validate author-match against the target's <code>e</code> tag; admin deletion is a separate kind (9005). Soft-deleted events remain in the audit log.</td></tr>
+<tr><td>Timelines are "give me the last N by <code>created_at</code>"</td><td>Stable paging over a threaded channel</td>
+<td><code>NIP-CW</code>: relay-computed cursor paging in stable keyset order, served through an extended NIP-01 filter.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>What Buzz had to extend — and how</h3>
+
+<p>The extension strategy is the part most worth stealing. Rather than adding proprietary fields
+to the event format, Buzz writes a spec per gap, claims kinds, and keeps them in-tree at
+<code>docs/nips/</code>. Fifteen drafts exist. Every one is marked <code>draft optional</code>,
+and the ones that need relay cooperation say so with a <code>relay</code> tag and a
+<em>Depends on</em> line.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Draft</th><th>Gap it fills</th><th>Kinds claimed</th></tr></thead>
+<tbody>
+<tr><td><code>NIP-OA</code> Owner Attestation</td><td>An owner key authorizing an agent key to publish <em>as itself</em>. Explicitly rejects reusing NIP-26 delegation, because NIP-26 assigns the event to the delegator — wrong semantics for agent provenance.</td><td>an <code>auth</code> tag</td></tr>
+<tr><td><code>NIP-AA</code> Agent Authentication</td><td>An agent whose owner is a relay member gains implicit access by presenting its NIP-OA credential during NIP-42 auth — no separate enrolment.</td><td>—</td></tr>
+<tr><td><code>NIP-AP</code> Agent Personas</td><td>Public, addressable blueprints for spawning an agent: identity, system prompt, model, runtime, name pool.</td><td>30175, 30178</td></tr>
+<tr><td><code>NIP-AE</code> Agent Engrams</td><td>Persistent agent memory, NIP-44-encrypted with the agent↔owner conversation key — symmetric, so the owner can always read everything the agent remembers.</td><td>30174</td></tr>
+<tr><td><code>NIP-AM</code> Agent Turn Metrics</td><td>Per-turn token usage and cost, encrypted to the owner, so cost accounting works without the relay learning what the agent did.</td><td>44200</td></tr>
+<tr><td><code>NIP-AO</code> Agent Observability</td><td>Ephemeral encrypted telemetry streamed from agent processes to the owner's client.</td><td>ephemeral range</td></tr>
+<tr><td><code>NIP-MP</code> Multi-Repository Projects</td><td>A signed named grouping of NIP-34 repo announcements, by coordinate — so a project can span repos owned by different pubkeys.</td><td>30621</td></tr>
+<tr><td><code>NIP-GS</code> Git Object Signing</td><td>Signing git commits and tags with Nostr keys through git's pluggable signing-program interface.</td><td>—</td></tr>
+<tr><td><code>NIP-CW</code> Channel Window</td><td>Cursor-paged top-level channel timelines as signed events.</td><td>overlay families</td></tr>
+<tr><td><code>NIP-RS</code> Read State Sync</td><td>Encrypted cross-device "I have read up to T".</td><td>30078</td></tr>
+<tr><td><code>NIP-ER</code> Event Reminders</td><td>Encrypted author-only reminders with a public <code>not_before</code> so the relay knows <em>when</em> without knowing <em>what</em>.</td><td>30300</td></tr>
+<tr><td><code>NIP-PL</code> Push Leases</td><td>Push notification delivery authority — the most heavily formalized of the set.</td><td>—</td></tr>
+<tr><td><code>NIP-DV</code> DM Visibility</td><td>Per-viewer hide state for DM conversations, exposed as a relay-signed replaceable event so pure-Nostr clients can filter.</td><td>—</td></tr>
+<tr><td><code>NIP-IA</code> Identity Archival</td><td>Relay-scoped hiding of a pubkey from member lists without implying global reputation.</td><td>—</td></tr>
+<tr><td><code>NIP-WP</code> Workspace Profile</td><td>A workspace icon set by admins (kind 9033) and served in the standard NIP-11 <code>icon</code> field, readable by any client.</td><td>9033</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+Notice the shape of that table: six of the fifteen drafts are about <em>agents</em>. Nostr had a
+complete story for humans-and-relays and no story at all for "a process acting on behalf of a
+person, whose costs and memory and telemetry the person needs to see." That is where an existing
+protocol stops paying and you start writing spec. The right lesson is not "always adopt" — it is
+that adopting buys you the boring 80% (bytes on the wire, signatures, auth, threading, reactions,
+search, DMs) so your specification effort concentrates on the part that is actually new. Writing
+fifteen focused drafts on top of NIP-01 is a much smaller and much better-scoped job than writing
+one protocol from zero, and each draft can be evaluated on its own.
+</div>
+
+<p>The counter-argument deserves a hearing. Adopting Nostr means inheriting a public-network
+protocol into a private-network product, and several of the workarounds above exist purely to
+undo assumptions you never wanted. A purpose-built protocol would have had private-by-default
+rooms, server-authored facts, and paging in version one, instead of as extensions. The trade you
+are making is: <em>up-front design cost and a frozen format you own</em> against <em>permanent
+low-grade friction and a format you did not choose, plus an ecosystem you did not have to
+build</em>. Buzz took the second. Given that the format decision is the irreversible one from
+<a href="#s2">§3</a>, taking the reviewed option there and spending your novelty budget on agents
+is a defensible allocation.</p>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<h2 id="s4">5. The architecture, layer by layer</h2>
+
+<p>With the protocol settled, the runtime is almost forced. You need something that terminates
+WebSockets and verifies signatures, something durable to put events in, something fast to fan
+them out, and something cheap to put large binaries in. That is the whole system.</p>
+
+<figure>
+<svg viewBox="0 0 760 470" role="img" aria-label="Layered runtime architecture: clients, relay, and backing stores">
+  <defs>
+    <marker id="f5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">
+
+    <rect x="18" y="16" width="724" height="96" rx="7" fill="none" stroke="currentColor" stroke-opacity=".45"/>
+    <text x="32" y="36" font-size="11.5" font-weight="700" fill="currentColor">CLIENTS</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".4">
+      <rect x="34" y="46" width="128" height="50" rx="5"/>
+      <rect x="176" y="46" width="128" height="50" rx="5"/>
+      <rect x="318" y="46" width="128" height="50" rx="5"/>
+      <rect x="460" y="46" width="128" height="50" rx="5"/>
+      <rect x="602" y="46" width="126" height="50" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="10.5">
+      <text x="98" y="68">Desktop</text><text x="98" y="84" fill-opacity=".65">Tauri 2 + React 19</text>
+      <text x="240" y="68">Web / admin</text><text x="240" y="84" fill-opacity=".65">Vite + React 19</text>
+      <text x="382" y="68">Mobile</text><text x="382" y="84" fill-opacity=".65">Flutter</text>
+      <text x="524" y="68">Agents</text><text x="524" y="84" fill-opacity=".65">buzz-acp → ACP</text>
+      <text x="665" y="68">Scripts / 3rd-party</text><text x="665" y="84" fill-opacity=".65">buzz-cli · nak</text>
+    </g>
+
+    <g stroke="currentColor" stroke-opacity=".5">
+      <line x1="98" y1="112" x2="98" y2="150" marker-end="url(#f5a)"/>
+      <line x1="240" y1="112" x2="240" y2="150" marker-end="url(#f5a)"/>
+      <line x1="382" y1="112" x2="382" y2="150" marker-end="url(#f5a)"/>
+      <line x1="524" y1="112" x2="524" y2="150" marker-end="url(#f5a)"/>
+      <line x1="665" y1="112" x2="665" y2="150" marker-end="url(#f5a)"/>
+    </g>
+    <text x="380" y="136" text-anchor="middle" fill="currentColor" fill-opacity=".65" font-size="10">
+      WebSocket (NIP-01: EVENT · REQ · CLOSE · AUTH)   +   REST bridge (NIP-98 signed)
+    </text>
+
+    <rect x="18" y="156" width="724" height="164" rx="7" fill="currentColor" fill-opacity=".05" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="32" y="176" font-size="11.5" font-weight="700" fill="currentColor">buzz-relay — the single source of truth (Axum)</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".4">
+      <rect x="34" y="188" width="164" height="46" rx="5"/>
+      <rect x="210" y="188" width="164" height="46" rx="5"/>
+      <rect x="386" y="188" width="164" height="46" rx="5"/>
+      <rect x="562" y="188" width="166" height="46" rx="5"/>
+      <rect x="34" y="246" width="164" height="46" rx="5"/>
+      <rect x="210" y="246" width="164" height="46" rx="5"/>
+      <rect x="386" y="246" width="164" height="46" rx="5"/>
+      <rect x="562" y="246" width="166" height="46" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="10.5">
+      <text x="116" y="208">community binding</text><text x="116" y="224" fill-opacity=".65">host → TenantContext</text>
+      <text x="292" y="208">NIP-42 auth</text><text x="292" y="224" fill-opacity=".65">challenge → scopes</text>
+      <text x="468" y="208">EVENT pipeline</text><text x="468" y="224" fill-opacity=".65">12 ordered stages</text>
+      <text x="645" y="208">REQ handler</text><text x="645" y="224" fill-opacity=".65">access check → EOSE</text>
+      <text x="116" y="266">SubscriptionRegistry</text><text x="116" y="282" fill-opacity=".65">3-tier DashMap index</text>
+      <text x="292" y="266">REST bridge</text><text x="292" y="282" fill-opacity=".65">media · git · hooks</text>
+      <text x="468" y="266">huddle audio</text><text x="468" y="282" fill-opacity=".65">Opus relay, no SFU</text>
+      <text x="645" y="266">workflow engine</text><text x="645" y="282" fill-opacity=".65">YAML triggers</text>
+    </g>
+
+    <g stroke="currentColor" stroke-opacity=".5">
+      <line x1="140" y1="320" x2="140" y2="358" marker-end="url(#f5a)"/>
+      <line x1="330" y1="320" x2="330" y2="358" marker-end="url(#f5a)"/>
+      <line x1="520" y1="320" x2="520" y2="358" marker-end="url(#f5a)"/>
+      <line x1="672" y1="320" x2="672" y2="358" marker-end="url(#f5a)"/>
+    </g>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".5">
+      <rect x="40" y="364" width="200" height="78" rx="6"/>
+      <rect x="254" y="364" width="152" height="78" rx="6"/>
+      <rect x="420" y="364" width="200" height="78" rx="6"/>
+      <rect x="634" y="364" width="94" height="78" rx="6"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="10.5">
+      <text x="140" y="386" font-weight="700">Postgres 17</text>
+      <text x="140" y="404" fill-opacity=".7">events (monthly partitions)</text>
+      <text x="140" y="418" fill-opacity=".7">channels · workflows · audit</text>
+      <text x="140" y="432" fill-opacity=".7">search_tsv + GIN index</text>
+
+      <text x="330" y="386" font-weight="700">Redis 7</text>
+      <text x="330" y="404" fill-opacity=".7">pub/sub fan-out</text>
+      <text x="330" y="418" fill-opacity=".7">presence (SET EX 180)</text>
+      <text x="330" y="432" fill-opacity=".7">typing (sorted set)</text>
+
+      <text x="520" y="386" font-weight="700">S3 / MinIO</text>
+      <text x="520" y="404" fill-opacity=".7">Blossom blobs (BUD-01/02)</text>
+      <text x="520" y="418" fill-opacity=".7">media, thumbnails, blurhash</text>
+      <text x="520" y="432" fill-opacity=".7">50 MB upload cap</text>
+
+      <text x="681" y="386" font-weight="700">git</text>
+      <text x="681" y="404" fill-opacity=".7">smart HTTP</text>
+      <text x="681" y="418" fill-opacity=".7">upload-pack</text>
+      <text x="681" y="432" fill-opacity=".7">receive-pack</text>
+    </g>
+    <text x="380" y="462" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10.5">
+      Four stores, each holding the one thing it is best at. Nothing is duplicated across two of them.
+    </text>
+  </g>
+</svg>
+<figcaption>The runtime, top to bottom. Every client speaks the same two entry points — a
+WebSocket carrying NIP-01 messages and a REST bridge authenticated with NIP-98 — so a Flutter app,
+a coding agent, and <code>nak</code> are indistinguishable to the relay. Services and versions from
+<code>ARCHITECTURE.md §8</code> and <code>docker-compose.yml</code>.</figcaption>
+</figure>
+
+<h3>Why these four stores</h3>
+
+<p>Fig. 5 is the whole runtime on one page: five kinds of client, one relay, four stores.</p>
+
+<p><strong>Postgres holds the truth.</strong> Events, channels, memberships, workflow definitions
+and runs, approvals, and the audit chain all live in one database, which means a channel-membership
+check and an event insert can share a transaction. The <code>events</code> table is monthly
+range-partitioned, which is the standard answer to "an append-only table that only ever grows":
+old months become drop-a-partition rather than delete-ten-million-rows. Inserts use
+<code>ON CONFLICT DO NOTHING</code> and return <code>(StoredEvent, was_inserted)</code>, which
+makes ingestion idempotent — a client that retries after a dropped connection cannot create a
+duplicate, because the event id <em>is</em> the content hash.</p>
+
+<p><strong>Redis holds only what is allowed to be lost.</strong> Presence is a key with a
+180-second TTL against a 60-second heartbeat, so one missed beat cannot make a user flicker
+offline. Typing is a sorted set with a 5-second activity window and a 60-second key expiry to stop
+orphaned empty sets accumulating. Pub/sub carries cross-node fan-out. Every one of these is
+reconstructible from live traffic within a minute; none of it is truth. That is the discipline
+that lets Redis be a cache and not a second database.</p>
+
+<div class="callout">
+<span class="lab">the docs say</span>
+The Redis subscriber uses a <em>dedicated</em> <code>redis::aio::PubSub</code> connection rather
+than one from the pool, and <code>ARCHITECTURE.md</code> says why: "pool connections cannot hold
+<code>PSUBSCRIBE</code> state." Reconnection backs off exponentially from 1 s to 30 s, and the
+backoff resets to 1 s only after a clean stream end — not on every attempt, which would defeat
+the purpose. Events published locally are tracked in an in-memory cache
+(<code>AppState.local_event_ids</code>) and skipped when they come back around the Redis loop, so
+a message is not delivered twice to the node that originated it.
+</div>
+
+<p><strong>Object storage holds bytes, not records.</strong> Media goes to S3 or MinIO through
+<a href="https://github.com/hzrd149/blossom">Blossom</a> — a small protocol for content-addressed
+blob upload and retrieval (<code>PUT /media/upload</code>, <code>GET /media/{sha256}.{ext}</code>),
+capped at 50 MB. Keeping blobs out of Postgres is unglamorous and correct: it keeps the partitioned
+event table small enough that the index fits in memory.</p>
+
+<p><strong>Git is served, not reimplemented.</strong> The relay exposes git smart HTTP
+(<code>info/refs</code>, <code>git-upload-pack</code>, <code>git-receive-pack</code>) so ordinary
+<code>git clone</code> and <code>git push</code> work, plus an internal policy-check endpoint for
+hooks. The runtime Docker image installs <code>git</code> for exactly this reason. Git activity
+then reappears in the event log as NIP-34 events, which is how a patch ends up in the same search
+index as the conversation about it.</p>
+
+<h3>The event lifecycle — where all the correctness lives</h3>
+
+<p>If you read one thing in the Buzz codebase, read the EVENT handler. The ordering of its twelve
+stages is the entire security and performance argument of the system, and almost every stage is
+ordered where it is for a reason you can articulate.</p>
+
+<figure>
+<svg viewBox="0 0 760 560" role="img" aria-label="The twelve-stage event pipeline from client submission to acknowledgement">
+  <defs>
+    <marker id="f6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".55"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="22" font-size="12.5" font-weight="700" fill="currentColor">["EVENT", &lt;signed event&gt;] arrives</text>
+
+    <!-- gate column -->
+    <text x="20" y="48" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">CHEAP GATES FIRST — reject before spending CPU</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".45">
+      <rect x="20" y="58" width="330" height="26" rx="4"/>
+      <rect x="20" y="90" width="330" height="26" rx="4"/>
+      <rect x="20" y="122" width="330" height="26" rx="4"/>
+      <rect x="20" y="154" width="330" height="26" rx="4"/>
+    </g>
+    <g fill="currentColor">
+      <text x="32" y="75"><tspan font-weight="700">1</tspan>  AUTH CHECK — authenticated? MessagesWrite scope?</text>
+      <text x="32" y="107"><tspan font-weight="700">2</tspan>  PUBKEY MATCH — event.pubkey == authenticated pubkey</text>
+      <text x="32" y="139"><tspan font-weight="700">3</tspan>  KIND_AUTH REJECT — kind 22242 is never stored</text>
+      <text x="32" y="171"><tspan font-weight="700">4</tspan>  EPHEMERAL ROUTE — kind 20000–29999 leaves the pipeline</text>
+    </g>
+
+    <!-- expensive -->
+    <text x="20" y="204" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">THEN THE EXPENSIVE, ORDER-CRITICAL WORK</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".6">
+      <rect x="20" y="214" width="330" height="26" rx="4"/>
+      <rect x="20" y="246" width="330" height="26" rx="4"/>
+      <rect x="20" y="278" width="330" height="26" rx="4"/>
+    </g>
+    <g fill="currentColor">
+      <text x="32" y="231"><tspan font-weight="700">5</tspan>  VERIFY — Schnorr sig + id hash, under spawn_blocking</text>
+      <text x="32" y="263"><tspan font-weight="700">6</tspan>  MEMBERSHIP — h tag → is this pubkey a channel member?</text>
+      <text x="32" y="295"><tspan font-weight="700">7</tspan>  DB INSERT — ON CONFLICT DO NOTHING (idempotent)</text>
+    </g>
+
+    <!-- delivery -->
+    <text x="20" y="328" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">DELIVERY</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".45">
+      <rect x="20" y="338" width="330" height="26" rx="4"/>
+      <rect x="20" y="370" width="330" height="26" rx="4"/>
+    </g>
+    <g fill="currentColor">
+      <text x="32" y="355"><tspan font-weight="700">8</tspan>  REDIS PUBLISH — cross-node, channel-scoped events only</text>
+      <text x="32" y="387"><tspan font-weight="700">9</tspan>  FAN-OUT — sub_registry → conn_manager.send_to</text>
+    </g>
+
+    <!-- fire and forget -->
+    <text x="20" y="420" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">FIRE-AND-FORGET — failure here does not fail the write</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="4 3">
+      <rect x="20" y="430" width="330" height="26" rx="4"/>
+      <rect x="20" y="462" width="330" height="26" rx="4"/>
+      <rect x="20" y="494" width="330" height="26" rx="4"/>
+    </g>
+    <g fill="currentColor" fill-opacity=".8">
+      <text x="32" y="447"><tspan font-weight="700">10</tspan>  SEARCH INDEX — bounded worker queue, capacity 1000</text>
+      <text x="32" y="479"><tspan font-weight="700">11</tspan>  AUDIT LOG — spawned task, hash-chained</text>
+      <text x="32" y="511"><tspan font-weight="700">12</tspan>  WORKFLOW TRIGGER — spawned task, loop-guarded</text>
+    </g>
+    <text x="20" y="540" fill="currentColor" font-weight="700">→ ["OK", id, true, ""] is sent after stage 12, not after stage 7</text>
+
+    <!-- annotations -->
+    <g stroke="currentColor" stroke-opacity=".3">
+      <line x1="350" y1="120" x2="392" y2="120" marker-end="url(#f6a)"/>
+      <line x1="350" y1="255" x2="392" y2="255" marker-end="url(#f6a)"/>
+      <line x1="350" y1="380" x2="392" y2="380" marker-end="url(#f6a)"/>
+      <line x1="350" y1="470" x2="392" y2="470" marker-end="url(#f6a)"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-opacity=".35">
+      <rect x="396" y="64" width="344" height="112" rx="6"/>
+      <rect x="396" y="200" width="344" height="112" rx="6"/>
+      <rect x="396" y="330" width="344" height="90" rx="6"/>
+      <rect x="396" y="436" width="344" height="90" rx="6"/>
+    </g>
+    <g fill="currentColor" font-size="10.3">
+      <text x="410" y="84" font-weight="700">Why this order</text>
+      <text x="410" y="102" fill-opacity=".78">Signature verification is the most expensive step</text>
+      <text x="410" y="118" fill-opacity=".78">in the pipeline. Every cheap rejection placed</text>
+      <text x="410" y="134" fill-opacity=".78">above it is CPU an attacker cannot make you</text>
+      <text x="410" y="150" fill-opacity=".78">spend. Stage 2 also prevents the simplest</text>
+      <text x="410" y="166" fill-opacity=".78">impersonation: signing as someone else.</text>
+
+      <text x="410" y="220" font-weight="700">Verify before authorize before store</text>
+      <text x="410" y="238" fill-opacity=".78">Membership is checked on the event's own h tag</text>
+      <text x="410" y="254" fill-opacity=".78">only after the signature proves the author is who</text>
+      <text x="410" y="270" fill-opacity=".78">they claim. Reversing 5 and 6 would let an</text>
+      <text x="410" y="286" fill-opacity=".78">unauthenticated forgery consume a DB round-trip</text>
+      <text x="410" y="302" fill-opacity=".78">— and authorize a pubkey nobody proved.</text>
+
+      <text x="410" y="350" font-weight="700">Fan-out excludes global subscribers</text>
+      <text x="410" y="368" fill-opacity=".78">A channel-scoped event reaches only subscriptions</text>
+      <text x="410" y="384" fill-opacity=".78">carrying that channel_id. A filter that merely</text>
+      <text x="410" y="400" fill-opacity=".78">matches is not enough — that is the private-</text>
+      <text x="410" y="416" fill-opacity=".78">channel boundary, enforced at delivery.</text>
+
+      <text x="410" y="456" font-weight="700">Durability ≠ observability</text>
+      <text x="410" y="474" fill-opacity=".78">Search, audit, and workflows are decoupled so a</text>
+      <text x="410" y="490" fill-opacity=".78">slow indexer or a wedged workflow cannot make</text>
+      <text x="410" y="506" fill-opacity=".78">chat stop working. The cost: a message can be</text>
+      <text x="410" y="522" fill-opacity=".78">delivered before it is searchable or audited.</text>
+    </g>
+  </g>
+</svg>
+<figcaption>The twelve stages of the EVENT pipeline, from <code>ARCHITECTURE.md §4</code>, with
+the reasoning each ordering constraint encodes. The annotations on the right are my reading of
+<em>why</em>; the stages and their order are as documented.</figcaption>
+</figure>
+
+<p>Two details in Fig. 6 repay a second look.</p>
+
+<p><strong>Workflows are loop-guarded, and the guard is a design statement.</strong> Workflow
+execution kinds 46001–46012, relay-signed messages tagged <code>buzz:workflow</code>, and gift-wrap
+events are excluded from triggering workflows. Everything else — including ordinary chat — can
+trigger one. That is the minimum viable cycle-breaker for a system where automation output is
+indistinguishable from human input, which is precisely the situation the one-log bet creates. If
+you build this, you will need the same guard on day one of shipping automation.</p>
+
+<p><strong>Ephemeral events get a whole separate sub-pipeline.</strong> Presence (kind 20001) is
+verified, written to Redis, and fanned out locally — no membership check, no
+<code>PUBLISH</code>, and the docs note the consequence honestly: multi-node presence fan-out
+would need Redis pub/sub and is future work. Typing and other ephemerals <em>do</em> get a
+membership check and <em>do</em> ride Redis, so they work across nodes. The asymmetry is a real
+current limitation, not a subtlety, and it is written down.</p>
+
+<h3>Subscriptions: the three-tier index</h3>
+
+<p>Fan-out is the operation that runs on every single event, so its data structure is the one
+place where a naive design shows up as a production incident. Buzz keeps three
+<code>DashMap</code>-backed indexes — a <code>DashMap</code> is a sharded concurrent hash map, so
+readers on different channels do not contend on one lock.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Tier</th><th>Index key</th><th>Serves</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>(channel_id, kind)</code></td><td>Subscriptions naming both a channel and specific kinds — the overwhelmingly common case</td><td>O(1) hash lookup</td></tr>
+<tr><td>2</td><td><code>channel_id</code></td><td>Subscriptions naming a channel with no <code>kinds</code> constraint</td><td>O(1) lookup, then filter</td></tr>
+<tr><td>3</td><td>linear scan of all subscriptions</td><td>Global subscriptions with no channel — and <em>only</em> for events that are not channel-scoped</td><td>O(n), deliberately rare</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The NIP-01 edge case documented here is one you would otherwise ship as a bug: an explicit
+empty <code>kinds: []</code> array means "match nothing," while an <em>absent</em>
+<code>kinds</code> field means "match everything." Buzz indexes the second in tiers 2 or 3 and
+does not index the first at all. Absent-versus-empty is a distinction JSON makes and most
+deserializers quietly erase.</p>
+
+<p>The access-control ordering in the REQ handler matters just as much as it does in EVENT: parse
+filters, extract channel, load the accessible channels for this connection's pubkey, refuse with
+<code>CLOSED "restricted: not a channel member"</code> if it does not match, and only then
+register the subscription. Registering first and checking after would open a window in which live
+events from a private channel reach a non-member — a race, not a hypothetical, because fan-out is
+concurrent with the check.</p>
+
+<h3>The crate decomposition — 26 crates and the rule that makes them work</h3>
+
+<p>Twenty-six crates in one Cargo workspace is a strong opinion. The opinion is not "small
+modules are nice." It is a specific dependency rule, and the rule is what makes the count
+sustainable.</p>
+
+<figure>
+<svg viewBox="0 0 760 430" role="img" aria-label="Crate dependency layering with zero-IO buzz-core at the bottom">
+  <defs>
+    <marker id="f7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".5"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+
+    <rect x="150" y="20" width="460" height="52" rx="6" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="380" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">buzz-relay</text>
+    <text x="380" y="60" text-anchor="middle" fill="currentColor" fill-opacity=".7">the only crate allowed to know about all the others</text>
+
+    <g stroke="currentColor" stroke-opacity=".45">
+      <line x1="200" y1="72" x2="120" y2="104" marker-end="url(#f7a)"/>
+      <line x1="270" y1="72" x2="248" y2="104" marker-end="url(#f7a)"/>
+      <line x1="340" y1="72" x2="376" y2="104" marker-end="url(#f7a)"/>
+      <line x1="430" y1="72" x2="504" y2="104" marker-end="url(#f7a)"/>
+      <line x1="520" y1="72" x2="632" y2="104" marker-end="url(#f7a)"/>
+    </g>
+
+    <text x="20" y="98" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">SERVICE CRATES — siblings, never call each other</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".5">
+      <rect x="42" y="108" width="122" height="44" rx="5"/>
+      <rect x="188" y="108" width="122" height="44" rx="5"/>
+      <rect x="316" y="108" width="122" height="44" rx="5"/>
+      <rect x="444" y="108" width="122" height="44" rx="5"/>
+      <rect x="572" y="108" width="146" height="44" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle">
+      <text x="103" y="128" font-weight="600">buzz-db</text><text x="103" y="144" fill-opacity=".68">Postgres</text>
+      <text x="249" y="128" font-weight="600">buzz-auth</text><text x="249" y="144" fill-opacity=".68">NIP-42/98, scopes</text>
+      <text x="377" y="128" font-weight="600">buzz-pubsub</text><text x="377" y="144" fill-opacity=".68">Redis, presence</text>
+      <text x="505" y="128" font-weight="600">buzz-search</text><text x="505" y="144" fill-opacity=".68">Postgres FTS</text>
+      <text x="645" y="128" font-weight="600">buzz-audit · buzz-workflow</text><text x="645" y="144" fill-opacity=".68">hash chain · YAML engine</text>
+    </g>
+
+    <g stroke="currentColor" stroke-opacity=".3" stroke-dasharray="3 3">
+      <path d="M164 130 L188 130" fill="none"/>
+      <path d="M310 130 L316 130" fill="none"/>
+      <path d="M438 130 L444 130" fill="none"/>
+      <path d="M566 130 L572 130" fill="none"/>
+    </g>
+    <text x="380" y="176" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10">
+      ⨯  buzz-workflow never calls buzz-pubsub · buzz-search never calls buzz-db · all coordination goes up through the relay
+    </text>
+
+    <g stroke="currentColor" stroke-opacity=".45">
+      <line x1="103" y1="152" x2="300" y2="212" marker-end="url(#f7a)"/>
+      <line x1="249" y1="152" x2="340" y2="212" marker-end="url(#f7a)"/>
+      <line x1="377" y1="152" x2="380" y2="212" marker-end="url(#f7a)"/>
+      <line x1="505" y1="152" x2="420" y2="212" marker-end="url(#f7a)"/>
+      <line x1="645" y1="152" x2="460" y2="212" marker-end="url(#f7a)"/>
+    </g>
+
+    <rect x="150" y="216" width="460" height="62" rx="6" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-opacity=".7"/>
+    <text x="380" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">buzz-core — zero I/O</text>
+    <text x="380" y="256" text-anchor="middle" fill="currentColor" fill-opacity=".75">event types · filter matching · Schnorr verification · 81 kind constants · is_private_ip</text>
+    <text x="380" y="271" text-anchor="middle" fill="currentColor" fill-opacity=".75">Cargo.toml explicitly forbids tokio, sqlx, redis, axum</text>
+
+    <line x1="380" y1="292" x2="380" y2="312" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/>
+    <text x="380" y="326" text-anchor="middle" fill="currentColor" fill-opacity=".6" font-size="10">
+      no dependencies below this line — buzz-core is pure computation over data
+    </text>
+
+    <text x="20" y="356" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".65">SEPARATE BINARIES — clients of the relay, not parts of it</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".4" stroke-dasharray="4 3">
+      <rect x="42" y="366" width="128" height="40" rx="5"/>
+      <rect x="182" y="366" width="128" height="40" rx="5"/>
+      <rect x="322" y="366" width="128" height="40" rx="5"/>
+      <rect x="462" y="366" width="128" height="40" rx="5"/>
+      <rect x="602" y="366" width="116" height="40" rx="5"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" fill-opacity=".85">
+      <text x="106" y="382" font-weight="600">buzz-cli</text><text x="106" y="397" fill-opacity=".65">JSON in / JSON out</text>
+      <text x="246" y="382" font-weight="600">buzz-acp</text><text x="246" y="397" fill-opacity=".65">agent harness</text>
+      <text x="386" y="382" font-weight="600">buzz-agent</text><text x="386" y="397" fill-opacity=".65">ACP coding agent</text>
+      <text x="526" y="382" font-weight="600">buzz-dev-mcp</text><text x="526" y="397" fill-opacity=".65">shell + file tools</text>
+      <text x="660" y="382" font-weight="600">buzz-admin</text><text x="660" y="397" fill-opacity=".65">operator CLI</text>
+    </g>
+  </g>
+</svg>
+<figcaption>The dependency rule. <code>buzz-relay</code> imports every service crate; the service
+crates are siblings that never import each other. Underneath, <code>buzz-core</code> holds
+everything that is pure computation and is forbidden — in its own manifest — from depending on an
+async runtime, a database driver, a Redis client, or a web framework. Structure from
+<code>ARCHITECTURE.md §1</code> and §6; the full 26-crate list is in the workspace
+<code>Cargo.toml</code>.</figcaption>
+</figure>
+
+<p>Fig. 7 draws that rule. The stated principle is worth quoting exactly: "The relay is the single source of truth.
+<code>buzz-relay</code> orchestrates all subsystems by calling them directly… However, those
+subsystems are isolated from each other: <code>buzz-workflow</code> never calls
+<code>buzz-pubsub</code>, <code>buzz-search</code> never calls <code>buzz-db</code>, etc.
+Cross-subsystem coordination happens only through the relay."</p>
+
+<p>That is a star topology enforced by the compiler. Cargo will not let <code>buzz-search</code>
+call into <code>buzz-db</code> if it does not list it as a dependency, so the architecture diagram
+cannot silently rot into a mesh — which is the normal fate of layering rules that live only in a
+document. It also means every cross-cutting concern has exactly one place it can be implemented,
+and you always know where to look.</p>
+
+<div class="callout myread">
+<span class="lab">my read — why zero-I/O core is the highest-leverage crate</span>
+<code>buzz-core</code> banning tokio, sqlx, redis, and axum in its manifest looks like
+purity theatre until you notice what it buys. First, <strong>the rules are testable without
+infrastructure</strong>: filter matching, signature verification, and the SSRF private-IP check
+are pure functions, so they can be property-tested (the workspace pulls in <code>proptest</code>)
+with no Postgres running — and those are exactly the functions where a subtle bug is a security
+bug. Second, <strong>it forces the interesting decisions into the open</strong>: if the type that
+represents a stored event cannot reach a database, then whoever <em>does</em> reach the database
+has to state the contract explicitly. Third, <strong>it is the only way to keep 26 crates from
+becoming 26 tangles</strong> — a bottom layer that cannot depend on anything is a bottom layer
+that everything can depend on safely. My suggestion for a from-scratch build: write this crate
+first and let it be the thing you are proud of.
+</div>
+
+<p>One more detail in that manifest is worth copying. <code>StoredEvent</code> carries a
+<em>private</em> <code>verified: bool</code> field with an <code>is_verified()</code> accessor.
+Privacy of a field is how you make "this event's signature has been checked" un-forgeable within
+your own codebase: no other module can construct a verified-looking event by setting a boolean.
+That is using the type system as an audit control, and it costs nothing.</p>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<h2 id="s5">6. The agent surface</h2>
+
+<p>"Agents are members, not bots" reads like positioning. It is actually a load-bearing
+architectural claim, and the difference shows up in five concrete places. Some vocabulary first.</p>
+
+<div class="defn">
+<b>MCP (Model Context Protocol).</b> A JSON-RPC protocol by which a model-driven agent calls
+tools — a shell, a file editor, a search index. The agent is the client; the tool provider is the
+server.
+</div>
+<div class="defn">
+<b>ACP (Agent Client Protocol).</b> A JSON-RPC-over-stdio protocol by which an <em>application</em>
+drives an agent. The handshake is <code>initialize</code>, then <code>session/new</code>
+(returning a <code>sessionId</code>), then <code>session/prompt</code>, which streams
+<code>session/update</code> notifications and returns a <code>stopReason</code>. Editors like Zed
+and JetBrains speak it, which is why an ACP-compliant agent works in an editor and in Buzz without
+an adapter.
+</div>
+<div class="defn">
+<b>Harness.</b> <code>buzz-acp</code> — the process that sits between the relay and the agent
+subprocesses. It holds a Nostr identity, subscribes to the relay, batches incoming
+<code>@mentions</code>, and drives agents over ACP.
+</div>
+
+<figure>
+<svg viewBox="0 0 760 400" role="img" aria-label="The agent surface: relay, ACP harness, agent pool, MCP tools, and the CLI write path">
+  <defs>
+    <marker id="f8a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+
+    <rect x="20" y="150" width="126" height="96" rx="6" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="83" y="182" text-anchor="middle" font-weight="700" font-size="11.5" fill="currentColor">buzz-relay</text>
+    <text x="83" y="200" text-anchor="middle" fill="currentColor" fill-opacity=".7">one event log</text>
+    <text x="83" y="216" text-anchor="middle" fill="currentColor" fill-opacity=".7">one membership</text>
+    <text x="83" y="232" text-anchor="middle" fill="currentColor" fill-opacity=".7">one audit chain</text>
+
+    <line x1="146" y1="176" x2="214" y2="176" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f8a)"/>
+    <text x="180" y="166" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="9.5">WS + NIP-42</text>
+    <text x="180" y="200" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="9.5">@mention events</text>
+
+    <rect x="216" y="120" width="150" height="156" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="291" y="142" text-anchor="middle" font-weight="700" font-size="11.5" fill="currentColor">buzz-acp</text>
+    <g fill="none" stroke="currentColor" stroke-opacity=".35">
+      <rect x="228" y="152" width="126" height="24" rx="4"/>
+      <rect x="228" y="182" width="126" height="24" rx="4"/>
+      <rect x="228" y="212" width="126" height="24" rx="4"/>
+      <rect x="228" y="242" width="126" height="24" rx="4"/>
+    </g>
+    <g fill="currentColor" text-anchor="middle" font-size="10">
+      <text x="291" y="168">per-channel queue</text>
+      <text x="291" y="198">1 prompt in flight</text>
+      <text x="291" y="228">pool of 1–32 agents</text>
+      <text x="291" y="258">crash → respawn</text>
+    </g>
+
+    <line x1="366" y1="198" x2="424" y2="198" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f8a)"/>
+    <text x="395" y="188" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="9.5">stdio ACP</text>
+
+    <rect x="426" y="150" width="146" height="96" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="499" y="176" text-anchor="middle" font-weight="700" font-size="11.5" fill="currentColor">agent process</text>
+    <text x="499" y="196" text-anchor="middle" fill="currentColor" fill-opacity=".72">buzz-agent · goose</text>
+    <text x="499" y="212" text-anchor="middle" fill="currentColor" fill-opacity=".72">codex · claude code</text>
+    <text x="499" y="232" text-anchor="middle" fill="currentColor" fill-opacity=".72">≤ 8 sessions each</text>
+
+    <line x1="572" y1="198" x2="630" y2="198" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f8a)"/>
+    <text x="601" y="188" text-anchor="middle" fill="currentColor" fill-opacity=".7" font-size="9.5">stdio MCP</text>
+
+    <rect x="632" y="150" width="108" height="96" rx="6" fill="none" stroke="currentColor" stroke-opacity=".6"/>
+    <text x="686" y="176" text-anchor="middle" font-weight="700" font-size="11.5" fill="currentColor">tools</text>
+    <text x="686" y="196" text-anchor="middle" fill="currentColor" fill-opacity=".72">buzz-dev-mcp</text>
+    <text x="686" y="212" text-anchor="middle" fill="currentColor" fill-opacity=".72">shell · str_replace</text>
+    <text x="686" y="232" text-anchor="middle" fill="currentColor" fill-opacity=".72">rg · tree · todo</text>
+
+    <!-- write-back path -->
+    <path d="M686 246 L686 320 L83 320 L83 246" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="5 3" marker-end="url(#f8a)"/>
+    <rect x="300" y="304" width="168" height="32" rx="5" fill="var(--bg)" stroke="currentColor" stroke-opacity=".5"/>
+    <text x="384" y="324" text-anchor="middle" fill="currentColor" font-size="10.5">buzz-cli — JSON in / JSON out</text>
+    <text x="384" y="356" text-anchor="middle" fill="currentColor" fill-opacity=".68" font-size="10">
+      the agent replies by signing its own events with its own key, over the same NIP-98 path any script uses
+    </text>
+
+    <text x="20" y="46" font-size="12.5" font-weight="700" fill="currentColor">Two pipes, two protocols, no coupling</text>
+    <text x="20" y="68" fill="currentColor" fill-opacity=".72" font-size="10.5">The harness does not know which agent it drives. The agent does not know which MCP server it calls.</text>
+    <text x="20" y="86" fill="currentColor" fill-opacity=".72" font-size="10.5">Both compose through protocols rather than imports — so any ACP client gets a coding agent, and any MCP server gets a caller.</text>
+    <text x="20" y="382" fill="currentColor" fill-opacity=".62" font-size="10">
+      Module sizes in buzz-acp: relay.rs 3,143 LOC · queue.rs 2,565 · main.rs 2,457 · pool.rs 2,253 · config.rs 1,903 · acp.rs 1,785 · filter.rs 814
+    </text>
+  </g>
+</svg>
+<figcaption>The agent path, end to end. The read path is push (relay → harness → agent); the
+write path is pull (agent → <code>buzz-cli</code> → relay), and it is the <em>same</em> path a
+shell script would use. Architecture from <code>ARCHITECTURE.md §6</code>,
+<code>VISION_AGENT.md</code>, and <code>docs/key-concepts.md</code>.</figcaption>
+</figure>
+
+<h3>What "member, not bot" actually changes</h3>
+
+<p>Fig. 8 traces one @mention from the log to a tool call and back. Five consequences follow from that shape.</p>
+
+<p><strong>1. Authorization is identity, not a flag.</strong> A bot API is a parallel permission
+system: bot tokens, bot scopes, a bot's-eye view of the world that drifts from the human one. Here
+an agent has a keypair, appears in <code>channel_members</code> with role <code>Bot</code>, and is
+gated by the same membership check as everyone else. Removing an agent from a channel is the same
+operation as removing a person. There is no second code path to audit — which also means there is
+no second code path to get wrong.</p>
+
+<p><strong>2. Provenance had to be specified, not hand-waved.</strong> This is where the design
+earns its claim. When an agent acts for a person, whose action is it? <code>NIP-OA</code> defines
+an <code>auth</code> tag by which an owner key authorizes an agent key to publish "under the
+agent's own authorship," and it explicitly refuses the obvious shortcut: NIP-26 delegation
+"assigns the event to the delegator semantically, and that semantic MUST NOT be reused for agent
+provenance." In other words, the log must record that <em>the agent</em> did it, with the owner
+visible as the authorizer — not that the owner did it. That distinction is what makes the audit
+trail meaningful once agents are numerous.</p>
+
+<p><strong>3. Onboarding becomes transitive.</strong> <code>NIP-AA</code> builds on that: an agent
+whose owner is a relay member gains implicit access by presenting its NIP-OA credential during
+NIP-42 authentication, without being separately enrolled. Compare the alternative, where every
+agent is an admin ticket. The scaling target in <code>VISION.md</code> is 10 000 humans and
+50 000 agents — a five-to-one ratio that makes manual enrolment obviously untenable.</p>
+
+<p><strong>4. Costs and memory belong to the owner, not the platform.</strong>
+<code>NIP-AM</code> records per-turn token usage and cost as <code>kind:44200</code> events
+encrypted to the owner, "so the owner can account for token usage across agents and harnesses
+without the relay — or any third party — learning what the agent did or what it cost."
+<code>NIP-AE</code> stores agent memory as encrypted <code>kind:30174</code> events using the
+symmetric agent↔owner conversation key, with the deliberate consequence that "the owner can always
+read everything the agent remembers." Both are the same move: agent state is the owner's data,
+living in the same log, under the owner's key.</p>
+
+<p><strong>5. The tool surface is designed for a machine reader.</strong> <code>buzz-cli</code> is
+"JSON in, JSON out" with structured errors on stderr — described in <code>VISION.md</code> as
+"designed for LLM tool calls." That is a real constraint, not a slogan: stdout must be parseable
+without heuristics, errors must be machine-classifiable, and the surface must be
+self-describing enough to become tool definitions. Human-first CLIs fail all three.</p>
+
+<h3>Backpressure, or why the queue is the interesting part</h3>
+
+<p>The single most important line in the harness design is that <em>at most one prompt is in
+flight per channel</em>, with subsequent mentions queued and later batched into one prompt. A busy
+channel that mentions an agent ten times produces one conversation, not ten concurrent agents
+racing to answer and posting five contradictory replies.</p>
+
+<p>Look at where the bounds live and a pattern emerges. Buzz bounds everything, and it prefers
+<em>refusing</em> to <em>queueing</em>:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Boundary</th><th>Bound</th><th>Behaviour at the limit</th></tr></thead>
+<tbody>
+<tr><td>Connections to the relay</td><td>connection semaphore</td><td><code>try_acquire</code> — rejected before a byte is read</td></tr>
+<tr><td>Concurrent EVENT/REQ handlers</td><td>1 024</td><td>bounded by semaphore</td></tr>
+<tr><td>Subscriptions per connection</td><td>1 024</td><td>refused</td></tr>
+<tr><td>Historical results per filter</td><td>500</td><td>hard cap, silently truncated</td></tr>
+<tr><td>WebSocket frame</td><td>65 536 bytes</td><td>rejected, connection closed</td></tr>
+<tr><td>Slow client send buffer</td><td>3 consecutive full-buffer events</td><td>connection cancelled; one success resets the counter</td></tr>
+<tr><td>Search indexing queue</td><td>1 000</td><td>bounded worker queue, off the write path</td></tr>
+<tr><td>Concurrent workflow runs</td><td>100 permits</td><td><code>try_acquire</code> → <code>CapacityExceeded</code> immediately, never queued</td></tr>
+<tr><td>Workflow condition evaluation</td><td>100 ms</td><td>timeout — adversarial expressions cannot block</td></tr>
+<tr><td>Agent prompts per channel</td><td>1 in flight</td><td>queued and batched</td></tr>
+<tr><td>Agent subprocesses per harness</td><td>1–32 (default 1)</td><td>pool with claim/return</td></tr>
+<tr><td>Huddle participants</td><td>25 soft / 255 hard</td><td>hard cap is structural — the peer index is a <code>u8</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+That table is the real answer to "what changes when agents are members." Agents do not get tired,
+do not notice they are being rude, and can generate load at machine rate through the exact same
+API as a person. A system that gives agents human affordances must therefore give <em>every</em>
+affordance a bound, because the polite-human assumption that used to hold the system up is gone.
+Notice how many of these prefer immediate refusal to queueing — <code>try_acquire</code> rather
+than <code>acquire</code>, <code>CapacityExceeded</code> rather than a backlog. That is the right
+default under machine load: a queue you cannot drain is just latency plus an eventual crash,
+whereas a refusal is a signal the caller can act on. Buzz's own known-limitations list admits rate
+limiting is <em>not</em> implemented — the <code>RateLimiter</code> trait exists with only a
+test stub — which makes the semaphores the only thing actually holding the line today.
+</div>
+
+<h3>Personas: separating identity from process</h3>
+
+<p>A <b>persona</b> is a saved agent identity — display name, avatar, system prompt, model and
+runtime choice, environment variables — held independently of any running process
+(<code>NIP-AP</code> makes it a public addressable <code>kind:30175</code> event; the desktop app
+stores the local half). A <b>managed agent</b> is a process the desktop app spawns and supervises
+against that persona. The useful consequence, documented in <code>key-concepts.md</code>: persona
+environment variables are read live at spawn time, so rotating a credential on the persona takes
+effect on the next spawn of every agent using it, with no per-agent edit. A <b>persona pack</b>
+bundles personas, skills, MCP server config, hooks, and distribution metadata into a portable
+zip or git repo — a superset of the Open Plugin Spec.</p>
+
+<p>The layering — persona (what it is) / process (a running instance) / pack (how it is
+distributed) — is the same separation container images made routine, applied to agent
+configuration. It is the difference between "my agent" being a machine you must not lose and
+being a document you can hand to a colleague.</p>
+
+<h3>Workflows: the deterministic half</h3>
+
+<p>Not everything that acts automatically should be a language model. <code>buzz-workflow</code>
+is the deterministic complement: channel-scoped YAML with four triggers
+(<code>message_posted</code>, <code>reaction_added</code>, <code>schedule</code>,
+<code>webhook</code>) and seven actions (<code>send_message</code>, <code>send_dm</code>,
+<code>set_channel_topic</code>, <code>add_reaction</code>, <code>call_webhook</code>,
+<code>request_approval</code>, <code>delay</code>).</p>
+
+<div class="codewrap">
+<button class="copybtn" onclick="copyCode(this)" aria-label="Copy code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+<pre><code>name: "Incident Triage"
+trigger:
+  on: message_posted
+  filter: "str_contains(trigger_text, 'P1')"
+steps:
+  - id: notify
+    action: send_message
+    text: "P1 incident detected: {{trigger.text}}"
+  - id: page
+    if: "str_contains(trigger_text, 'production')"
+    action: request_approval
+    from: "{{trigger.author}}"
+    message: "Page on-call?"</code></pre>
+</div>
+
+<p>The engineering details are more instructive than the DSL. Conditions are evaluated by
+<code>evalexpr</code> against a flat context in which dot notation is rewritten to underscores
+(<code>trigger.text</code> becomes <code>trigger_text</code>), with four registered string
+functions and a 100 ms timeout so a hostile expression cannot occupy a worker. Step ids are
+restricted to alphanumerics and underscore explicitly to prevent injection into that expression
+namespace. Template substitution is <em>single-pass and non-recursive</em>, and unknown variables
+are left as literal text — a deliberately boring choice that removes an entire class of expansion
+attack. Outbound <code>call_webhook</code> requests get SSRF protection (the shared
+<code>is_private_ip</code> check in <code>buzz-core</code>, covering loopback, private ranges,
+link-local, CGNAT, IPv6 ULA, and IPv4-mapped IPv6), redirects disabled, and a 1 MiB response cap.
+Approval tokens are CSPRNG UUIDs stored as SHA-256 hashes, and single use is enforced in SQL with
+<code>AND status = 'pending'</code> on the UPDATE rather than in application code.</p>
+
+<p>Each of those is a small decision. Together they are the difference between a workflow engine
+and a remote code execution vector, since the whole point is that channel members can author
+automation.</p>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<h2 id="s6">7. Tech stack, and what you could substitute</h2>
+
+<p>A stack list is not an argument. What follows is each choice, the problem it solves, and what
+you could put in its place if you were building this yourself — because for most of them, you
+could.</p>
+
+<h3>The server</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Choice</th><th>Problem it solves</th><th>Substitutable with</th></tr></thead>
+<tbody>
+<tr><td><strong>Rust</strong>, edition 2021, MSRV 1.88, toolchain pinned to 1.95</td>
+<td>Per-event Schnorr verification is CPU-bound and runs on every write; the fan-out index is read by every connection concurrently. Rust gives predictable latency with no GC pause, and its aliasing rules make the shared-mutable subscription registry safe to reason about.</td>
+<td>Go — genuinely fine here, simpler concurrency story, small GC pauses. Elixir/OTP is arguably a better <em>fit</em> for connection fan-out and supervision, at the cost of a slower verification path and a smaller crypto ecosystem.</td></tr>
+<tr><td><strong>Axum 0.8</strong> + tower 0.5 / tower-http 0.6</td>
+<td>One process must serve a WebSocket upgrade, a REST bridge, git smart-HTTP, media upload, and health probes on the same port. Axum's extractor model plus tower middleware (timeouts, CORS, compression, body limits) covers all of it.</td>
+<td>Actix-web, or hyper directly. The middleware stack is what you would end up re-creating.</td></tr>
+<tr><td><strong>tokio 1</strong> (multi-thread) with <code>spawn_blocking</code></td>
+<td>Tens of thousands of mostly-idle WebSocket connections. The critical use is <code>spawn_blocking</code> around <code>verify_event</code> — keeping CPU-bound crypto off the async worker threads.</td>
+<td>Nothing else, realistically, in Rust.</td></tr>
+<tr><td><strong>sqlx 0.9</strong>, runtime queries</td>
+<td>Async Postgres with compile-time-checked queries available — though Buzz uses runtime <code>sqlx::query()</code>, not the <code>query!()</code> macro, and lists that as known limitation #1: no <code>.sqlx/</code> offline cache, so queries are not validated at compile time.</td>
+<td>Diesel (sync, stronger typing), or tokio-postgres for a thinner layer. Turning on the macro form is a within-sqlx fix, not a swap.</td></tr>
+<tr><td><strong>Postgres 17</strong>, monthly range partitions</td>
+<td>One store for events, channels, workflows, and audit means cross-entity transactions. Partitioning makes retention a metadata operation.</td>
+<td>Any partition-capable relational store. The seam is <code>buzz-db</code> and it is small.</td></tr>
+<tr><td><strong>Postgres FTS</strong> — a <code>search_tsv</code> generated column with a GIN index</td>
+<td>Search with <em>zero</em> extra infrastructure and no dual-write consistency problem: the index is a column, populated on insert, in the same transaction as the row.</td>
+<td>Elasticsearch, Meilisearch, Typesense — better relevance ranking, worse consistency and one more service to run. See the note below.</td></tr>
+<tr><td><strong>Redis 7</strong> + deadpool-redis 0.23</td>
+<td>Cross-node pub/sub, presence with TTL, typing with sorted sets and expiry.</td>
+<td>NATS (arguably better for pure fan-out), Postgres <code>LISTEN/NOTIFY</code> at small scale, or an in-process broadcast channel if you accept single-node.</td></tr>
+<tr><td><strong>S3 / MinIO</strong> via Blossom (BUD-01/02)</td>
+<td>Blobs do not belong in a partitioned event table. Blossom gives content-addressed upload/fetch semantics that fit the event model.</td>
+<td>Any S3-compatible store; MinIO is the local-dev stand-in already.</td></tr>
+<tr><td><strong>dashmap 6</strong> and <strong>moka 0.12</strong></td>
+<td>Sharded concurrent maps for the subscription index (no global lock on the hot path) and a bounded TTL cache for local-echo event ids.</td>
+<td><code>RwLock&lt;HashMap&gt;</code> works until it does not; these are the standard upgrades.</td></tr>
+<tr><td><strong>nostr 0.44</strong> (with nip44, nip98)</td>
+<td>Event types, canonical serialization, Schnorr sign/verify, NIP-44 encryption. The one dependency you would be foolish to reimplement.</td>
+<td>Rolling your own — see <a href="#s3">§4</a> for why not.</td></tr>
+<tr><td><strong>evalexpr 11</strong> + <strong>cron 0.16</strong></td>
+<td>Sandboxed expression evaluation for workflow conditions, and cron parsing for scheduled triggers.</td>
+<td>Any embeddable expression evaluator — but keep the timeout and the restricted identifier set.</td></tr>
+<tr><td><strong>tracing</strong> + OpenTelemetry (OTLP) + Prometheus metrics</td>
+<td>Structured spans across a 12-stage pipeline plus three spawned tasks; you cannot debug fire-and-forget stages from logs alone.</td>
+<td>Any OTel-compatible stack. The instrumentation, not the vendor, is the work.</td></tr>
+<tr><td><strong>iroh 1.0-rc</strong> (optional, mesh feature)</td>
+<td>Peer-to-peer transport for Buzz Mesh — pooling members' GPUs into shared AI compute behind the relay's membership model.</td>
+<td>Skip it. It is behind a feature flag that pulls in roughly 420 extra crates; the core product does not need it.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout myread">
+<span class="lab">my read — the FTS choice is the best decision in the stack</span>
+Postgres full-text search will lose a relevance bake-off against a dedicated engine. It wins on
+something that matters more here. A separate search service means a dual write, which means a
+window where a message exists and is not findable, which means reconciliation, backfill jobs, and
+an entire failure mode. Buzz's version is a generated <code>tsvector</code> column: the index is
+part of the row, committed by the same transaction, and it is <em>impossible</em> for an event to
+be stored but unindexed. The privacy control rides along for free — <code>CASE WHEN kind IN
+(1059, 30300, 30622) THEN NULL</code> makes gift-wrapped DMs and encrypted reminders unsearchable
+at the storage layer rather than by remembering to filter at query time. In a separate engine
+that same rule would be an indexer branch, and forgetting it would leak DMs into search. Choose
+the boring one and revisit only when relevance is a measured complaint.
+</div>
+
+<p>One nuance worth copying regardless of engine: <code>buzz-search</code> deliberately does
+<em>not</em> enforce access control. It returns candidate hits, and "the relay re-authorizes each
+one (channel membership, <code>#p</code>, owner gates) before delivering it." That separation is
+what keeps the search engine swappable — permissions never leak into the index — and it also means
+a bug in search cannot become a data leak on its own.</p>
+
+<h3>The clients</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Choice</th><th>Problem it solves</th><th>Substitutable with</th></tr></thead>
+<tbody>
+<tr><td><strong>Tauri 2</strong> desktop (macOS, Linux, Windows)</td>
+<td>A native shell where the Rust side does the work the web layer cannot: OS keychain access (<code>keyring</code>), a local SQLite cache (<code>rusqlite</code>), audio (Opus, NetEQ, rodio, rubato, an ONNX speech runtime), tray icon, deep links, auto-update, and spawning/supervising managed agent subprocesses. Bundles are far smaller than Electron because the webview is the OS's.</td>
+<td>Electron — larger, but a single well-known webview instead of three platform ones. That difference is real: the repo pins a specific <code>webkit2gtk</code> version and keeps per-OS canary CI workflows.</td></tr>
+<tr><td><strong>React 19</strong> + Vite 8 + TypeScript 6</td>
+<td>Shared UI language across desktop, web, and admin, all in one pnpm workspace.</td>
+<td>Svelte, Solid, Vue. No part of the architecture depends on this.</td></tr>
+<tr><td><strong>TanStack Router + TanStack Query</strong> (no Redux, no Zustand)</td>
+<td>Nearly all client state is server state arriving over a subscription. Query's cache is the state layer; a separate global store would mostly duplicate it.</td>
+<td>Any data-fetching cache. The insight — do not build a Redux store for data you are already streaming — transfers to any framework.</td></tr>
+<tr><td><strong>Tailwind 4</strong> + Radix primitives + Lucide</td>
+<td>Accessible unstyled primitives with utility styling; <code>VISION.md</code> targets WCAG 2.1 AA, and hand-rolled dialogs and menus are where that target usually dies.</td>
+<td>Any headless-UI library. Do not hand-roll focus management.</td></tr>
+<tr><td><strong>Flutter</strong> (Dart 3.11) mobile, Riverpod state</td>
+<td>One codebase for iOS and Android with native performance, sharing nothing with the web clients except the wire protocol.</td>
+<td>React Native would share more code with the web client; the protocol makes either viable. Buzz's mobile client is still marked in-progress.</td></tr>
+<tr><td><strong>nostr-tools</strong> (JS) / <strong>nostr</strong> (Dart)</td>
+<td>Client-side signing and event construction, so clients are genuine protocol participants rather than callers of a private API.</td>
+<td>—; this is the protocol payoff.</td></tr>
+<tr><td><strong>isomorphic-git</strong> in the web client</td>
+<td>Browsing repositories in the browser without a server-side rendering path.</td>
+<td>Server-rendered repo views. Notably it needs a local patch, which is the usual cost of doing git in a browser.</td></tr>
+<tr><td><strong>Playwright</strong> (smoke + sharded integration), Vitest, node <code>--test</code></td>
+<td>Real end-to-end coverage against a running relay; the desktop e2e suites are sharded across CI runners.</td>
+<td>Any e2e runner. The sharding is what makes it survivable.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>The developer environment — the underrated third of the stack</h3>
+
+<p><strong>Hermit</strong> pins every tool the project uses, not just the language: Rust via
+rustup 1.28.2, Node 24.15.0, pnpm 11.4.0, Flutter 3.41.7, Biome 2.4.7, just 1.46.0,
+cargo-deny 0.19.0, lefthook 2.1.3, cmake 4.3.1, pgschema 1.7.4. One
+<code>. ./bin/activate-hermit</code> and a contributor has the same toolchain as CI, on any
+machine, with no README section titled "install these fourteen things." The substitutes are
+Nix (more powerful, much steeper) or devcontainers (heavier, needs Docker for editing).</p>
+
+<p><strong><code>just</code></strong> supplies 94 named recipes — <code>just setup</code>,
+<code>just dev</code>, <code>just check</code>, <code>just ci</code> — as a flat, discoverable,
+dependency-free task list. <code>make</code> substitutes if you enjoy tabs; npm scripts do not,
+because half the tasks are Rust.</p>
+
+<p><strong>Multi-stage Docker with cargo-chef.</strong> Eight stages: a chef stage computes a
+dependency recipe, a planner stage cooks it, and only then does the source layer build — so an
+unchanged <code>Cargo.lock</code> means a cached dependency build. A separate Node stage builds
+the web assets, and the runtime is <code>debian:bookworm-slim</code> with <code>git</code>
+installed because the relay shells out to <code>git-upload-pack</code> and
+<code>git-receive-pack</code>. That last line is a nice illustration of an architecture decision
+reaching all the way into a Dockerfile.</p>
+
+<p><strong>The security tooling is load-bearing, not decoration.</strong> <code>cargo-deny</code>
+runs in CI with a licence allowlist and — importantly — <em>four explicitly enumerated advisory
+ignores</em>, each naming the transitive path that forces it (an <code>instant</code> advisory via
+<code>nostr</code>, a <code>paste</code> advisory via mesh→iroh→netlink, two
+<code>quick-xml</code> advisories via <code>rust-s3</code> and <code>plist</code>). Writing down
+<em>why</em> you accepted a known vulnerability, next to the path that causes it, is the difference
+between a security process and a green checkmark. Alongside it: Biome for JS/TS lint and format,
+clippy with <code>-D warnings</code>, lefthook pre-commit hooks, Renovate for dependency updates,
+and a bespoke CI job that greps client code for dead auth-token identifiers to stop a removed
+mechanism creeping back.</p>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+If you copy one non-obvious thing from this stack, make it the <em>pinning</em>. A protocol-first
+system with 26 crates, four clients, and two ecosystems has an enormous surface for "works on my
+machine." Hermit collapses it to one command, and it is the reason a contributor's first
+experience is <code>just setup &amp;&amp; just build</code> rather than an afternoon. The
+architecture gets written about; this is what determines whether anyone else can work on it.
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<h2 id="s7">8. Build order</h2>
+
+<p>Here is a concrete sequence, each stage tied to the crate that would embody it. The ordering
+principle is the one from <a href="#s2">§3</a>: anything that gets frozen into stored data comes
+first; anything that is only code can wait.</p>
+
+<figure>
+<svg viewBox="0 0 760 470" role="img" aria-label="Nine build stages showing which are must-not-defer and which are deferrable">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">Build order — and the cost of getting it wrong</text>
+    <text x="20" y="44" fill="currentColor" fill-opacity=".68">Solid boxes freeze data or an interface. Dashed boxes are pure code and can be reordered freely.</text>
+
+    <g>
+      <rect x="20" y="60" width="500" height="36" rx="5" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".7"/>
+      <rect x="20" y="102" width="470" height="36" rx="5" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".7"/>
+      <rect x="20" y="144" width="440" height="36" rx="5" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".6"/>
+      <rect x="20" y="186" width="410" height="36" rx="5" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".6"/>
+      <rect x="20" y="228" width="380" height="36" rx="5" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".6"/>
+      <rect x="20" y="270" width="350" height="36" rx="5" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="5 3"/>
+      <rect x="20" y="312" width="320" height="36" rx="5" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="5 3"/>
+      <rect x="20" y="354" width="290" height="36" rx="5" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="5 3"/>
+      <rect x="20" y="396" width="260" height="36" rx="5" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="5 3"/>
+    </g>
+    <g fill="currentColor" font-size="11">
+      <text x="34" y="83"><tspan font-weight="700">1</tspan>  Event type, verification, filters, kind registry  —  buzz-core</text>
+      <text x="34" y="125"><tspan font-weight="700">2</tspan>  Tenancy: host → community, before any handler  —  relay entry</text>
+      <text x="34" y="167"><tspan font-weight="700">3</tspan>  Storage + schema + partitioning  —  buzz-db</text>
+      <text x="34" y="209"><tspan font-weight="700">4</tspan>  Auth + channel membership  —  buzz-auth</text>
+      <text x="34" y="251"><tspan font-weight="700">5</tspan>  WebSocket loop, EVENT pipeline, REQ + fan-out  —  buzz-relay</text>
+      <text x="34" y="293"><tspan font-weight="700">6</tspan>  Audit chain  —  buzz-audit</text>
+      <text x="34" y="335"><tspan font-weight="700">7</tspan>  Search, presence, media  —  buzz-search / pubsub / media</text>
+      <text x="34" y="377"><tspan font-weight="700">8</tspan>  Agent surface  —  buzz-cli, then buzz-acp</text>
+      <text x="34" y="419"><tspan font-weight="700">9</tspan>  Workflows, git, huddles, clients</text>
+    </g>
+
+    <g fill="currentColor" font-size="9.8" fill-opacity=".72">
+      <text x="530" y="83">rewrite = history unverifiable</text>
+      <text x="500" y="125">retrofit = formal-methods project</text>
+      <text x="470" y="167">migration, but painful at volume</text>
+      <text x="440" y="209">a leak here is the whole product</text>
+      <text x="410" y="251">the load-bearing hot path</text>
+      <text x="380" y="293">re-genesis loses continuity</text>
+      <text x="350" y="335">rebuildable from the log</text>
+      <text x="320" y="377">additive; iterate freely</text>
+      <text x="290" y="419">features; ship when ready</text>
+    </g>
+
+    <line x1="700" y1="60" x2="700" y2="432" stroke="currentColor" stroke-opacity=".3"/>
+    <text x="712" y="70" fill="currentColor" fill-opacity=".65" font-size="9.5" transform="rotate(90 712 70)">MUST NOT DEFER</text>
+    <text x="712" y="300" fill="currentColor" fill-opacity=".65" font-size="9.5" transform="rotate(90 712 300)">DEFERRABLE</text>
+    <text x="686" y="456" text-anchor="end" fill="currentColor" fill-opacity=".6" font-size="10">
+      bar length ≈ how much of the system a late change would touch
+    </text>
+  </g>
+</svg>
+<figcaption>Nine stages. The taper is the point: each stage constrains less of the system than
+the one above it, so the cost of being wrong falls monotonically as you descend. Stage
+assignment to crates follows the repo's own dependency hierarchy; the ordering argument is
+mine.</figcaption>
+</figure>
+
+<h3>Stage by stage</h3>
+
+<p>Fig. 9 shows the taper; here is each stage in words.</p>
+
+<p><strong>1 · <code>buzz-core</code> — the event and nothing else.</strong> Types, canonical
+serialization, id derivation, Schnorr verify, NIP-01 filter matching (OR across filters, AND
+within one, including id prefix matching), and the kind registry with its ranges reserved up
+front. No I/O — forbid the runtime in the manifest, as Buzz does, so the ban is mechanical rather
+than aspirational. Property-test the filter matcher here; it is the function whose bugs become
+either missed messages or leaked ones. <em>You cannot defer this, because everything else is a
+consumer of it.</em></p>
+
+<p><strong>2 · Tenancy binding, before you have a second tenant.</strong> Even if you will only
+ever run one community, resolve it from the request host at the connection boundary and thread it
+through as an explicit context. The <em>plumbing</em> is nearly free at N = 1 and near-impossible
+to add at N = 1 000 000 rows — which is the whole lesson of the multi-tenant spec. Make unknown
+hosts fail closed from day one, never defaulting to a fallback tenant.</p>
+
+<p><strong>3 · <code>buzz-db</code> — storage, with retention designed in.</strong> The events
+table, partitioning, and idempotent insert. Do <code>ON CONFLICT DO NOTHING</code> immediately;
+retry-safety costs one clause now and a deduplication project later. Partition by time from the
+first migration — repartitioning a large live table is genuinely miserable. Buzz is at 26
+migrations, which is a reasonable calibration for how much schema movement to expect.</p>
+
+<p><strong>4 · <code>buzz-auth</code> — identity and the single gate.</strong> NIP-42 for the
+socket with a bounded timestamp tolerance (±60 s), NIP-98 for HTTP, and channel membership as the
+<em>only</em> authorization concept. Resist a second one. The moment you have both "membership"
+and "permissions," you have two systems that can disagree, and the disagreement is the vulnerability.
+Make membership operations transactional so check-then-modify cannot race, and soft-delete members
+(a <code>removed_at</code> column) so re-adding is reversible and history survives.</p>
+
+<p><strong>5 · <code>buzz-relay</code> — the socket, the pipeline, the registry.</strong> The
+connection lifecycle (semaphore, challenge, auth, then three coordinated loops for receive, send,
+and heartbeat, with a cancellation token to shut them down together), the ordered EVENT pipeline,
+and the REQ path with its access check <em>before</em> registration. Build the three-tier
+subscription index now rather than a linear scan you plan to optimize — the index shape determines
+the fan-out ordering rules, and those are semantics, not performance.</p>
+
+<div class="callout myread">
+<span class="lab">my read — the one you must not defer that looks deferrable</span>
+Stage 4's fan-out exclusion rule. "Channel-scoped events are never delivered to a global
+subscription, even if the filter matches" sounds like a refinement you would add once private
+channels exist. It is not. It is a rule about which index a delivery is allowed to consult, and
+retrofitting it means auditing every delivery path in a system that already has users. Write the
+private-channel boundary into the fan-out on the first day you write fan-out, even if every
+channel is public.
+</div>
+
+<p><strong>6 · <code>buzz-audit</code> — the hash chain.</strong> Each entry hashes the previous
+one, so tampering with any entry invalidates everything after it. The implementation notes are
+worth copying wholesale: hash a canonical serialization with <code>BTreeMap</code>-ordered keys so
+it is reproducible, take a <code>pg_advisory_lock</code> so there is exactly one writer, and
+release that lock on every path <em>including panic</em> via <code>catch_unwind</code> — an
+advisory lock leaked by a panic wedges the chain for everyone. Ten action types is a good starting
+vocabulary. You <em>can</em> add this later, but you will not have the earlier history, so add it
+before anyone depends on the log.</p>
+
+<p><strong>7 · Search, presence, media.</strong> All three are rebuildable from the event log,
+which is what makes them deferrable. Search as a generated column costs one migration; presence
+and typing are Redis keys with TTLs; media is an S3 bucket and an upload endpoint. Get the
+privacy exclusions into the search column at the moment you create it, though — retroactively
+un-indexing DMs means a reindex.</p>
+
+<p><strong>8 · The agent surface — CLI first, harness second.</strong> Order matters here. Build
+<code>buzz-cli</code> (JSON in, JSON out) before <code>buzz-acp</code>, because the CLI is the
+agent's <em>write</em> path and the harness only supplies the <em>read</em> path. A CLI with no
+harness still gives you scriptable agents and a testable surface; a harness with no CLI gives you
+an agent that can be woken up and cannot answer. And building the CLI first forces the API to be
+machine-shaped early, which is much harder to retrofit onto a human-shaped one.</p>
+
+<p><strong>9 · Everything else.</strong> Workflows, git hosting, huddles, canvases, forums,
+desktop, mobile. Each is genuinely additive under the one-log bet: a new kind, a new handler, a
+new surface. This is the payoff for the discipline of the first five stages — by stage 9, adding a
+feature is not an architectural event.</p>
+
+<h3>What you can defer, stated plainly</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Defer</th><th>Because</th><th>But do this now</th></tr></thead>
+<tbody>
+<tr><td>Multi-node fan-out</td><td>Single-node in-process broadcast is a correct subset</td><td>Route delivery through one <code>fan_out</code> function so Redis is a later plug-in — and plan for local-echo dedup, which is the bug you will hit first</td></tr>
+<tr><td>A dedicated search engine</td><td>A generated tsvector column ships in a migration</td><td>Keep permission filtering outside search from the start</td></tr>
+<tr><td>Rate limiting</td><td>Semaphores bound the worst case</td><td>Define the trait and the tiers so the call sites exist. Buzz did exactly this — and still has no implementation, which is the risk of the approach</td></tr>
+<tr><td>Voice</td><td>Entirely orthogonal to the event log</td><td>Nothing</td></tr>
+<tr><td>Mobile</td><td>The protocol makes clients independent</td><td>Do not add server features that assume a persistent connection</td></tr>
+<tr><td>Workflow approval gates</td><td>Suspension and resumption are genuinely hard</td><td>Do not ship <code>request_approval</code> until it resumes — Buzz's engine marks such runs <em>failed</em> today (limitation WF-08), which is a worse outcome than not offering the step</td></tr>
+<tr><td>End-to-end encryption</td><td>It conflicts with server-side search and eDiscovery</td><td>Decide deliberately and write the decision down, as <code>VISION.md</code> does</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<h2 id="s8">9. What's actually hard</h2>
+
+<p>Two sources in the repo tell you where the real difficulty is, and they tell you in opposite
+ways. <code>ARCHITECTURE.md §9</code> lists six known limitations — the things that are unfinished.
+<code>docs/spec/</code> and <code>docs/formal/</code> contain machine-checked proofs — the things
+that were frightening enough to prove. Read together, they map the risk surface better than any
+prose summary.</p>
+
+<h3>The admitted gaps</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>#</th><th>Limitation</th><th>What it actually means</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>No sqlx offline query cache — runtime <code>sqlx::query()</code>, not the checked macro</td><td>SQL errors surface at runtime, not compile time. A tooling debt, cheap to pay down, and the only reason it persists is that the macro form requires a live database at build time.</td></tr>
+<tr><td>2</td><td><strong>No rate limiting.</strong> The <code>RateLimiter</code> trait exists; the only implementation is a test stub that always allows. Four tiers (human, agent-standard, agent-elevated, agent-platform) are defined as a design target and enforced nowhere.</td><td>The most consequential gap on the list. In a system explicitly designed for 50 000 agents, the only backpressure is semaphores and connection caps. A well-meaning agent in a retry loop is currently indistinguishable from an attack.</td></tr>
+<tr><td>3</td><td>No REST endpoint for typing state</td><td>Cosmetic. Typing is delivered live; you just cannot query "who is typing now."</td></tr>
+<tr><td>4</td><td>Huddle recording and per-track publishing not built — kinds reserved, no producer</td><td>Honest scoping. Voice works; the compliance-shaped part of voice does not.</td></tr>
+<tr><td>5</td><td><strong>Approval gates not wired end to end.</strong> The executor returns <code>Suspended</code>, the DB and REST endpoints exist, but the engine intercepts before creating a <code>WaitingApproval</code> row — so a run that hits an approval gate is marked <em>Failed</em>.</td><td>The genuinely hard one. See below.</td></tr>
+<tr><td>6</td><td><code>send_dm</code> and <code>set_channel_topic</code> return <code>NotImplemented</code></td><td>Schema outran execution. A run reaching either action fails at that step.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Limitation 5 deserves attention because it is the same problem in every workflow engine ever
+built, and it is worth understanding <em>before</em> you design your own DSL. A step that waits for
+a human turns your executor from a function into a state machine that must survive process
+restarts. You now need durable execution state, resumption from an arbitrary step, a timeout with
+its own scheduler, single-use token semantics, and a coherent answer for what happens when a
+deploy lands mid-wait. Buzz has the ingredients — <code>execute_from_step()</code> exists,
+approval tokens are CSPRNG UUIDs stored as SHA-256 hashes with single-use enforced in the SQL
+UPDATE — and has not yet assembled them.</p>
+
+<div class="callout myread">
+<span class="lab">my read</span>
+The design lesson is about ordering, not about workflows. Suspension is the feature that turns a
+stateless evaluator into a durable orchestrator, and that is a different program. If you know you
+want approval gates, either build the executor as a persisted state machine from the first line
+— or ship without the step. The current middle state, where the step exists in the DSL and marks
+runs failed, is the worst of the three, because a user can author a workflow the engine promises
+to run and then does not.
+</div>
+
+<h3>Where they reached for formal methods</h3>
+
+<p>Now the more interesting signal. Formal verification is expensive; nobody does it for fun. What
+a team chooses to prove tells you which failures they judged both <em>plausible</em> and
+<em>catastrophic</em> — and in this repo the answer is unambiguous.</p>
+
+<div class="defn">
+<b>TLA+</b> is a specification language for concurrent and distributed systems; its model checker
+(TLC) explores every reachable interleaving of a bounded model and reports a counterexample trace
+when an invariant breaks. <b>Tamarin</b> is a symbolic protocol verifier that proves properties
+against a <b>Dolev-Yao adversary</b> — an attacker who controls the entire network, can read,
+drop, reorder, and forge any message, but cannot break cryptography. <b>Mutation testing</b>, in
+this context, means deliberately weakening a check and requiring the model to <em>fail</em> — the
+proof that your invariant is not vacuously true.
+</div>
+
+<figure>
+<svg viewBox="0 0 760 336" role="img" aria-label="Four areas subjected to formal verification and what each proves">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">
+    <text x="20" y="24" font-size="12.5" font-weight="700" fill="currentColor">What they bothered to prove — and what that reveals about the risk</text>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".55">
+      <rect x="20" y="42" width="352" height="126" rx="6"/>
+      <rect x="388" y="42" width="352" height="126" rx="6"/>
+      <rect x="20" y="182" width="352" height="126" rx="6"/>
+      <rect x="388" y="182" width="352" height="126" rx="6"/>
+    </g>
+    <g fill="currentColor">
+      <text x="36" y="64" font-weight="700" font-size="11.5">MultiTenantRelay.tla  ·  TLA+</text>
+      <text x="36" y="84" fill-opacity=".78">Isolation as non-interference: one community's</text>
+      <text x="36" y="100" fill-opacity=".78">observable interface — query results, authorization</text>
+      <text x="36" y="116" fill-opacity=".78">decisions, error strings, audit contents — is</text>
+      <text x="36" y="132" fill-opacity=".78">unaffected by any other community's activity.</text>
+      <text x="36" y="156" fill-opacity=".6" font-style="italic">Risk: a row-level boundary leaking across tenants.</text>
+
+      <text x="404" y="64" font-weight="700" font-size="11.5">MultiTenantAuth.spthy  ·  Tamarin</text>
+      <text x="404" y="84" fill-opacity=".78">NIP-98 minting, stamped bearer tokens, per-community</text>
+      <text x="404" y="100" fill-opacity=".78">signing keys, and independent audit chains — under a</text>
+      <text x="404" y="116" fill-opacity=".78">network attacker, with explicit leak rules and</text>
+      <text x="404" y="132" fill-opacity=".78">anti-vacuity lemmas.</text>
+      <text x="404" y="156" fill-opacity=".6" font-style="italic">Risk: a credential that crosses a community boundary.</text>
+
+      <text x="36" y="204" font-weight="700" font-size="11.5">GitOnObjectStore.tla  ·  TLA+</text>
+      <text x="36" y="224" fill-opacity=".78">T1 fence — an observed success means the push is</text>
+      <text x="36" y="240" fill-opacity=".78">durably published.  T2 closure — a manifest covers its</text>
+      <text x="36" y="256" fill-opacity=".78">parent's packs or names a trusted compaction pack.</text>
+      <text x="36" y="272" fill-opacity=".78">T3 — ref installs form a fork-free chain.</text>
+      <text x="36" y="296" fill-opacity=".6" font-style="italic">Risk: concurrent pushes losing a commit.</text>
+
+      <text x="404" y="204" font-weight="700" font-size="11.5">NIP-PL models  ·  bounded executable</text>
+      <text x="404" y="224" fill-opacity=".78">Push-lease acceptance across all 5 040 orderings of one</text>
+      <text x="404" y="240" fill-opacity=".78">address's candidates; gateway delivery authority; and</text>
+      <text x="404" y="256" fill-opacity=".78">a proof the APNs body stays byte-identical to a</text>
+      <text x="404" y="272" fill-opacity=".78">constant under every input.</text>
+      <text x="404" y="296" fill-opacity=".6" font-style="italic">Risk: a push notification disclosing content.</text>
+    </g>
+    <text x="380" y="328" text-anchor="middle" fill="currentColor" fill-opacity=".62" font-size="10.5">
+      Every invariant in all four is mutation-tested: weaken the check, and the model must produce a counterexample.
+    </text>
+  </g>
+</svg>
+<figcaption>The four formally modelled areas, from <code>docs/spec/</code> and
+<code>docs/formal/</code>. Three of the four are about a boundary between parties who must not see
+each other's data; the fourth is about not losing a write under concurrency.</figcaption>
+</figure>
+
+<p>Fig. 10 collects the four modelled areas. <strong>Multi-tenancy is the top risk, and they knew it.</strong> The spec's own framing:
+demoting a process-level security boundary to a row-level one "collapses a process-level boundary
+into a row-level one. The contribution of this document is the formal characterization that the
+collapse loses nothing." Crucially it states isolation as <em>non-interference encoded as a
+label-flow invariant</em> — not as "every query has <code>WHERE community_id = $1</code>." Those
+are different claims. The second is a coding convention you can forget in one query; the first is a
+property of the whole interface, including error messages and audit contents. Note what
+counts as an observable there: <em>error strings</em>. A distinguishable error is an oracle, and it
+is the leak nobody writes a test for.</p>
+
+<p><strong>Git on object storage is about lost writes.</strong> Two pushers racing to advance one
+ref pointer is the classic compare-and-swap problem, and the failure mode — a commit that the
+client was told succeeded and that is not there — is silent and unrecoverable. The model asserts
+that installs form a fork-free chain and that each commits exactly the value it proposed, derived
+from the pointer it read. If you are putting git refs anywhere other than a filesystem with real
+locking, this is the property you need.</p>
+
+<p><strong>Push notifications are about content disclosure.</strong> A push payload leaves your
+infrastructure and traverses Apple's. The model requires the body to be byte-identical to a fixed
+constant under <em>every</em> relay-controlled and gateway-state input, with a mutation test that
+injects each prohibited input category and requires it to be caught. That is how you get a
+notification system that cannot leak message text even by accident.</p>
+
+<div class="callout">
+<span class="lab">the docs say — the honesty is the strongest part</span>
+Each formal artefact states its own limits. The multi-tenant spec disclaims liveness, performance,
+Postgres's internal correctness, the crypto primitives, physical-resource isolation, and
+client-side leakage above the relay's interface — and argues that stating the boundary is part of
+the claim: "'Provably isolated' without naming the trust boundary does not survive scrutiny." The
+NIP-PL note is equally direct: the models "enumerate bounded abstract transitions, not SQL
+schedules or network behavior," a crash after APNs accepts but before persistence "remains
+intentionally at-least-once," and a constant payload "prevents content disclosure but cannot hide
+wake timing or frequency."
+</div>
+
+<h3>What all of this tells a from-scratch builder</h3>
+
+<p>Line the two lists up and a pattern falls out. The <em>admitted</em> gaps are all
+<strong>execution</strong> problems — code that is not written yet, states not persisted, an
+implementation missing behind a trait. The <em>proved</em> properties are all
+<strong>boundary</strong> problems — data crossing between parties who must not see each other,
+or a write disappearing under concurrency.</p>
+
+<p>That is the real risk map of this class of system, and it inverts the intuition. The hard parts
+are not the features. Chat, reactions, threads, canvases, media, and even voice are legible,
+testable work you can grind through. The hard parts are: <em>the boundary between tenants</em>,
+<em>the boundary between what the relay knows and what it should be able to see</em>, <em>the
+boundary between an owner and their agent</em>, and <em>the moments where two writers race</em>.
+Those are the places where a bug is silent, catastrophic, and unreachable by ordinary tests —
+which is precisely why the team spent TLA+ and Tamarin budget on them and not on the chat.</p>
+
+<p>The corollary for your own build: when you are deciding where to spend disproportionate care,
+do not ask which feature is biggest. Ask which failure would be invisible.</p>
+
+<hr>
+
+<h3>The argument in one page</h3>
+
+<p>Buzz makes one bet — that everything a team does is a signed typed record in one log, and that
+an agent is just another keypair — and then follows it honestly. Following it honestly is the
+whole discipline: it means a kind registry instead of a table per feature, membership as the only
+authorization concept instead of a permission matrix, a star-shaped crate graph the compiler
+enforces instead of a layering doc nobody reads, and a bound on every affordance because agents
+do not self-moderate. The two decisions that had to be made top-down — the event format with its
+frozen serialization, and the tenancy boundary resolved from the host before any handler runs —
+were made top-down; the twenty-six crates, four clients, and four backing stores underneath were
+discovered bottom-up and remain individually replaceable. Where the protocol they adopted did not
+reach, they wrote fifteen specifications rather than proprietary fields, and where they judged a
+failure would be silent rather than loud, they reached for a model checker. The gaps that remain
+are unfinished code. The parts that are built are solid at the boundaries, which is the
+right way round.</p>
+
+<p class="small">Sources: <code>README.md</code>, <code>ARCHITECTURE.md</code> §1–§9,
+<code>VISION.md</code>, <code>VISION_AGENT.md</code>, <code>NOSTR.md</code>,
+<code>docs/key-concepts.md</code>, <code>docs/nips/</code> (15 drafts),
+<code>docs/multi-tenant-relay.md</code>, <code>docs/spec/</code> (TLA+ and Tamarin models),
+<code>docs/formal/</code>, the workspace <code>Cargo.toml</code>, <code>Dockerfile</code>,
+<code>docker-compose.yml</code>, <code>Justfile</code>, <code>deny.toml</code>, and the
+<code>desktop/</code>, <code>web/</code>, and <code>mobile/</code> manifests. Buzz is Apache-2.0,
+by Block, Inc.</p>
+
+<script>
+function copyCode(btn){
+  var code = btn.parentElement.querySelector('code');
+  var text = code.textContent;
+  var done = function(){
+    var old = btn.lastChild.nodeValue;
+    btn.lastChild.nodeValue = 'Copied!';
+    setTimeout(function(){ btn.lastChild.nodeValue = old; }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+</script>
+
+</div>
+</body>
+</html>
