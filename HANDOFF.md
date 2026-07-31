@@ -44,8 +44,9 @@ Desktop DM path doesn't use gift wrap" is correct.
 map, 12 blindspots each with a research prompt, 5-prompt minimum set, rat-hole
 warning, master prompt. Four claims marked `[verified]` were re-checked directly
 against the repo. Deliberately unpublished — it reads as a critique of someone
-else's shipped codebase. **This file exists in exactly one place; back it up
-before touching `buzz_me/`.**
+else's shipped codebase. Backed up byte-identical to
+`C:\Users\simon\mms\buzz-blindspots.md` on 31 Jul 2026 — two copies exist, both
+outside git. If you edit one, re-copy.
 
 ## Proposed upstream docs — `buzz-docs/` (restored, tracked)
 
