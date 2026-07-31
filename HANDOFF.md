@@ -28,9 +28,16 @@ Identical copies also sit in `C:\Users\simon\Downloads\buzz_me\`.
 implied Buzz's own DMs are gift-wrapped/end-to-end encrypted. They are not.
 `open_dm` publishes `kind:41010`, the relay allocates a channel, and DM messages
 are ordinary `kind:9` events with an `#h` tag
-(`desktop/src-tauri/src/commands/dms.rs:17-45`). `kind:1059` appears only in
-desktop test files. A warning callout now states plainly that DM confidentiality
-rests on relay-side authorization, not cryptography.
+(`desktop/src-tauri/src/commands/dms.rs:17-45`). A warning callout now states
+plainly that DM confidentiality rests on relay-side authorization, not
+cryptography.
+
+Precise wording matters here: `kind:1059` gift wrap **is** real production code
+in the relay — push routing, storage, migrations — and `NOSTR.md` documents it as
+a relay feature for third-party Nostr clients. What's absent is any use of it in
+the Desktop app's own DM-building path, where it appears only in a test file and
+the e2e bridge. "Gift wrap only exists in test files" is too strong; "the Buzz
+Desktop DM path doesn't use gift wrap" is correct.
 
 **Local only, NOT in any git repo** — `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md`
 (30 KB). A blindspot pass on the technical creation of Buzz: false framings, stack
@@ -40,36 +47,42 @@ against the repo. Deliberately unpublished — it reads as a critique of someone
 else's shipped codebase. **This file exists in exactly one place; back it up
 before touching `buzz_me/`.**
 
-## Known loss — four docs need recreating if wanted
+## Proposed upstream docs — `buzz-docs/` (restored, tracked)
 
-Earlier in the session, four documentation files were written into the upstream
-clone at `buzz_me/buzz/docs/`. They were never committed (untracked in someone
-else's repo), the clone was replaced, and **they are gone**:
+Four docs were originally written into the upstream clone at `buzz_me/buzz/docs/`,
+left untracked, and destroyed when the clone was replaced. They have been
+regenerated and are now committed here in `buzz-docs/` (commit `693f3fe`):
 
-- `docs/index.md` — navigation hub grouping README / ARCHITECTURE / CONTRIBUTING /
-  NIPs / formal specs by audience (end user / contributor / operator / protocol
-  implementer)
-- `docs/key-concepts.md` — glossary; entries for Nostr, NIP, relay, community,
-  channel, kind ranges, NIP-42, NIP-98, membership, audit log, canvas, huddle,
-  workflow, Blossom, ACP, managed agent, persona, persona pack, buzz-cli,
-  buzz-dev-mcp, git events
-- `docs/troubleshooting/common-issues.md` — symptom → cause → fix, mined from
-  TESTING.md, AGENTS.md, CONTRIBUTING.md, and readiness code
-- `docs/user-guide/using-your-ai-subscription.md` — how to run Buzz agents on a
+- `buzz-docs/index.md` — navigation hub, 13 links grouped by audience (end user /
+  contributor / operator / protocol implementer / vision); all paths verified
+- `buzz-docs/key-concepts.md` — glossary: Nostr, NIP, relay, community, channel,
+  kind ranges, NIP-42, NIP-98, membership, audit log, canvas, huddle, workflow,
+  Blossom, ACP, managed agent, persona, persona pack, buzz-cli, buzz-dev-mcp, git
+  events — plus the DM-encryption correction described above
+- `buzz-docs/troubleshooting/common-issues.md` — symptom → cause → fix across
+  setup/build, relay/CLI, ACP agents, Desktop managed agents, plus a
+  "documentation trap" section recording the two ARCHITECTURE.md drifts
+- `buzz-docs/user-guide/using-your-ai-subscription.md` — running Buzz agents on a
   Claude Pro/Max or ChatGPT Plus subscription instead of a metered API key
 
-Their key finding is preserved here so it need not be re-derived: **Buzz Desktop's
+Links inside them are written relative to `buzz/docs/`, their intended home in a
+fork of `block/buzz` — they will not resolve from `buzz-docs/`. See
+`buzz-docs/README.md`.
+
+Their key finding, kept here so it need not be re-derived: **Buzz Desktop's
 Claude Code and Codex agent types do support subscription auth** — they shell out
 to the real CLI and gate readiness on `claude auth status` / `codex login status`,
 never on `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` (`discovery.rs:140` and
 `discovery.rs:173`). The onboarding UI prefers subscription login
 (`SetupStep.tsx:397-442`). By contrast the built-in **Buzz Agent** runtime calls
 LLM APIs directly and accepts only metered credentials
-(`crates/buzz-agent/src/config.rs:755-802`). Standalone `buzz-acp` without Desktop
+(`crates/buzz-agent/src/config.rs:763-813`). Standalone `buzz-acp` without Desktop
 is API-key-only in practice; Codex's ChatGPT login fails with HTTP 426 headless.
 
-If recreating: write them into a fork you control, or commit immediately —
-untracked files in the upstream clone do not survive.
+**Line citations drift.** On the 31 Jul regeneration, `buzz-agent/src/config.rs`
+had moved ~13 lines and `readiness.rs`'s docstring to `393-394`; `discovery.rs`
+and `SetupStep.tsx` were unchanged. Re-verify line numbers against the current
+clone before quoting them anywhere public.
 
 ## Next task
 
@@ -85,7 +98,10 @@ untracked files in the upstream clone do not survive.
    access: name the mechanism that enforces it, the artifact that verifies it, and
    whether that verification is armed in production. Four of the six have
    surprising answers.
-3. **Recreate the four lost docs** (above) if they're still wanted.
+3. **Open a PR to `block/buzz`** with the four `buzz-docs/` files, if you want
+   them upstream. Fork, copy `buzz-docs/{index,key-concepts}.md` and the two
+   subfolders into `docs/`, drop `buzz-docs/README.md`, confirm the relative
+   links resolve from that location, then open the PR.
 
 ## Where to read things
 
