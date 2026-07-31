@@ -765,10 +765,20 @@ is to the implementation.</p>
 <tr><td><strong>NIP-45</strong> (8)</td><td><code>COUNT</code></td><td>Counting matching events without transferring them — behind Buzz's <code>/count</code> endpoint.</td></tr>
 <tr><td><strong>NIP-38</strong> (8)</td><td>User statuses</td><td>Presence and status strings.</td></tr>
 <tr><td><strong>NIP-19</strong> (5)</td><td>bech32 identifiers</td><td>The <code>npub1…</code> / <code>nsec1…</code> / <code>naddr1…</code> encodings from <a href="#s2">§1b</a>.</td></tr>
-<tr><td><strong>NIP-17</strong> (4)</td><td>Gift-wrapped private messages</td><td>Direct messages. The outer envelope is a <code>kind:1059</code> event signed with a throwaway key, hiding the real sender, content, and timestamp. Buzz stores these unindexed and delivers them only to <code>#p</code>-filtered subscriptions.</td></tr>
+<tr><td><strong>NIP-17</strong> (4)</td><td>Gift-wrapped private messages</td><td>Supported by the relay for <em>third-party</em> Nostr clients: the outer envelope is a <code>kind:1059</code> event signed with a throwaway key, hiding the real sender, content, and timestamp, and Buzz stores these unindexed and delivers them only to <code>#p</code>-filtered subscriptions. <strong>This is not how the Buzz app's own DMs work</strong> — see the box below.</td></tr>
 <tr><td><strong>NIP-65</strong> (6) · <strong>NIP-40</strong> (4) · <strong>NIP-02</strong> (4)</td><td>Relay lists · expiration · contact lists</td><td>Supporting cast, referenced but peripheral to the workspace experience.</td></tr>
 </tbody>
 </table>
+</div>
+
+<div class="callout warn">
+<p><strong>Correction: Buzz DMs are not end-to-end encrypted.</strong> If you read the NIP-17 row above and concluded that a direct message in the Buzz app is gift-wrapped and unreadable by the server, that is the wrong conclusion, and it is the single easiest mistake to make about this system.</p>
+
+<p>The Buzz app does not use gift wrapping for its own DMs. Opening a DM publishes a <code>kind:41010</code> command; the relay allocates a channel id and returns it; messages in that channel are then ordinary <code>kind:9</code> events carrying an <code>#h</code> tag, exactly like any other channel message (<code>desktop/src-tauri/src/commands/dms.rs:17-45</code>). In the desktop client, <code>kind:1059</code> appears only in test files.</p>
+
+<p>So the confidentiality of a Buzz DM rests on <em>relay-side authorization</em> — NIP-43 membership plus <code>#h</code> access checks — and not on cryptography. <strong>The relay stores every DM and every channel message in a form it can read.</strong> For a self-hosted workspace on infrastructure you control, that is a coherent choice: it is what makes server-side search, moderation, audit, and agent participation possible at all. But it is a different privacy model from the one Nostr's gift-wrap story implies, and you should size it accordingly before putting anything sensitive in a relay somebody else operates.</p>
+
+<p>NIP-44 encryption <em>is</em> used in Buzz, but for four narrow purposes rather than message bodies: self-encrypted personal state (read state, reminders, mutes), agent-to-owner traffic, device-pairing payloads, and NIP-49 key backup.</p>
 </div>
 
 <p>Two things stand out in that list. First, <strong>authentication is the densest area of the
