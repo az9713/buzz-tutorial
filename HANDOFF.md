@@ -11,13 +11,13 @@ this file deliberately does not name — it is a public repo):
 - **Working folder** — `<working folder>` holds an upstream clone
   of `block/buzz` plus local-only research notes
 
-Last session: 1 August 2026.
+Last session: 1 August 2026 (second session that day — the onboarding page).
 
 ## Current state (as of latest push)
 
-Commit `d1d3c37` on `main`; local and remote hashes match; working tree clean.
+Commit `e892b76` on `main`; local and remote hashes match; working tree clean.
 
-**Seven self-contained HTML documents, all live on GitHub Pages** (Pages enabled
+**Eight self-contained HTML documents, all live on GitHub Pages** (Pages enabled
 31 Jul 2026, `source: main /`, every URL below verified HTTP 200 on 1 Aug 2026):
 
 | Document | Live URL | Landed in |
@@ -26,9 +26,37 @@ Commit `d1d3c37` on `main`; local and remote hashes match; working tree clean.
 | `how-buzz-works.html` (~135 KB, 10 SVGs) | https://az9713.github.io/buzz-tutorial/how-buzz-works.html | `218464c` |
 | `trust-map.html` (~41 KB, 1 SVG) | https://az9713.github.io/buzz-tutorial/trust-map.html | `857e570` |
 | `hardening.html` (~25 KB) | https://az9713.github.io/buzz-tutorial/hardening.html | `e14b5f0` |
+| `buzz-onboarding.html` (~55 KB) | https://az9713.github.io/buzz-tutorial/buzz-onboarding.html | `190959f`, `e892b76` |
 | `audit/advisory.html` (~190 KB) | https://az9713.github.io/buzz-tutorial/audit/advisory.html | `a16a705` |
 | `audit/blindspots.html` (~45 KB) | https://az9713.github.io/buzz-tutorial/audit/blindspots.html | `3ee8ec8` |
 | `audit/phase0-log.html` (~29 KB) | https://az9713.github.io/buzz-tutorial/audit/phase0-log.html | `3ee8ec8` |
+
+**`buzz-onboarding.html` is new (1 Aug 2026)** and is the first *user-facing*
+document here — the other four explain how Buzz works; this one explains how to
+operate it. Covers every item in the desktop app's main sidebar and settings
+sidebar at **v0.5.3** (which matches the clone at `b1b283cd4` — `desktop/package.json`
+says `"version": "0.5.3"`, verified, so no drift). Click paths, labels, the
+Personal/Communities/App settings grouping, all 25 keyboard shortcuts and the full
+workflow schema are quoted from source with file:line beneath each claim.
+
+Its centre is a **workflow cookbook**: eight YAML recipes that paste into the
+create-workflow dialog's `Edit as YAML` mode (`WorkflowFormBuilder.tsx:215`),
+covering all five triggers and all seven actions from
+`crates/buzz-workflow/src/schema.rs`, plus six validator traps. Facts worth not
+re-deriving: template vars are dotted (`{{trigger.text}}`) but expression vars are
+flat (`trigger_text`) because evalexpr can't parse dots; `interval` has a 60s
+floor; a `send_message` `channel:` override must be a UUID *and* equal the
+workflow's own channel (`executor.rs:468`); `call_webhook` needs owner/admin, not
+membership (SEC-006, `schema.rs:149-161`).
+
+`e892b76` made the page interactive — copy buttons on all 10 code blocks,
+scroll-spy TOC, self-linking headings, back-to-top — and linked it from
+`README.md`. **Verified in Chrome over a local server: 35/35 TOC links resolve, 0
+broken anchors, scroll-spy observed working.** The clipboard write itself is
+*unverified* — Chrome's permission prompt on a non-HTTPS localhost origin froze
+CDP mid-test. Standard `navigator.clipboard.writeText` with an `execCommand`
+fallback; Pages serves HTTPS. **Click a Copy button on the live page once to close
+this out.**
 
 Plus the interactive knowledge graph at
 https://az9713.github.io/buzz-tutorial/audit/graph/graph.html.
@@ -47,8 +75,8 @@ now resolve paths relative to themselves. Verified 0 username references on the
 live pages. **Don't reintroduce absolute paths into anything under this repo.**
 
 All are single pages with CSS/JS/SVG inlined, no CDN, theme-aware. Identical
-copies also sit in the working folder. `README.md` frames all
-four, states they are unofficial, CC BY 4.0.
+copies of the original four also sit in the working folder. `README.md` frames
+all five explainers, states they are unofficial, CC BY 4.0.
 
 **Also tracked:** `buzz-docs/` — four docs proposed for upstream (`index.md`,
 `key-concepts.md`, `troubleshooting/common-issues.md`,
@@ -160,6 +188,48 @@ framed as a question not a PR; (4) a CI job for the ignored Postgres tests;
 
 Then, unblocked work in rough priority:
 
+- **START HERE — the Agents deep-dive companion page.** Agreed with the user on
+  1 Aug 2026 as the next document, explicitly deferred to a fresh session because
+  it needs a reading pass over ~40,000 lines and the previous session was past
+  173k context. Goal: give **Agents** the reference treatment that
+  `buzz-onboarding.html` gave **Workflows**. The onboarding page covers Agents at
+  orientation depth only (three-layer concept, the 12-harness table, five click
+  paths); it is roughly one screen out of a needed fifteen.
+
+  Scope: `desktop/src/features/agents/` (**202 files, 39,877 lines**, 181 in
+  `ui/`), `desktop/src/features/agent-memory/`, plus crates `buzz-agent`,
+  `buzz-acp`, `buzz-persona`. The ten proposed sections, inferred from component
+  names and **not yet confirmed by reading**: (1) the config surface field by
+  field — `AgentConfigFields`, `ProviderConfigFields`, `ModelPicker`,
+  `EditAgentAdvancedFields`, `AgentAiConfigurationMode`, and the
+  defaults-vs-per-agent precedence; (2) **MCP servers** (`McpServersSection.tsx`)
+  — likely the highest-leverage undocumented feature in the app; (3) env and
+  secrets (`EnvVarsEditor`, `PersonaProviderApiKeyField`) — including *what leaks
+  when a persona is shared*, a security question not a convenience one;
+  (4) personas as a system (catalog, share, recipients, delete, prompt sections);
+  (5) teams; (6) snapshots — what actually travels between machines;
+  (7) reading a session (`ManagedAgentSessionPanel`,
+  `AgentSessionTranscriptList`, `FileEditDiffView`, `RawEventRail`,
+  `ManagedAgentLogPanel`) — the debugging chapter; (8) **BYOH / ACP** — what a CLI
+  must implement to plug in, the genuinely novel capability with nothing written
+  about it; (9) run location (`AgentRunLocationContext`) and its interaction with
+  the Compute setting; (10) agent memory. Plus worked examples in the cookbook
+  spirit: triage agent, repo-bound reviewer, a three-model team, an MCP-equipped
+  agent.
+
+  **Two scoping questions were put to the user and are unanswered:**
+  (a) full ten-section reference, or just sections 1, 2, 3 and 7 — config, MCP,
+  secrets, debugging — for roughly a third of the effort? (b) drive the *running*
+  Buzz app (the user has it open with four agents: Claude, Codex, Grok, hermes)
+  to screenshot real dialogs and session panels, which would also catch anywhere
+  the source misled us? Ask before starting; both change the shape of the work.
+
+  **Honest limit to state in the document itself:** the config *surface* is
+  readable TypeScript and can be documented accurately, but runtime behaviour
+  (timeouts, failure surfacing, mid-run panel state) cannot be verified without
+  running the app — and this documents the interface to `managed_agents/`, ~37,000
+  Rust lines with no lint coverage that nobody has properly reviewed.
+
 - **Fix the F014/F015 parser differential** — the advisory's own top
   recommendation. Desktop and mobile both resolve a `kind:40003` edit's target by
   the *last* `e` tag while the relay uses the *first*; fixing one platform alone
@@ -202,9 +272,13 @@ If the user asks for something else, that takes precedence.
 scripts were rescued out of a session-scoped scratchpad into `audit/data/` on
 1 Aug 2026, so nothing load-bearing lives in a temp directory any more.
 
-The four original explainers were hand-written directly into the repo with no
-generator; edit those `.html` files in place. The three audit pages are the
-opposite — **generated**, so edit the markdown and re-render, never the HTML:
+The four original explainers **and `buzz-onboarding.html`** were hand-written
+directly into the repo with no generator; edit those `.html` files in place.
+`buzz-onboarding.html` has no markdown source and is **not** part of the
+`md2html.py` `DOCS` table — do not try to re-render it. Its inline `<script>`
+(copy buttons, scroll-spy, anchors, back-to-top) is self-contained vanilla JS at
+the bottom of the file. The three audit pages are the opposite — **generated**,
+so edit the markdown and re-render, never the HTML:
 
 - `python audit/data/make_advisory.py` → `audit/buzz-audit-advisory.md` (from the
   JSON in `audit/data/`, so no number is hand-copied)
