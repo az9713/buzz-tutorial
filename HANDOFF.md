@@ -87,18 +87,67 @@ clone before quoting them anywhere public.
 
 ## Next task
 
-**Two open tasks, both decided on 31 Jul 2026. Nothing is blocked.**
+**Both prior tasks are DONE (31 Jul 2026, commit `857e570`).** Nothing is blocked;
+nothing is queued. Pick your own next thing, or see "Possible follow-ups" below.
 
-1. **Enable GitHub Pages** so the HTML renders instead of showing source:
-   `gh api -X POST repos/az9713/buzz-tutorial/pages -f source[branch]=main -f source[path]=/`
-   Then add the two live URLs to `README.md`. ~5 minutes. This was offered and
-   never actioned.
-2. **Run the trust map** — the highest-value follow-up, the "Next best prompt" at
-   the bottom of `buzz-blindspots.md`. For each of channel message content, DM
-   content, channel membership, tenant isolation, agent authority, and media blob
-   access: name the mechanism that enforces it, the artifact that verifies it, and
-   whether that verification is armed in production. Four of the six have
-   surprising answers.
+1. ~~Enable GitHub Pages~~ — **done.** Live and verified HTTP 200:
+   - https://az9713.github.io/buzz-tutorial/what-is-nostr.html
+   - https://az9713.github.io/buzz-tutorial/how-buzz-works.html
+   - https://az9713.github.io/buzz-tutorial/trust-map.html
+2. ~~Run the trust map~~ — **done**, published as `trust-map.html` (~41 KB, 1 inline
+   SVG). Findings summarised below so they need not be re-derived.
+
+### Trust map findings (verified against `main` @ `b1b283cd4`, 31 Jul 2026)
+
+| Property | Enforced by | Armed? |
+|---|---|---|
+| Channel message content | SQL membership predicate; **plaintext at rest** | enforcement yes, DB tests mostly not |
+| DM content | same predicate — DMs are ordinary channels, **no E2E crypto** | same |
+| Channel membership | relay-only `kind:13534`; forged snapshots rejected | **yes**, e2e test in CI (`ci.yml:755`) |
+| Tenant isolation | app predicates + composite keys + migration lint | partly; **RLS backstop absent** |
+| Agent authority | scopes + filter + prose; permissions auto-approved | **no meaningful bound** |
+| Media blob access | uploads: 5 gates. downloads: **SHA-256 knowledge only** | **off by default** |
+
+Sharpest four, with citations:
+- **RLS does not exist anywhere in the repo.** No `ROW LEVEL SECURITY` DDL in
+  `migrations/`, no `NOBYPASSRLS`, no `set_config('app.community_id',…)`. Yet the
+  non-interference proof is stated relative to axioms A-RLS-1..5 which name RLS the
+  fail-closed backstop, "admitted by a startup/CI assertion suite" that also does
+  not exist (`docs/multi-tenant-relay.md:350-374`, `:655-660`). Consequence: a
+  missed `WHERE community_id` predicate fails **open**, not closed.
+- **`require_media_get_auth` defaults to `false`** (`crates/buzz-relay/src/config.rs:212-214`,
+  `:742-748`; asserted at `:1037-1040`). `authenticate_media_read` returns after
+  tenant binding only (`api/media.rs:494-498`) and serves `Cache-Control: public`
+  (`:517-521`). Uploads by contrast pass five gates (`buzz-media/src/auth.rs:20-70`,
+  `api/media.rs:171-218`).
+- **ACP auto-approves every `session/request_permission`** with `allow_once`
+  (`crates/buzz-acp/src/acp.rs:1856-1900`), and raw channel text is interpolated
+  into the prompt as `Content: {content}` with no escaping or delimiting
+  (`crates/buzz-acp/src/queue.rs:1097-1109`). `ReposRead` is documented as not
+  enforced; `ReposWrite` not enforced on git HTTP push (`buzz-auth/src/scope.rs:46-56`).
+- **208 `#[ignore = "requires Postgres"]` tests, and `scripts/run-tests.sh:93-100`
+  states outright that nothing runs them.** CI reaches in by name only
+  (`ci.yml:687-717`). What *is* armed: the migration tenant lints
+  (`buzz-db/src/migration.rs:368-507`, infra-free), `buzz-conformance` replay
+  (production binds `NoopTracer`, `buzz-relay/src/state.rs:799`), the NIP-43
+  forged-snapshot e2e (`buzz-test-client/tests/e2e_relay.rs:219-237`), and the
+  per-community hash-chain audit log, on by default (`config.rs:853`).
+
+New doc drift found: the TLA spec (`docs/spec/MultiTenantRelay.tla:38-40`) and
+design doc (`docs/multi-tenant-relay.md:896-899`) both still describe
+`get_accessible_channel_ids` as unscoped, citing `channel.rs:545-560`. It now lives
+at `channel.rs:746-774` and both arms carry `WHERE community_id = $1`. Code is
+newer and safer — but the RLS gap above drifts the *other* way, so "code is newer"
+is a recency rule, not a safety guarantee.
+
+### Possible follow-ups (none started, none required)
+
+- Fold the DM-encryption and media-default findings back into `what-is-nostr.html`
+  and `how-buzz-works.html`, which currently do not mention either.
+- Report the four findings upstream to `block/buzz` — the media default and the
+  RLS gap are the two an operator would want to know.
+- Deepen any single subsystem with the master prompt at the bottom of
+  `buzz-blindspots.md`.
 **Dropped** — an upstream PR to `block/buzz` with the four `buzz-docs/` files was
 considered and declined on 31 Jul 2026. Don't re-propose it. The docs stay here.
 
