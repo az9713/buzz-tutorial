@@ -1,6 +1,6 @@
 # Buzz Tutorial
 
-Four self-contained explainers about [Buzz](https://github.com/block/buzz) — a
+Five self-contained explainers about [Buzz](https://github.com/block/buzz) — a
 self-hostable Nostr relay that doubles as a workspace where humans and AI
 agents share the same rooms.
 
@@ -14,6 +14,7 @@ it in a browser.
 - [How Buzz works](https://az9713.github.io/buzz-tutorial/how-buzz-works.html)
 - [The Buzz trust map](https://az9713.github.io/buzz-tutorial/trust-map.html)
 - [Hardening Buzz](https://az9713.github.io/buzz-tutorial/hardening.html)
+- [Power user onboarding](https://az9713.github.io/buzz-tutorial/buzz-onboarding.html) — every menu item, with click paths and paste-ready workflows
 
 From the [audit](audit/):
 
@@ -97,6 +98,26 @@ connection pooling produces a system that passes its tests and leaks anyway.
 
 This is an advisory. Nothing in it has been submitted to `block/buzz`, and
 `SECURITY.md` there asks that vulnerabilities not go through public issues.
+
+### [`buzz-onboarding.html`](https://az9713.github.io/buzz-tutorial/buzz-onboarding.html) — read this if you actually have to use Buzz tomorrow
+
+The other pages explain how Buzz works. This one explains how to work it. Every
+item in the desktop app's main sidebar and settings sidebar, at v0.5.3: what it
+does, the exact click path to reach it, and a worked example where one helps.
+
+Written against the source rather than from the running app — labels, click
+paths, the settings grouping, all 25 keyboard shortcuts and the workflow schema
+are quoted from the files they live in, with file and line cited underneath.
+
+The centre of it is a workflow cookbook: eight YAML recipes that paste straight
+into the create-workflow dialog's `Edit as YAML` mode, covering all five triggers
+and all seven actions, plus the six traps the validator enforces — dashes in step
+ids, the 60-second interval floor, the dotted-versus-underscored variable split,
+and why `call_webhook` needs owner authority rather than membership.
+
+It carries the audit's caveats forward where they touch a feature, and states its
+own coverage limits: the Agents interface is roughly 40,000 lines, and this covers
+its concepts and main paths, not every dialog.
 
 ## Provenance and accuracy
 
