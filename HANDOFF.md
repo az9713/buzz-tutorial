@@ -1,177 +1,178 @@
 # HANDOFF — resume point for buzz-tutorial
 
 **Read this first each new session.** This file is the live "what to do next."
-There is no `CLAUDE.md` in this repo; conventions are in `README.md`.
+There is no `CLAUDE.md` in this repo; the standing conventions live in
+`README.md` and in "How to work" at the bottom of this file.
 
 Work spans two locations:
 - **This repo** — `C:\Users\simon\Downloads\buzz_me\buzz-tutorial` → published at
-  https://github.com/az9713/buzz-tutorial (public)
+  https://github.com/az9713/buzz-tutorial (public) and served via GitHub Pages
 - **Working folder** — `C:\Users\simon\Downloads\buzz_me` holds an upstream clone
   of `block/buzz` plus local-only research notes
 
-Last session: 30–31 July 2026.
+Last session: 31 July 2026.
 
 ## Current state (as of latest push)
 
-**Published and live** — commit `1ee5c85` on `main`, matches remote, tree clean:
-- `what-is-nostr.html` (~93 KB) — Nostr from zero, then how Buzz uses it, then
-  verified external pointers. 8 inline SVG figures.
-- `how-buzz-works.html` (~135 KB) — the architecture reasoning; 9 sections built
-  around "if I were building Buzz from scratch, what order would I think in."
-  10 inline SVG figures. Landed in `218464c`.
-- `README.md` — frames both docs, states they're unofficial, CC BY 4.0.
+Commit `e14b5f0` on `main`; local and remote hashes match; working tree clean.
 
-Both HTML files are self-contained: inlined CSS/JS/SVG, no CDN, theme-aware.
-Identical copies also sit in `C:\Users\simon\Downloads\buzz_me\`.
+**Four self-contained HTML documents, all live on GitHub Pages** (Pages enabled
+31 Jul 2026, `source: main /`, all four verified HTTP 200):
 
-**Correction already shipped** (`1ee5c85`): the NIP-17 row in `what-is-nostr.html`
-implied Buzz's own DMs are gift-wrapped/end-to-end encrypted. They are not.
-`open_dm` publishes `kind:41010`, the relay allocates a channel, and DM messages
-are ordinary `kind:9` events with an `#h` tag
-(`desktop/src-tauri/src/commands/dms.rs:17-45`). A warning callout now states
-plainly that DM confidentiality rests on relay-side authorization, not
-cryptography.
+| Document | Live URL | Landed in |
+|---|---|---|
+| `what-is-nostr.html` (~93 KB, 8 SVGs) | https://az9713.github.io/buzz-tutorial/what-is-nostr.html | `1ee5c85` |
+| `how-buzz-works.html` (~135 KB, 10 SVGs) | https://az9713.github.io/buzz-tutorial/how-buzz-works.html | `218464c` |
+| `trust-map.html` (~41 KB, 1 SVG) | https://az9713.github.io/buzz-tutorial/trust-map.html | `857e570` |
+| `hardening.html` (~25 KB) | https://az9713.github.io/buzz-tutorial/hardening.html | `e14b5f0` |
 
-Precise wording matters here: `kind:1059` gift wrap **is** real production code
-in the relay — push routing, storage, migrations — and `NOSTR.md` documents it as
-a relay feature for third-party Nostr clients. What's absent is any use of it in
-the Desktop app's own DM-building path, where it appears only in a test file and
-the e2e bridge. "Gift wrap only exists in test files" is too strong; "the Buzz
-Desktop DM path doesn't use gift wrap" is correct.
+All are single pages with CSS/JS/SVG inlined, no CDN, theme-aware. Identical
+copies also sit in `C:\Users\simon\Downloads\buzz_me\`. `README.md` frames all
+four, states they are unofficial, CC BY 4.0.
 
-**Local only, NOT in any git repo** — `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md`
-(30 KB). A blindspot pass on the technical creation of Buzz: false framings, stack
-map, 12 blindspots each with a research prompt, 5-prompt minimum set, rat-hole
-warning, master prompt. Four claims marked `[verified]` were re-checked directly
-against the repo. Deliberately unpublished — it reads as a critique of someone
-else's shipped codebase. Backed up byte-identical to
-`C:\Users\simon\mms\buzz-blindspots.md` on 31 Jul 2026 — two copies exist, both
-outside git. If you edit one, re-copy.
-
-## Proposed upstream docs — `buzz-docs/` (restored, tracked)
-
-Four docs were originally written into the upstream clone at `buzz_me/buzz/docs/`,
-left untracked, and destroyed when the clone was replaced. They have been
-regenerated and are now committed here in `buzz-docs/` (commit `693f3fe`):
-
-- `buzz-docs/index.md` — navigation hub, 13 links grouped by audience (end user /
-  contributor / operator / protocol implementer / vision); all paths verified
-- `buzz-docs/key-concepts.md` — glossary: Nostr, NIP, relay, community, channel,
-  kind ranges, NIP-42, NIP-98, membership, audit log, canvas, huddle, workflow,
-  Blossom, ACP, managed agent, persona, persona pack, buzz-cli, buzz-dev-mcp, git
-  events — plus the DM-encryption correction described above
-- `buzz-docs/troubleshooting/common-issues.md` — symptom → cause → fix across
-  setup/build, relay/CLI, ACP agents, Desktop managed agents, plus a
-  "documentation trap" section recording the two ARCHITECTURE.md drifts
-- `buzz-docs/user-guide/using-your-ai-subscription.md` — running Buzz agents on a
-  Claude Pro/Max or ChatGPT Plus subscription instead of a metered API key
-
-Links inside them are written relative to `buzz/docs/`, their intended home in a
-fork of `block/buzz` — they will not resolve from `buzz-docs/`. See
-`buzz-docs/README.md`.
+**Also tracked:** `buzz-docs/` — four docs proposed for upstream (`index.md`,
+`key-concepts.md`, `troubleshooting/common-issues.md`,
+`user-guide/using-your-ai-subscription.md`), committed in `693f3fe`. Their
+internal links are written relative to `buzz/docs/`, their intended home in a
+fork of `block/buzz`, so they do not resolve from `buzz-docs/`. See
+`buzz-docs/README.md`. **An upstream PR for these was considered and declined on
+31 Jul 2026 — do not re-propose it.**
 
 Their key finding, kept here so it need not be re-derived: **Buzz Desktop's
 Claude Code and Codex agent types do support subscription auth** — they shell out
 to the real CLI and gate readiness on `claude auth status` / `codex login status`,
-never on `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` (`discovery.rs:140` and
-`discovery.rs:173`). The onboarding UI prefers subscription login
-(`SetupStep.tsx:397-442`). By contrast the built-in **Buzz Agent** runtime calls
-LLM APIs directly and accepts only metered credentials
-(`crates/buzz-agent/src/config.rs:763-813`). Standalone `buzz-acp` without Desktop
-is API-key-only in practice; Codex's ChatGPT login fails with HTTP 426 headless.
+never on `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` (`discovery.rs:140`,
+`discovery.rs:173`); onboarding prefers subscription login
+(`SetupStep.tsx:397-442`). The built-in **Buzz Agent** runtime calls LLM APIs
+directly and accepts only metered credentials (`buzz-agent/src/config.rs:763-813`).
 
-**Line citations drift.** On the 31 Jul regeneration, `buzz-agent/src/config.rs`
-had moved ~13 lines and `readiness.rs`'s docstring to `393-394`; `discovery.rs`
-and `SetupStep.tsx` were unchanged. Re-verify line numbers against the current
-clone before quoting them anywhere public.
+**Local only, NOT in any git repo** — `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md`
+(30 KB): blindspot pass on Buzz's technical creation — false framings, stack map,
+12 blindspots each with a research prompt, rat-hole warning, master prompt.
+Deliberately unpublished — it reads as a critique of someone else's shipped
+codebase. Backed up byte-identical to `C:\Users\simon\mms\buzz-blindspots.md`.
+Two copies, both outside git; if you edit one, re-copy.
 
-## Next task
+## Trust map findings — verified 31 Jul 2026 against `main` @ `b1b283cd4`
 
-**Both prior tasks are DONE (31 Jul 2026, commit `857e570`).** Nothing is blocked;
-nothing is queued. Pick your own next thing, or see "Possible follow-ups" below.
+Recorded here so a fresh session need not re-derive them. Full evidence and
+prose in `trust-map.html`.
 
-1. ~~Enable GitHub Pages~~ — **done.** Live and verified HTTP 200:
-   - https://az9713.github.io/buzz-tutorial/what-is-nostr.html
-   - https://az9713.github.io/buzz-tutorial/how-buzz-works.html
-   - https://az9713.github.io/buzz-tutorial/trust-map.html
-2. ~~Run the trust map~~ — **done**, published as `trust-map.html` (~41 KB, 1 inline
-   SVG). Findings summarised below so they need not be re-derived.
-
-### Trust map findings (verified against `main` @ `b1b283cd4`, 31 Jul 2026)
-
-| Property | Enforced by | Armed? |
+| Property | Enforced by | Verification armed? |
 |---|---|---|
 | Channel message content | SQL membership predicate; **plaintext at rest** | enforcement yes, DB tests mostly not |
 | DM content | same predicate — DMs are ordinary channels, **no E2E crypto** | same |
-| Channel membership | relay-only `kind:13534`; forged snapshots rejected | **yes**, e2e test in CI (`ci.yml:755`) |
+| Channel membership | relay-only `kind:13534`; forged snapshots rejected | **yes** — e2e test in CI (`ci.yml:755`) |
 | Tenant isolation | app predicates + composite keys + migration lint | partly; **RLS backstop absent** |
 | Agent authority | scopes + filter + prose; permissions auto-approved | **no meaningful bound** |
 | Media blob access | uploads: 5 gates. downloads: **SHA-256 knowledge only** | **off by default** |
 
-Sharpest four, with citations:
+The four sharpest, with citations:
+
 - **RLS does not exist anywhere in the repo.** No `ROW LEVEL SECURITY` DDL in
   `migrations/`, no `NOBYPASSRLS`, no `set_config('app.community_id',…)`. Yet the
-  non-interference proof is stated relative to axioms A-RLS-1..5 which name RLS the
+  non-interference proof is stated relative to axioms A-RLS-1..5 naming RLS the
   fail-closed backstop, "admitted by a startup/CI assertion suite" that also does
-  not exist (`docs/multi-tenant-relay.md:350-374`, `:655-660`). Consequence: a
-  missed `WHERE community_id` predicate fails **open**, not closed.
-- **`require_media_get_auth` defaults to `false`** (`crates/buzz-relay/src/config.rs:212-214`,
-  `:742-748`; asserted at `:1037-1040`). `authenticate_media_read` returns after
-  tenant binding only (`api/media.rs:494-498`) and serves `Cache-Control: public`
-  (`:517-521`). Uploads by contrast pass five gates (`buzz-media/src/auth.rs:20-70`,
+  not exist (`docs/multi-tenant-relay.md:350-374`, `:655-660`). A missed
+  `WHERE community_id` predicate therefore fails **open**.
+- **`require_media_get_auth` defaults to `false`** (`buzz-relay/src/config.rs:212-214`,
+  `:742-748`, asserted `:1037-1040`). `authenticate_media_read` returns after
+  tenant binding only (`api/media.rs:494-498`), `Cache-Control: public`
+  (`:517-521`). Uploads pass five gates (`buzz-media/src/auth.rs:20-70`,
   `api/media.rs:171-218`).
 - **ACP auto-approves every `session/request_permission`** with `allow_once`
-  (`crates/buzz-acp/src/acp.rs:1856-1900`), and raw channel text is interpolated
-  into the prompt as `Content: {content}` with no escaping or delimiting
-  (`crates/buzz-acp/src/queue.rs:1097-1109`). `ReposRead` is documented as not
-  enforced; `ReposWrite` not enforced on git HTTP push (`buzz-auth/src/scope.rs:46-56`).
-- **208 `#[ignore = "requires Postgres"]` tests, and `scripts/run-tests.sh:93-100`
-  states outright that nothing runs them.** CI reaches in by name only
-  (`ci.yml:687-717`). What *is* armed: the migration tenant lints
-  (`buzz-db/src/migration.rs:368-507`, infra-free), `buzz-conformance` replay
-  (production binds `NoopTracer`, `buzz-relay/src/state.rs:799`), the NIP-43
-  forged-snapshot e2e (`buzz-test-client/tests/e2e_relay.rs:219-237`), and the
-  per-community hash-chain audit log, on by default (`config.rs:853`).
+  (`buzz-acp/src/acp.rs:1856-1900`); raw channel text is interpolated as
+  `Content: {content}` with no delimiting (`buzz-acp/src/queue.rs:1097-1109`).
+  `ReposRead` documented as not enforced, `ReposWrite` not enforced on git HTTP
+  push (`buzz-auth/src/scope.rs:46-56`).
+- **208 `#[ignore = "requires Postgres"]` tests; `scripts/run-tests.sh:93-100`
+  states outright nothing runs them.** CI reaches in by name only
+  (`ci.yml:687-717`). Genuinely armed: migration tenant lints
+  (`buzz-db/src/migration.rs:368-507`), `buzz-conformance` replay (production
+  binds `NoopTracer`, `buzz-relay/src/state.rs:799`), the NIP-43 forged-snapshot
+  e2e (`buzz-test-client/tests/e2e_relay.rs:219-237`), and the per-community
+  hash-chain audit log, on by default (`config.rs:853`).
 
-New doc drift found: the TLA spec (`docs/spec/MultiTenantRelay.tla:38-40`) and
-design doc (`docs/multi-tenant-relay.md:896-899`) both still describe
-`get_accessible_channel_ids` as unscoped, citing `channel.rs:545-560`. It now lives
-at `channel.rs:746-774` and both arms carry `WHERE community_id = $1`. Code is
-newer and safer — but the RLS gap above drifts the *other* way, so "code is newer"
-is a recency rule, not a safety guarantee.
+Doc drift found: the TLA spec (`docs/spec/MultiTenantRelay.tla:38-40`) and design
+doc (`docs/multi-tenant-relay.md:896-899`) still describe
+`get_accessible_channel_ids` as unscoped, citing `channel.rs:545-560`. It now
+lives at `channel.rs:746-774` with `WHERE community_id = $1` on both arms. Code
+newer and safer — but the RLS gap drifts the *other* way, so "code is newer" is a
+recency rule, not a safety guarantee.
 
-### Possible follow-ups (none started, none required)
+## Remediation stance (decided 31 Jul 2026)
 
-- Fold the DM-encryption and media-default findings back into `what-is-nostr.html`
-  and `how-buzz-works.html`, which currently do not mention either.
-- Report the four findings upstream to `block/buzz` — the media default and the
-  RLS gap are the two an operator would want to know.
-- Deepen any single subsystem with the master prompt at the bottom of
+`hardening.html` is an **advisory, not a patch series**. Nothing has been
+submitted upstream. The user chose advisory-only after asking why the full fix
+wasn't strictly better; the reasons, so they need not be re-argued: we cannot
+merge, so an unmerged patch protects nobody while a published URL reaches
+operators today; two of the four gaps are deliberate product decisions whose
+context we lack; we cannot verify a patch to the standard it needs (the relevant
+test pool is exactly the one that doesn't run); the cost of a wrong advisory is a
+correctable sentence, of a wrong merged tenant-fence migration is a leak; and the
+advisory is step one of any PR route regardless.
+
+The advisory's own ranking, if this is ever revisited: (1) prompt delimiting in
+`queue.rs` — the convention already exists in-tree at
+`buzz-agent/src/handoff.rs:83-89` with a regression test at
+`regressions.rs:1108,1199`; (2) a startup warning for `require_media_get_auth`
+mirroring `config.rs:637-641` — **do not flip the default**, that breaks clients;
+(3) a config-gated ACP permission policy with today's behaviour as default,
+framed as a question not a PR; (4) a CI job for the ignored Postgres tests;
+(5) RLS — **advised against**, build only the assertion suite.
+
+## Next task
+
+**Nothing is queued and nothing is blocked.** Both tasks carried by the previous
+handoff are done. Pick freely, or take one of these:
+
+- **Fold the two headline findings back into the older docs.** Neither
+  `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download
+  default or the absent RLS backstop, and both discuss the areas concerned.
+- **Report upstream.** `block/buzz`'s `SECURITY.md` opens with "please do not
+  report security vulnerabilities through public GitHub issues" — route the media
+  default privately first, let maintainers say whether the rest can be public.
+  `hardening.html` §"What a good upstream report would say" has the framing per
+  finding.
+- **Run the ignored Postgres tests locally** against a throwaway DB and report
+  which fail. Needs no permission — happens entirely in the local clone — and it
+  is the prerequisite for gap 4 ever being fixable.
+- **Deepen one subsystem** with the master prompt at the bottom of
   `buzz-blindspots.md`.
-**Dropped** — an upstream PR to `block/buzz` with the four `buzz-docs/` files was
-considered and declined on 31 Jul 2026. Don't re-propose it. The docs stay here.
+
+If the user asks for something else, that takes precedence.
 
 ## Where to read things
 
 - `README.md` (this repo) — what each document is and the provenance rules
-- `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md` — the research findings,
-  with a master prompt for going deeper on any subsystem
+- `trust-map.html` / `hardening.html` — the security findings and their remedies
+- `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md` — research findings plus a
+  master prompt for going deeper on any subsystem
 - `C:\Users\simon\Downloads\buzz_me\buzz\` — full upstream clone of `block/buzz`,
-  521 MB, 3,435 files, git `main` @ `b1b283cd4`, tree clean, 0 commits ahead.
+  521 MB, git `main` @ `b1b283cd4`, tree clean, 0 commits ahead.
   **Do not commit into it** — it's upstream, not ours.
+
+## Session-transient scratch
+
+None this session. All four HTML documents were hand-written directly into the
+repo with no generator scripts; the committed `.html` files are the durable
+record and can be edited in place.
 
 ## How to work
 
-- **Accuracy rule for these docs**: every architectural claim traceable to the
-  repo, cited by file and line. Keep "the docs say X" separate from "my read of
-  why." `ARCHITECTURE.md` has drifted from the code in at least two places (rate
-  limiting, `MAX_FRAME_BYTES`) — when they disagree, the code is newer.
-- **Verify claims independently** before publishing. The NIP-17 error above got
-  through because a plausible-sounding NIP mapping wasn't checked against the
+- **Accuracy rule**: every architectural claim traceable to the repo, cited by
+  file and line, opened directly rather than inferred. Keep "the docs say X"
+  separate from "my read of why." Where a claim rests on the *absence* of code,
+  label it as an inference.
+- **Verify claims independently** before publishing. The original NIP-17 error
+  got through because a plausible-sounding NIP mapping wasn't checked against the
   actual DM code path.
-- **External links rot.** Everything in `what-is-nostr.html` was fetched and
-  confirmed on 31 July 2026; `rust-nostr/nostr` had already been renamed to
-  `nostrdevkit/nostr`. Re-verify before any future publish.
-- `/verify`, `/code-review`, and `/security-review` all need a diff. The upstream
-  clone has none (0 commits ahead, clean tree), so they have nothing to operate
-  on there. Scope them to a branch or a commit range.
+- **Line citations drift.** Re-verify against the clone before quoting anywhere
+  public — `buzz-agent/src/config.rs` moved ~13 lines between two sessions.
+- **External links rot.** Everything in `what-is-nostr.html` was confirmed on
+  31 Jul 2026; `rust-nostr/nostr` had already become `nostrdevkit/nostr`.
+- **Publishing loop**: edit → `cp <file>.html ../` → commit → push → poll
+  `curl -s -o /dev/null -w '%{http_code}'` on the live URL until `200`. Pages
+  takes roughly a minute.
+- `/verify`, `/code-review` and `/security-review` all need a diff. The upstream
+  clone has none (clean, 0 ahead), so scope them to a branch or commit range.
