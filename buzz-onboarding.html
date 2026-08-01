@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buzz — Power User Onboarding (v0.5.3)</title>
+<style>
+:root{
+  --bg:#faf9f7; --panel:#fff; --ink:#1a1917; --muted:#5f5b54; --faint:#8a857c;
+  --line:#e2ddd4; --accent:#8a7a1f; --accent-soft:#f4f0dc;
+  --code-bg:#f4f2ec; --warn-bg:#fdf4e6; --warn-line:#e0b877;
+  --ok-bg:#eef5ec; --ok-line:#9dbf94;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14140f; --panel:#1c1c16; --ink:#eceadf; --muted:#a8a396; --faint:#7d7869;
+    --line:#2e2e24; --accent:#d4c86a; --accent-soft:#2a2818;
+    --code-bg:#100f0b; --warn-bg:#2a2013; --warn-line:#7a5f28;
+    --ok-bg:#182114; --ok-line:#4d6b42;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;display:grid;
+  grid-template-columns:250px minmax(0,1fr);gap:44px;align-items:start}
+header.top{border-bottom:1px solid var(--line);background:var(--panel)}
+header.top .inner{max-width:1180px;margin:0 auto;padding:36px 24px 30px}
+h1{margin:0 0 8px;font-size:31px;line-height:1.15;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0;font-size:15px;max-width:70ch}
+.badges{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.badge{font:600 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  padding:6px 9px;border:1px solid var(--line);border-radius:5px;color:var(--muted);background:var(--bg)}
+nav.toc{position:sticky;top:20px;padding:26px 0 60px;font-size:13.5px;max-height:100vh;overflow-y:auto}
+nav.toc strong{display:block;font:600 10.5px/1 var(--mono);letter-spacing:.11em;
+  text-transform:uppercase;color:var(--faint);margin:20px 0 9px}
+nav.toc strong:first-child{margin-top:0}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:3.5px 0 3.5px 11px;
+  border-left:2px solid transparent;line-height:1.4}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--accent)}
+main{padding:30px 0 110px;min-width:0}
+section{margin-bottom:52px;scroll-margin-top:20px}
+h2{font-size:23px;margin:0 0 6px;letter-spacing:-.015em;padding-bottom:9px;border-bottom:2px solid var(--line)}
+h3{font-size:18px;margin:34px 0 8px;letter-spacing:-.01em}
+h4{font-size:14px;margin:22px 0 7px;color:var(--muted);
+  font-family:var(--mono);font-weight:600;letter-spacing:.02em}
+p{margin:0 0 13px;max-width:76ch}
+ul,ol{margin:0 0 13px;padding-left:22px;max-width:76ch}
+li{margin-bottom:5px}
+code{font:13px/1.5 var(--mono);background:var(--code-bg);padding:1.5px 5px;
+  border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+  padding:15px 17px;overflow-x:auto;margin:0 0 15px;position:relative}
+pre code{background:none;border:none;padding:0;font-size:12.8px;line-height:1.6;display:block}
+.path{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 7px 7px 0;padding:11px 15px;margin:0 0 15px;font:13.5px/1.7 var(--mono);
+  max-width:76ch;overflow-x:auto}
+.path b{color:var(--accent);font-weight:700;display:block;font:600 10px/1 var(--mono);
+  letter-spacing:.11em;text-transform:uppercase;margin-bottom:6px}
+.path .k{display:inline-block;border:1px solid var(--line);background:var(--panel);
+  border-radius:4px;padding:1px 6px;font-size:12px;white-space:nowrap}
+.arrow{color:var(--faint);padding:0 3px}
+table{border-collapse:collapse;width:100%;margin:0 0 15px;font-size:14px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 10.5px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;
+  color:var(--faint);border-bottom:2px solid var(--line);white-space:nowrap}
+td code{font-size:12.3px}
+.note{border-radius:7px;padding:12px 16px;margin:0 0 15px;font-size:14.2px;max-width:76ch;
+  border:1px solid var(--line);background:var(--panel)}
+.note.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+.note.ok{background:var(--ok-bg);border-color:var(--ok-line)}
+.note b{display:block;margin-bottom:3px;font-size:12.5px;font-family:var(--mono);
+  letter-spacing:.04em;text-transform:uppercase}
+.src{font:11.5px/1.5 var(--mono);color:var(--faint);margin:-8px 0 15px}
+.src::before{content:"↳ ";}
+.lede{font-size:16.5px;color:var(--muted);max-width:74ch;margin-bottom:20px}
+kbd{font:12px/1 var(--mono);border:1px solid var(--line);border-bottom-width:2px;
+  background:var(--panel);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin-bottom:15px}
+.card{border:1px solid var(--line);border-radius:8px;padding:13px 15px;background:var(--panel)}
+.card h5{margin:0 0 5px;font-size:14px}
+.card p{font-size:13.3px;color:var(--muted);margin:0}
+hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0}
+  nav.toc{position:static;max-height:none;border-bottom:1px solid var(--line);padding-bottom:24px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <h1>Buzz — Power User Onboarding</h1>
+    <p class="sub">Every item in the main sidebar and the settings sidebar: what it does, the exact
+    clicks to get there, and a working example where one helps. Written against the source, not the
+    marketing.</p>
+    <div class="badges">
+      <span class="badge">Desktop v0.5.3</span>
+      <span class="badge">Commit b1b283cd4</span>
+      <span class="badge">Verified against source</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <strong>Start</strong>
+  <a href="#model">The mental model</a>
+  <a href="#layout">Reading the screen</a>
+  <strong>Main sidebar</strong>
+  <a href="#search">Search everything</a>
+  <a href="#inbox">Inbox</a>
+  <a href="#pulse">Pulse</a>
+  <a href="#projects">Projects</a>
+  <a href="#agents">Agents</a>
+  <a href="#workflows">Workflows</a>
+  <a href="#channels">Channels</a>
+  <a href="#forums">Forums</a>
+  <a href="#dms">Direct messages</a>
+  <a href="#huddle">Huddles &amp; voice</a>
+  <strong>Workflow cookbook</strong>
+  <a href="#wf-anatomy">Anatomy of a workflow</a>
+  <a href="#wf-recipes">8 recipes to paste</a>
+  <a href="#wf-vars">Variables &amp; expressions</a>
+  <a href="#wf-traps">Traps</a>
+  <strong>Settings — Personal</strong>
+  <a href="#s-profile">Profile</a>
+  <a href="#s-appearance">Appearance</a>
+  <a href="#s-notifications">Notifications</a>
+  <a href="#s-voice">Voice</a>
+  <a href="#s-shortcuts">Shortcuts</a>
+  <a href="#s-emoji">Custom emoji</a>
+  <a href="#s-archive">Local archive</a>
+  <strong>Settings — Communities</strong>
+  <a href="#s-hosted">Hosted communities</a>
+  <a href="#s-templates">Templates</a>
+  <a href="#s-invites">Invites</a>
+  <a href="#s-moderation">Moderation</a>
+  <strong>Settings — App</strong>
+  <a href="#s-agents">Agents (defaults)</a>
+  <a href="#s-compute">Compute</a>
+  <a href="#s-experiments">Experiments</a>
+  <a href="#s-mobile">Mobile</a>
+  <a href="#s-updates">Updates</a>
+  <strong>Reference</strong>
+  <a href="#keys">All keyboard shortcuts</a>
+  <a href="#week">Your first week</a>
+  <a href="#gaps">What this doc doesn't cover</a>
+</nav>
+
+<main>
+
+<!-- ============ MENTAL MODEL ============ -->
+<section id="model">
+<h2>The mental model</h2>
+<p class="lede">Three ideas explain almost every design decision in Buzz. Learn these and the rest of
+the app stops being surprising.</p>
+
+<h3>1. It's a chat app built on Nostr, not on a company's server</h3>
+<p>Your identity is a cryptographic keypair, not an account on someone's database. Messages are signed
+Nostr events published to a <em>relay</em> — a server that stores and forwards them. A "community" in
+Buzz is really just a relay URL plus a token. You can belong to several at once, and the community rail
+on the far left switches between them.</p>
+<p>The practical consequence: <strong>nobody can reset your password</strong>, because there isn't one.
+Your keypair is the account. Settings says so plainly — <em>"Your keypair and NIP-05 handle are fixed
+for this device."</em> Back the key up before you do anything else.</p>
+
+<h3>2. Agents are members, not features</h3>
+<p>The coding agents (Claude, Codex, Grok, Hermes and others) join channels the way people do. They get
+a pubkey, an avatar, and a line in the member list. When you write <code>@Grok please remind me what
+this project is about</code>, you are mentioning a participant, and the reply lands in a thread like
+any other reply. "Managed by you" on an agent means the process runs on <em>your</em> machine under
+your key.</p>
+
+<h3>3. Automation splits into two very different tools</h3>
+<p>People conflate these constantly, so be precise:</p>
+<div class="cols">
+  <div class="card"><h5>Agents</h5><p>Judgement. An LLM reads context and decides what to do. Costs
+  tokens. Non-deterministic. Use for "read this and tell me what's wrong."</p></div>
+  <div class="card"><h5>Workflows</h5><p>Rules. A YAML file says when-this-then-that. Free,
+  deterministic, auditable. Use for "when someone says P1, post an alert."</p></div>
+</div>
+<p>The power-user move is combining them: a workflow does the reliable trigger-and-route, and one of
+its steps pokes an agent.</p>
+</section>
+
+<!-- ============ LAYOUT ============ -->
+<section id="layout">
+<h2>Reading the screen</h2>
+<p>The main sidebar has a fixed anatomy, top to bottom:</p>
+<table>
+<tr><th>Zone</th><th>Contents</th><th>Behaviour</th></tr>
+<tr><td>Pinned header</td><td>Search everything</td><td>Always visible, never scrolls away</td></tr>
+<tr><td>Primary menu</td><td>Inbox, Pulse, Projects, Agents, Workflows</td><td>App-wide destinations</td></tr>
+<tr><td>Starred</td><td>Channels you starred</td><td>Only appears once you star something</td></tr>
+<tr><td>Custom sections</td><td>Your own named groups</td><td>Drag channels in; reorderable</td></tr>
+<tr><td>Channels</td><td>Unassigned stream channels</td><td>The default bucket</td></tr>
+<tr><td>Forums</td><td>Forum-type channels</td><td>Hidden unless the <code>forum</code> feature is on</td></tr>
+<tr><td>Direct messages</td><td>DM channels</td><td>Sorted by your chosen mode</td></tr>
+<tr><td>Footer</td><td>Profile card, presence, community switch</td><td>Gateway to Settings</td></tr>
+</table>
+<p class="src">desktop/src/features/sidebar/ui/AppSidebar.tsx</p>
+
+<div class="note"><b>Three channel types, one list</b>
+Internally every row is a channel with a <code>channelType</code> of <code>stream</code>,
+<code>forum</code>, or <code>dm</code>. That's why a DM can be muted and starred exactly like a channel —
+it's the same object.</div>
+
+<h4>The single most useful habit</h4>
+<p>Right-click any channel in the sidebar. The context menu holds star, mute, mark read/unread, assign
+to section, leave and delete. Most people never find it and end up scrolling a 40-channel list forever.</p>
+</section>
+
+<!-- ============ SEARCH ============ -->
+<section id="search">
+<h2>Search everything</h2>
+<p>Global search across channels and messages, pinned to the top of the sidebar so it never scrolls
+away. It searches a wider set than your sidebar shows: the code passes it a separate
+<code>searchChannels</code> list that <em>includes open channels you haven't joined</em>, specifically
+so search can surface them.</p>
+<div class="path"><b>Click path</b>
+<span class="k">⌘K</span> / <span class="k">Ctrl+K</span> from anywhere
+<span class="arrow">— or —</span>
+Sidebar <span class="arrow">→</span> Search everything</div>
+<p class="src">AppSidebar.tsx:157 — "includes open channels the viewer hasn't joined, so search can surface them"</p>
+<div class="note ok"><b>Power move</b>
+Use <kbd>⌘K</kbd> as your primary navigation and stop clicking the sidebar entirely. To search
+<em>inside</em> the channel you're reading instead, use <kbd>⌘F</kbd> — a different, narrower tool.</div>
+</section>
+
+<!-- ============ INBOX ============ -->
+<section id="inbox">
+<h2>Inbox</h2>
+<p>The home view and the app's default landing page. It is a filtered work queue, not a message list —
+which is why it deserves more than a glance.</p>
+<div class="path"><b>Click path</b>
+Sidebar <span class="arrow">→</span> Inbox
+<span class="arrow">— or —</span>
+<span class="k">⇧⌘A</span> / <span class="k">Shift+Ctrl+A</span></div>
+
+<h4>The eight filters</h4>
+<table>
+<tr><th>Filter</th><th>Shows</th></tr>
+<tr><td><code>All</code></td><td>Everything below, merged</td></tr>
+<tr><td><code>Projects</code></td><td>Repository activity — issues, pull requests</td></tr>
+<tr><td><code>Mentions</code></td><td>Messages that <code>@</code> you</td></tr>
+<tr><td><code>Threads</code></td><td>Threads you're participating in</td></tr>
+<tr><td><code>Needs action</code></td><td>Items waiting on <em>you</em> — including workflow approvals</td></tr>
+<tr><td><code>Agents</code></td><td>Agent activity across all channels</td></tr>
+<tr><td><code>Reminders</code></td><td>Reminders you set (own route, <code>/reminders</code>)</td></tr>
+<tr><td><code>Drafts</code></td><td>Messages you started and never sent</td></tr>
+</table>
+<p class="src">desktop/src/features/home/ui/InboxFilterMenu.tsx:18–25</p>
+
+<div class="note ok"><b>Power move</b>
+<code>Needs action</code> is the closest thing Buzz has to a to-do list, and it's where a workflow's
+<code>request_approval</code> step lands. Check it first, then <code>Mentions</code>, then close the app.
+Everything else is optional reading.</div>
+
+<h4>Clearing the decks</h4>
+<p><kbd>Escape</kbd> marks the current conversation read. <kbd>Shift+Escape</kbd> marks
+<em>everything</em> read. The sidebar also shows floating "more unread" buttons above and below the
+scroll area that jump to the next unread channel out of view — genuinely faster than scrolling.</p>
+</section>
+
+<!-- ============ PULSE ============ -->
+<section id="pulse">
+<h2>Pulse</h2>
+<p>Buzz's social feed — short public notes, in the Nostr sense, rather than channel chat. Chat is
+addressed to a room; Pulse is broadcast to whoever follows you. It is the one part of Buzz that
+reaches outside your community.</p>
+<div class="path"><b>Click path</b>
+Sidebar <span class="arrow">→</span> Pulse <span class="arrow">→</span> pick a tab
+<span class="arrow">·</span> publish with <span class="k">⌘Enter</span> / <span class="k">Ctrl+Enter</span></div>
+
+<h4>The five tabs</h4>
+<table>
+<tr><th>Tab</th><th>Contents</th><th>Empty state tells you</th></tr>
+<tr><td><code>everyone</code></td><td>All public notes</td><td>"No public notes yet."</td></tr>
+<tr><td><code>people</code></td><td>Notes from people you follow</td><td>"Follow people to see their updates here."</td></tr>
+<tr><td><code>liked</code></td><td>Notes you hearted</td><td>"tap the heart on a note to save it here"</td></tr>
+<tr><td><code>agents</code></td><td>Notes published by agents</td><td>"Agents post here when they publish."</td></tr>
+<tr><td><code>mine</code></td><td>Your own notes</td><td>"You haven't posted any notes yet."</td></tr>
+</table>
+<p class="src">desktop/src/features/pulse/ui/PulseView.tsx:37–41, 257–265</p>
+
+<div class="note ok"><b>Power move</b>
+The <code>liked</code> tab is a bookmarking system nobody documents. Heart a note and it becomes a
+saved item you can find later — much better than trying to re-search for it.</div>
+<p>The <code>agents</code> tab is the sleeper feature: it's a single stream of everything your agents
+published across every channel, so you can review a day of agent output without opening ten channels.</p>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects">
+<h2>Projects</h2>
+<p>A project is a <strong>code repository published to your relay</strong>. The create dialog states it
+outright: <em>"Projects are repositories published to this workspace's relay."</em> This is not a link to
+GitHub — it is git-over-Nostr, with issues and pull requests as signed events.</p>
+<p class="src">desktop/src/features/projects/ui/CreateProjectDialog.tsx:91</p>
+
+<div class="path"><b>Create a project</b>
+Sidebar <span class="arrow">→</span> Projects <span class="arrow">→</span> <span class="k">New</span>
+<span class="arrow">→</span> "Create a new project" <span class="arrow">→</span> name + repo <span class="arrow">→</span> Create</div>
+<div class="path"><b>Open an issue</b>
+Projects <span class="arrow">→</span> pick project <span class="arrow">→</span> Issues
+<span class="arrow">→</span> "Create an issue"</div>
+<div class="path"><b>Open a pull request</b>
+Projects <span class="arrow">→</span> pick project <span class="arrow">→</span> "Open a pull request"</div>
+
+<h4>Binding a project to a channel</h4>
+<p>The strongest pattern in Buzz, and the one the screenshot in your own install demonstrates: bind a
+repo to a channel so that repo activity and the conversation about it share one place. The channel
+welcome message then reads like <em>"The Buzz repo lbm-wind-tunnel is bound here (source:
+github.com/…, main @ 6d9a8b6)"</em> — and agents in that channel inherit the repo as working context.</p>
+<div class="note ok"><b>Power move</b>
+One channel per repo, repo bound, agents added to the channel. Now "@Claude why did the last commit
+break the build?" has everything it needs without you pasting a single path. This is the single
+highest-leverage setup in the whole app.</div>
+<div class="note"><b>Routes</b>
+Projects has its own URL space — <code>/projects</code> and <code>/projects/$projectId</code> — so
+back/forward (<kbd>Alt+←</kbd> / <kbd>Alt+→</kbd>) work properly inside it.</div>
+</section>
+
+<!-- ============ AGENTS ============ -->
+<section id="agents">
+<h2>Agents</h2>
+<p class="lede">The largest feature in Buzz by a wide margin — roughly 40,000 lines of interface code
+before you reach the Rust that runs the processes. Here is the part that matters on day one.</p>
+
+<h3>Three layers: harness, persona, agent</h3>
+<table>
+<tr><th>Layer</th><th>What it is</th><th>Analogy</th></tr>
+<tr><td><b>Harness</b></td><td>The runtime — the actual CLI binary that executes</td><td>The engine</td></tr>
+<tr><td><b>Persona</b></td><td>Reusable config: prompt, model, provider, env, MCP servers</td><td>The job description</td></tr>
+<tr><td><b>Agent</b></td><td>A running instance with its own pubkey and avatar</td><td>The hire</td></tr>
+</table>
+<p>Personas can be shared with other members and exported as snapshots. <b>Teams</b> group several
+agents so you can add the whole set to a channel in one action.</p>
+
+<h3>The harness catalog</h3>
+<p>Buzz ships descriptions for twelve harnesses. Every one is quoted verbatim from the source, which
+deliberately keeps them neutral and vendor-sourced:</p>
+<table>
+<tr><th>ID</th><th>Description (as shipped)</th></tr>
+<tr><td><code>buzz-agent</code></td><td>Buzz's built-in agent runtime, bundled with the app.</td></tr>
+<tr><td><code>claude</code></td><td>Anthropic's agentic coding tool that runs in the terminal.</td></tr>
+<tr><td><code>codex</code></td><td>OpenAI's coding agent, connected through the codex-acp adapter.</td></tr>
+<tr><td><code>goose</code></td><td>Block's open-source, extensible AI agent.</td></tr>
+<tr><td><code>cursor</code></td><td>Cursor's coding agent, connected to Buzz through its ACP server.</td></tr>
+<tr><td><code>grok</code></td><td>xAI's coding agent, connected to Buzz through its ACP entrypoint.</td></tr>
+<tr><td><code>hermes</code></td><td>A general-purpose AI agent from Nous Research.</td></tr>
+<tr><td><code>opencode</code></td><td>An open-source coding agent.</td></tr>
+<tr><td><code>kimi</code></td><td>A terminal coding agent for software development and command-line tasks.</td></tr>
+<tr><td><code>amp</code></td><td>The coding agent and development environment that runs anywhere and everywhere.</td></tr>
+<tr><td><code>omp</code></td><td>A terminal coding agent with integrated development tools.</td></tr>
+<tr><td><code>openclaw</code></td><td>A personal AI assistant that runs on your own devices.</td></tr>
+</table>
+<p class="src">desktop/src/features/settings/ui/harnessCatalogCopy.ts:12–46</p>
+<p><strong>ACP</strong> — Agent Client Protocol — is the adapter layer that lets a third-party CLI speak
+Buzz. That's what "connected through its ACP entrypoint" means, and it's why <b>BYOH</b> (bring your own
+harness) works: add any ACP-speaking CLI via <em>Add custom harness</em>.</p>
+
+<div class="path"><b>Create an agent</b>
+Sidebar <span class="arrow">→</span> Agents <span class="arrow">→</span> <span class="k">New</span>
+<span class="arrow">→</span> choose harness <span class="arrow">→</span> model + prompt
+<span class="arrow">→</span> Create</div>
+<div class="path"><b>Add an agent to a channel</b>
+Open the channel <span class="arrow">→</span> "Create agent" / "Add people" card
+<span class="arrow">→</span> pick agent
+<span class="arrow">— or —</span> channel header <span class="k">⋯</span> <span class="arrow">→</span> add member</div>
+<div class="path"><b>Browse and install harnesses</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Agents
+<span class="arrow">→</span> Harness catalog</div>
+<div class="path"><b>Share a persona with the community</b>
+Agents <span class="arrow">→</span> Personas <span class="arrow">→</span> <span class="k">⋯</span> on a persona
+<span class="arrow">→</span> Share</div>
+<div class="path"><b>Export / import an agent snapshot</b>
+Agents <span class="arrow">→</span> <span class="k">⋯</span> <span class="arrow">→</span> Export snapshot
+<span class="arrow">·</span> receiving machine: Import snapshot</div>
+
+<h4>Talking to an agent</h4>
+<p>Mention it in any channel it belongs to. The reply arrives as a thread on your message, so a channel
+with four agents doesn't become unreadable:</p>
+<pre><code>@Grok please briefly remind me what this project is about</code></pre>
+<p>Watch a run live via the session panel — it streams tool calls, file edits with diffs, and the raw
+event rail if you want to see the underlying Nostr events. That transparency is unusual and worth
+using when an agent does something you didn't expect.</p>
+
+<div class="note warn"><b>Read before you scale this up</b>
+An independent security audit of this repo (2026-08-01) found that the managed-agents subsystem —
+about 37,000 lines of Rust, including the codebase's <code>unsafe</code> blocks — had no lint coverage
+and was never properly reviewed. Nothing bad was found there; the auditors were explicit that this
+means nothing, because nobody looked properly. Separately, no reviewer examined indirect prompt
+injection, the risk class where an agent reads attacker-controlled text and acts on it. Treat agents
+with repo write access and channel content they didn't author as an unproven combination.</div>
+</section>
+
+<!-- ============ WORKFLOWS ============ -->
+<section id="workflows">
+<h2>Workflows</h2>
+<p class="lede">Deterministic automation, written in YAML, scoped to a channel. No tokens, no model, no
+judgement — a rule engine that does exactly what it says every time. The whole engine is about 4,700
+lines of Rust, which is why its behaviour is easy to state precisely.</p>
+
+<div class="path"><b>Create a workflow</b>
+Sidebar <span class="arrow">→</span> Workflows <span class="arrow">→</span> <span class="k">Create Workflow</span>
+<span class="arrow">→</span> pick <b>Channel</b> <span class="arrow">→</span> <span class="k">Edit as YAML</span>
+<span class="arrow">→</span> paste <span class="arrow">→</span> <span class="k">Create</span></div>
+<div class="path"><b>Inspect a run</b>
+Workflows <span class="arrow">→</span> click the workflow <span class="arrow">→</span> Execution Trace</div>
+<div class="path"><b>Duplicate to another channel</b>
+Workflows <span class="arrow">→</span> <span class="k">⋯</span> <span class="arrow">→</span> Create Copy
+<span class="arrow">→</span> change the Channel</div>
+
+<div class="note ok"><b>The toggle that makes this document useful</b>
+The create dialog opens in a form builder. Click <b>Edit as YAML</b> (top right, code icon) for a plain
+textarea. Every recipe below can be pasted straight in. You can switch back to the form afterwards —
+but only if the YAML parses, so paste first, then toggle to check your work.</div>
+<p class="src">desktop/src/features/workflows/ui/WorkflowFormBuilder.tsx:215, 225–237</p>
+</section>
+
+<section id="wf-anatomy">
+<h2>Anatomy of a workflow</h2>
+<pre><code>name: Human readable name        # required, non-empty
+description: Optional one-liner  # optional
+enabled: true                    # optional, defaults to true
+trigger:
+  on: message_posted             # one of five, see below
+steps:                           # required, at least one
+  - id: step_one                 # letters, digits, underscore ONLY. Max 64 chars.
+    name: Optional label
+    if: 'str_len(trigger_text) > 5'   # skip (not fail) when false
+    timeout_secs: 60
+    action: send_message
+    text: 'Hello'</code></pre>
+
+<h4>The five triggers</h4>
+<table>
+<tr><th>Trigger</th><th>Fires when</th><th>Options</th></tr>
+<tr><td><code>message_posted</code></td><td>Any message in the workflow's channel</td><td><code>filter:</code> expression</td></tr>
+<tr><td><code>reaction_added</code></td><td>An emoji reaction is added</td><td><code>emoji:</code> — omit to match any</td></tr>
+<tr><td><code>diff_posted</code></td><td>A diff message is posted in the channel</td><td><code>filter:</code> expression</td></tr>
+<tr><td><code>schedule</code></td><td>On a clock</td><td><code>cron:</code> <b>or</b> <code>interval:</code>, never both</td></tr>
+<tr><td><code>webhook</code></td><td>HTTP POST arrives at <code>/hooks/{id}</code></td><td>none</td></tr>
+</table>
+
+<h4>The seven actions</h4>
+<table>
+<tr><th>Action</th><th>Does</th><th>Fields</th></tr>
+<tr><td><code>send_message</code></td><td>Posts to the channel</td><td><code>text</code>, <code>channel</code> (see trap 3)</td></tr>
+<tr><td><code>send_dm</code></td><td>Direct message to a user</td><td><code>to</code>, <code>text</code></td></tr>
+<tr><td><code>set_channel_topic</code></td><td>Rewrites the channel topic</td><td><code>topic</code></td></tr>
+<tr><td><code>add_reaction</code></td><td>Reacts to the <em>triggering</em> message</td><td><code>emoji</code></td></tr>
+<tr><td><code>call_webhook</code></td><td>HTTP request out</td><td><code>url</code>, <code>method</code>, <code>headers</code>, <code>body</code></td></tr>
+<tr><td><code>request_approval</code></td><td>Suspends until a human answers</td><td><code>from</code>, <code>message</code>, <code>timeout</code> (default 24h)</td></tr>
+<tr><td><code>delay</code></td><td>Pauses the run</td><td><code>duration</code></td></tr>
+</table>
+<p class="src">crates/buzz-workflow/src/schema.rs:36–147</p>
+</section>
+
+<!-- ============ RECIPES ============ -->
+<section id="wf-recipes">
+<h2>Eight recipes to paste</h2>
+<p>All eight validate against the schema in <code>schema.rs</code>. Change the names and channel-specific
+values; the structure is ready to run.</p>
+
+<h3>1 — Daily standup prompt</h3>
+<p>The friendliest possible starting point: it can't break anything and you'll see it work tomorrow
+morning. Cron is <strong>UTC</strong>, so translate your local time.</p>
+<pre><code>name: Daily Standup
+description: Weekday nudge at 09:00 UTC
+trigger:
+  on: schedule
+  cron: '0 9 * * 1-5'
+steps:
+  - id: prompt
+    action: send_message
+    text: |
+      Standup time. Three lines each:
+      1. Shipped yesterday
+      2. Doing today
+      3. Blocked on</code></pre>
+
+<h3>2 — P1 escalation with branching</h3>
+<p>Shows filtering at the trigger <em>and</em> branching between steps. The trigger filter keeps the
+engine from waking up at all for ordinary chatter; the <code>if</code> then splits behaviour.</p>
+<pre><code>name: Incident Escalation
+description: React and shout when a P1 or SEV1 appears
+trigger:
+  on: message_posted
+  filter: 'str_contains(trigger_text, "P1") || str_contains(trigger_text, "SEV1")'
+steps:
+  - id: ack
+    action: add_reaction
+    emoji: rotating_light
+  - id: escalate
+    if: 'str_contains(trigger_text, "SEV1")'
+    action: send_message
+    text: 'SEV1 declared by {{trigger.author}} — paging the on-call rota now.'
+  - id: normal
+    if: '!str_contains(trigger_text, "SEV1")'
+    action: send_message
+    text: 'P1 logged. Someone pick this up: {{trigger.text}}'</code></pre>
+
+<h3>3 — Reaction-driven triage</h3>
+<p>A team convention with zero process overhead: anyone who reacts 📋 to a message turns it into
+tracked work. The reaction becomes the button.</p>
+<pre><code>name: Clipboard Triage
+description: React with :clipboard: to escalate a message into triage
+trigger:
+  on: reaction_added
+  emoji: clipboard
+steps:
+  - id: seen
+    action: add_reaction
+    emoji: eyes
+  - id: announce
+    action: send_message
+    text: 'Triage requested on a message from {{trigger.author}}. Original: {{trigger.text}}'</code></pre>
+
+<h3>4 — Deploy approval gate</h3>
+<p>The most valuable pattern in the whole engine. <code>request_approval</code> genuinely suspends the
+run — it doesn't poll or block a thread — and resumes when a human answers or the timeout expires. The
+request appears under <b>Inbox → Needs action</b>.</p>
+<pre><code>name: Deploy Approval
+description: Ask a human before a deploy proceeds
+trigger:
+  on: webhook
+steps:
+  - id: request
+    action: request_approval
+    from: '@engineering-lead'
+    message: 'Deploy to production? Triggered by CI.'
+    timeout: 4h
+  - id: notify_approved
+    if: 'steps_request_output_approved == true'
+    action: send_message
+    text: 'Deploy APPROVED. Proceeding.'
+  - id: notify_denied
+    if: 'steps_request_output_approved == false'
+    action: send_message
+    text: 'Deploy DENIED. Holding at current release.'</code></pre>
+<div class="note"><b>Reading a previous step's output</b>
+Note the flattened variable name: <code>steps_request_output_approved</code>, where
+<code>request</code> is the step id. In templates you'd write the dotted form
+<code>{{steps.request.output.approved}}</code>, but in an <code>if:</code> expression it must be
+underscores. This catches everyone once.</div>
+
+<h3>5 — Diff review nudge</h3>
+<p>Uses the trigger unique to a developer chat tool: <code>diff_posted</code> fires on posted code
+diffs, and its filter sees the diff text — so you can watch specific paths.</p>
+<pre><code>name: Sensitive Path Watch
+description: Speak up when a diff touches auth or crypto code
+trigger:
+  on: diff_posted
+  filter: 'str_contains(trigger_text, "src/auth/") || str_contains(trigger_text, "crypto")'
+steps:
+  - id: flag
+    action: add_reaction
+    emoji: warning
+  - id: request_review
+    action: send_message
+    text: |
+      This diff touches a sensitive path and needs a second reviewer
+      before merge. Author: {{trigger.author}}</code></pre>
+
+<h3>6 — Welcome DM for first posters</h3>
+<p>Demonstrates <code>send_dm</code> addressed to the person who triggered the run. Quiet onboarding —
+nothing clutters the channel.</p>
+<pre><code>name: Newcomer Welcome
+description: DM anyone whose message contains an introduction marker
+trigger:
+  on: message_posted
+  filter: 'str_starts_with(trigger_text, "intro:")'
+steps:
+  - id: greet
+    action: add_reaction
+    emoji: wave
+  - id: dm
+    action: send_dm
+    to: '{{trigger.author}}'
+    text: |
+      Welcome aboard. Two things worth doing now:
+      1. Settings → Profile → set a display name
+      2. Settings → Personal → back up your private key
+      Ask me anything in the channel.</code></pre>
+
+<h3>7 — Slow heartbeat with a delay</h3>
+<p>Shows <code>interval</code> and <code>delay</code> together. The interval minimum is <strong>60
+seconds</strong> and the definition is rejected below that, because the scheduler only ticks once a
+minute.</p>
+<pre><code>name: Hourly Focus Check
+description: Hourly nudge, with a short pause before the follow-up
+trigger:
+  on: schedule
+  interval: 1h
+steps:
+  - id: ping
+    action: send_message
+    text: 'Hourly check: is the top of the board still the right top of the board?'
+  - id: wait
+    action: delay
+    duration: 5m
+  - id: followup
+    action: send_message
+    text: 'If nobody has re-ranked in five minutes, assume yes and keep going.'</code></pre>
+
+<h3>8 — Outbound webhook (elevated privilege)</h3>
+<p>Forwards channel content to an external system. Read the warning below <em>before</em> using this
+one — it is the only action in the engine with a special authority rule.</p>
+<pre><code>name: Incident Bridge
+description: Forward incident declarations to the external pager
+trigger:
+  on: message_posted
+  filter: 'str_contains(trigger_text, "SEV1")'
+steps:
+  - id: page
+    action: call_webhook
+    url: https://hooks.example.com/incident
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"severity":"sev1","author":"{{trigger.author}}","text":"{{trigger.text}}"}'</code></pre>
+<div class="note warn"><b>call_webhook requires owner or admin authority</b>
+Being a channel member is not enough — to save <em>or</em> run a workflow containing
+<code>call_webhook</code> you need elevated channel authority. The reason is stated in the source: a
+workflow forwards channel content using the owner's standing authority long after it was saved, so an
+ordinary member could otherwise install a permanent data-exfiltration pipe. The URL must be a public
+HTTPS endpoint.
+<span class="src" style="margin:8px 0 0;display:block">crates/buzz-workflow/src/schema.rs:149–161 (SEC-006)</span></div>
+</section>
+
+<!-- ============ VARIABLES ============ -->
+<section id="wf-vars">
+<h2>Variables &amp; expressions</h2>
+<p>Two syntaxes exist for the same data, and using the wrong one in the wrong place is the most common
+workflow bug.</p>
+<table>
+<tr><th>Data</th><th>In text (templates)</th><th>In <code>if:</code> / <code>filter:</code></th></tr>
+<tr><td>Message text</td><td><code>{{trigger.text}}</code></td><td><code>trigger_text</code></td></tr>
+<tr><td>Author pubkey</td><td><code>{{trigger.author}}</code></td><td><code>trigger_author</code></td></tr>
+<tr><td>Channel id</td><td><code>{{trigger.channel_id}}</code></td><td><code>trigger_channel_id</code></td></tr>
+<tr><td>Timestamp</td><td><code>{{trigger.timestamp}}</code></td><td><code>trigger_timestamp</code></td></tr>
+<tr><td>Emoji</td><td><code>{{trigger.emoji}}</code></td><td><code>trigger_emoji</code></td></tr>
+<tr><td>Message id</td><td><code>{{trigger.message_id}}</code></td><td><code>trigger_message_id</code></td></tr>
+<tr><td>Step output</td><td><code>{{steps.ID.output.FIELD}}</code></td><td><code>steps_ID_output_FIELD</code></td></tr>
+</table>
+<p class="src">crates/buzz-workflow/src/executor.rs:208–216</p>
+<p><b>Why the difference:</b> the expression engine (<code>evalexpr</code>) can't parse dotted
+identifiers, so dots become underscores. That's also why step ids may only contain letters, digits and
+underscores — a step called <code>my-step</code> would be read as <em>my</em> minus <em>step</em>.</p>
+
+<h4>The four string functions</h4>
+<table>
+<tr><th>Function</th><th>Returns</th></tr>
+<tr><td><code>str_contains(haystack, needle)</code></td><td>bool</td></tr>
+<tr><td><code>str_starts_with(s, prefix)</code></td><td>bool</td></tr>
+<tr><td><code>str_ends_with(s, suffix)</code></td><td>bool</td></tr>
+<tr><td><code>str_len(s)</code></td><td>int</td></tr>
+</table>
+<p>Combine with <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>, and the usual comparisons.
+These four are registered by Buzz specifically because the expression library doesn't ship them —
+so don't expect other string helpers to exist.</p>
+</section>
+
+<!-- ============ TRAPS ============ -->
+<section id="wf-traps">
+<h2>Six traps, straight from the validator</h2>
+<p>Each one is enforced by a test in the source. Knowing them saves an afternoon.</p>
+<ol>
+<li><b>Step ids reject dashes.</b> <code>my-step</code> fails validation. Underscores only, max 64
+characters, and duplicates are rejected.</li>
+<li><b>Intervals under 60 seconds are refused.</b> <code>interval: 30s</code> fails at save time with a
+message about the 60-second minimum — the scheduler ticks once a minute, so a shorter interval could
+never fire correctly.</li>
+<li><b>You cannot post to another channel.</b> For a channel-scoped workflow, a <code>channel:</code>
+override must be a valid UUID <em>and</em> must equal the workflow's own channel, otherwise the run
+errors. Just omit the field.</li>
+<li><b>Unknown template variables stay as literal text.</b> A typo like
+<code>{{trigger.txt}}</code> doesn't error — it posts the string <code>{{trigger.txt}}</code> into your
+channel. Check the first run's output.</li>
+<li><b>Cron is UTC and accepts 5, 6, or 7 fields.</b> Five fields (<code>min hour dom month dow</code>)
+get a seconds field prepended and a year appended automatically.</li>
+<li><b><code>cron</code> and <code>interval</code> are mutually exclusive.</b> Supplying both, or
+neither, fails validation.</li>
+</ol>
+<div class="note ok"><b>Debugging routine</b>
+Open the workflow → <b>Execution Trace</b>. It shows each step and whether it ran, was skipped by its
+<code>if</code>, or failed. A skipped step is not an error — that distinction is deliberate in the
+engine and it's usually the answer to "why did nothing happen?"</div>
+</section>
+
+<!-- ============ CHANNELS ============ -->
+<section id="channels">
+<h2>Channels</h2>
+<p>Stream channels — ordinary flowing chat. Two properties are set at creation and matter later.</p>
+<div class="path"><b>Create a channel</b>
+<span class="k">⇧⌘N</span> / <span class="k">Shift+Ctrl+N</span>
+<span class="arrow">— or —</span> Channels section <span class="arrow">→</span> <span class="k">＋</span></div>
+<div class="path"><b>Browse channels you haven't joined</b>
+<span class="k">⇧⌘O</span> / <span class="k">Shift+Ctrl+O</span></div>
+
+<h4>Creation fields</h4>
+<table>
+<tr><th>Field</th><th>Options</th><th>Notes</th></tr>
+<tr><td>Name</td><td>free text</td><td>—</td></tr>
+<tr><td>Description</td><td>free text</td><td>Placeholder: "What this channel is for"</td></tr>
+<tr><td>Visibility</td><td><code>open</code> or <code>private</code></td><td>Open channels appear in search to non-members</td></tr>
+<tr><td>Ephemeral (TTL)</td><td>on/off + seconds</td><td>Messages expire; editable later in channel settings</td></tr>
+<tr><td>Template</td><td>a saved template, or none</td><td>See <a href="#s-templates">Templates</a></td></tr>
+</table>
+
+<h4>Organising the sidebar</h4>
+<p>Four independent mechanisms, all per-user and all invisible to everyone else:</p>
+<ul>
+<li><b>Star</b> — pulls a channel into a "Starred" group pinned above everything.</li>
+<li><b>Sections</b> — your own named groups with icons. Drag channels between them; reorder the
+sections themselves.</li>
+<li><b>Sort mode</b> — set <em>per group</em>, not globally. Starred can sort by activity while
+Channels sorts alphabetically.</li>
+<li><b>Mute</b> — stays in the list, stops generating noise.</li>
+</ul>
+<div class="note ok"><b>Power move</b>
+Sections plus per-section sort is the feature that makes Buzz scale past ~30 channels. Make a section
+per project, drag its channels in, sort it by recent activity, and collapse the ones you're not on
+this week.</div>
+</section>
+
+<section id="forums">
+<h2>Forums</h2>
+<p>Channels with <code>channelType: forum</code> — threaded, post-and-reply, for discussions that should
+stay findable rather than scroll past. They get their own sidebar group and their own route
+(<code>/channels/$channelId/posts/$postId</code>), so an individual post is a linkable destination.</p>
+<div class="path"><b>Create a forum</b>
+Sidebar <span class="arrow">→</span> Forums section <span class="arrow">→</span> <span class="k">New forum</span></div>
+<div class="note"><b>Feature-gated</b>
+The Forums group is wrapped in a feature gate. If you don't see it, the <code>forum</code> feature is
+off for your build or community — check <a href="#s-experiments">Experiments</a>.</div>
+<p>Use the split deliberately: channels for things that expire, forums for decisions you'll want to cite
+in three months.</p>
+</section>
+
+<section id="dms">
+<h2>Direct messages</h2>
+<p>DMs are channels of type <code>dm</code>, which is why they support muting, marking unread and
+sorting like any channel. They support multiple recipients — the composer takes a list of pubkeys, so a
+"group DM" is a DM with more participants rather than a separate concept.</p>
+<div class="path"><b>New direct message</b>
+<span class="k">⇧⌘K</span> / <span class="k">Shift+Ctrl+K</span>
+<span class="arrow">— or —</span> Direct messages <span class="arrow">→</span> <span class="k">＋</span></div>
+<p><b>Hide</b> is DM-specific: it removes the conversation from your sidebar without leaving or deleting
+it. The DM returns if the other person writes again.</p>
+</section>
+
+<section id="huddle">
+<h2>Huddles &amp; voice</h2>
+<p>A huddle is a live audio conversation inside a channel — the headphone icon in the channel header.
+There is no separate "call" object; the huddle belongs to the channel.</p>
+<div class="path"><b>Start or join a huddle</b>
+Open a channel <span class="arrow">→</span> headphone icon in the header (top right)</div>
+<div class="path"><b>Talk</b>
+Hold <span class="k">Ctrl+Space</span> — push to talk</div>
+<p>The genuinely novel part is in <a href="#s-voice">Settings → Voice</a>: Buzz can read new agent
+responses aloud while a huddle is active. Your agents can literally speak in the meeting.</p>
+</section>
+
+<hr>
+
+<!-- ============ SETTINGS ============ -->
+<section id="s-profile">
+<h2>Settings — Personal</h2>
+<p class="lede">Reach all of it with <kbd>⌘,</kbd> / <kbd>Ctrl+,</kbd>. The settings sidebar is grouped
+into <b>Personal</b>, <b>Communities</b> and <b>App</b>, exactly as listed here.</p>
+
+<h3 id="s-profile-h">Profile</h3>
+<p><em>"Update how your name, avatar, and bio appear across Buzz."</em> Display name, avatar, profile
+description — plus the <b>Identity</b> panel, which is the most important thing in Settings.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Profile</div>
+<div class="note warn"><b>Do this before anything else</b>
+Expand <b>Identity</b> and back up your private key. There is no recovery flow, no support email and no
+password reset — the keypair <em>is</em> your account, and Buzz states it is fixed for this device.
+There is an encrypted-backup flow in the same area; use it, and store the result somewhere that isn't
+this machine.</div>
+
+<h3 id="s-appearance">Appearance</h3>
+<p><em>"Choose a theme for Buzz."</em> System / Light / Dark, plus a large set of named themes (the code
+pairs light and dark variants of families like GitHub, Gruvbox, Rosé Pine and Catppuccin). A separate
+layout control offers <b>Focus</b> and <b>Split</b> density modes.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Appearance</div>
+
+<h3 id="s-notifications">Notifications</h3>
+<p><em>"Desktop alerts are on by default. Fine-tune what gets through below."</em> Controls: the desktop
+notification permission itself, the home badge count, per-slot sound alerts with a sound picker, a
+master toggle for all slot alerts, and whether to notify while you're actively viewing a channel.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Notifications</div>
+<div class="note ok"><b>Power move</b>
+Turn <em>off</em> "notify while viewing" and mute chatty channels rather than disabling notifications
+globally. Different sounds per slot lets you learn which alerts to look at without looking.</div>
+
+<h3 id="s-voice">Voice</h3>
+<p><em>"Choose whether Buzz reads new agent responses aloud during an active huddle."</em> Narrow but
+distinctive: agent output as speech during a live call.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Voice</div>
+
+<h3 id="s-shortcuts">Shortcuts</h3>
+<p>A reference list of all 25 shortcuts in four categories. It's a reference, not an editor — the
+bindings are fixed in this version. Full table at the <a href="#keys">end of this document</a>.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Shortcuts</div>
+
+<h3 id="s-emoji">Custom emoji</h3>
+<p>Upload emoji for your community. Feature-gated on <code>custom-emoji</code>; if the section is
+missing, that's why.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Custom emoji</div>
+<p>Worth more than it sounds, because emoji are a <em>control surface</em> here: recipe 3 above turns a
+custom emoji into a workflow trigger. A team emoji becomes a team button.</p>
+
+<h3 id="s-archive">Local archive</h3>
+<p><em>"Save copies of relay messages to a local SQLite database in your Buzz nest. Events are
+re-verified against the relay at archive time."</em></p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Personal <span class="arrow">→</span> Local archive</div>
+<p>Three things follow from that sentence. It's a <b>real local database</b> you own, queryable with
+ordinary SQLite tools. Events are <b>re-verified</b> when archived, so the archive isn't just a cached
+copy — signatures are checked again. And because relays can drop history, this is your only durable
+record.</p>
+<div class="note ok"><b>Power move</b>
+Turn this on for channels that hold decisions. If a relay prunes old events or you leave a community,
+the archive is what survives.</div>
+</section>
+
+<section id="s-hosted">
+<h2>Settings — Communities</h2>
+
+<h3>Hosted communities</h3>
+<p>Quoted in full, because it prevents a real misunderstanding: <em>"Buzz works with any relay. This
+page is only for relay hosting provided by Block — sign in with a Builderlab account to create and
+manage Block-hosted communities. Builderlab sign-in is used on this page alone."</em></p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Communities <span class="arrow">→</span> Hosted communities</div>
+<p>So: this is a convenience for people who don't want to run a relay. Buzz itself has no dependency on
+Block, and signing in here doesn't sign you in anywhere else in the app. To join a relay you already
+have, use the profile card at the bottom of the sidebar instead — <b>Add community</b>, which takes a
+relay URL and a token.</p>
+
+<h3 id="s-templates">Templates</h3>
+<p>Channel templates — saved presets applied at channel creation, so a new channel arrives with its
+intended shape instead of empty.</p>
+<div class="path"><b>Manage templates</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Communities <span class="arrow">→</span> Templates</div>
+<div class="path"><b>Use one</b>
+Create channel dialog <span class="arrow">→</span> <b>Template</b> dropdown <span class="arrow">→</span> pick</div>
+<div class="note ok"><b>Power move</b>
+Pair templates with <a href="#projects">project binding</a>: a "project channel" template plus a bound
+repo plus a standard agent team means spinning up a new workstream is one dialog rather than fifteen
+minutes of setup. Feature-gated on <code>channel-templates</code>.</div>
+
+<h3 id="s-invites">Invites</h3>
+<p><em>"Manage members and community access."</em> The section is labelled <b>Invites</b> in the sidebar
+but is internally <code>community-members</code> — it covers both inviting people and managing who
+already has access.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Communities <span class="arrow">→</span> Invites</div>
+
+<h3 id="s-moderation">Moderation</h3>
+<p><em>"Review reported content and take action. Visible to community moderators only."</em> A queue of
+reports with actions. It is not listed in the three sidebar groups in the source — it appears
+conditionally, based on whether you hold moderator authority.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> Moderation <span class="arrow">·</span> moderators only</div>
+</section>
+
+<section id="s-agents">
+<h2>Settings — App</h2>
+
+<h3>Agents</h3>
+<p>Two cards. <b>Agent defaults</b>: <em>"Provider, model, effort, and environment settings inherited by
+local agents. Agent-specific settings always take priority."</em> <b>Behaviour</b>: <em>"Control how
+agents behave in conversations and run on this machine"</em> — including prevent-sleep, so long runs
+aren't killed by your laptop suspending. The harness catalog and custom-harness form live here too.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Agents</div>
+<div class="note ok"><b>Power move</b>
+Set provider, model and API key <em>once</em> in Agent defaults and let every agent inherit. Override
+per-agent only where it matters — a cheap fast model for triage, an expensive one for review. Note the
+precedence direction: agent-specific always wins over the default.</div>
+
+<h3 id="s-compute">Compute</h3>
+<p><em>"Share this machine with your relay. When on, other members can run [agents on it]."</em> Your
+machine becomes a compute node other members of the same relay can borrow — mesh compute. This is
+unusual enough to be worth stating plainly: you are lending your GPU to your team.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Compute
+<span class="arrow">→</span> <b>Share this machine</b> toggle</div>
+<h4>The three controls</h4>
+<table>
+<tr><th>Control</th><th>Does</th></tr>
+<tr><td><b>Share this machine</b></td><td>Master toggle. Reflects serve-mode occupancy only.</td></tr>
+<tr><td><b>Model</b></td><td>Which model this node serves; installed models are listed, others can be fetched</td></tr>
+<tr><td><b>Max VRAM (GB)</b></td><td>Ceiling on video memory the shared runtime may take</td></tr>
+</table>
+<div class="note"><b>Two facts the UI states directly</b>
+<em>"Only members of this relay can use this machine's shared compute."</em> — it is not open to the
+internet. And there is a <b>single runtime slot</b>: if you are currently consuming someone else's
+shared compute, the card says <em>"This machine is currently using another member's shared compute"</em>
+and the Share switch will not tear that session down. You are either lending or borrowing, not both.</div>
+<div class="note ok"><b>Power move</b>
+One person with a strong GPU turns it on; everyone else's agents can use it. Set Max VRAM below your
+total so your own work keeps its headroom.</div>
+
+<h3 id="s-experiments">Experiments</h3>
+<p>The feature-gate switchboard. Several things elsewhere in this document — Forums, Templates, Custom
+emoji, managed Agents — are gated features. If a section you expected is missing, this is where to look
+first.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Experiments</div>
+
+<h3 id="s-mobile">Mobile</h3>
+<p>Pairs the mobile app with this desktop install by displaying a <b>Mobile pairing QR code</b>. Scan it
+from the phone.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Mobile
+<span class="arrow">→</span> scan the QR from the phone</div>
+<div class="note warn"><b>Treat the QR like a key</b>
+Pairing extends your identity to another device. Don't screen-share this panel and don't photograph the
+code.</div>
+
+<h3 id="s-updates">Updates</h3>
+<p>Check for and install new versions. Buzz also surfaces updates as a dismissible card in the sidebar
+footer when one is available, so you don't have to come here to notice.</p>
+<div class="path"><b>Click path</b>
+<span class="k">Ctrl+,</span> <span class="arrow">→</span> App <span class="arrow">→</span> Updates</div>
+</section>
+
+<hr>
+
+<!-- ============ SHORTCUTS ============ -->
+<section id="keys">
+<h2>All keyboard shortcuts</h2>
+<p>The complete registry, both platforms. This is the whole list — there are no hidden bindings.</p>
+
+<h4>Navigation</h4>
+<table>
+<tr><th>Action</th><th>macOS</th><th>Windows / Linux</th><th>Does</th></tr>
+<tr><td>Quick search</td><td><kbd>⌘K</kbd></td><td><kbd>Ctrl+K</kbd></td><td>Open the search dialog</td></tr>
+<tr><td>Browse channels</td><td><kbd>⇧⌘O</kbd></td><td><kbd>Shift+Ctrl+O</kbd></td><td>Open the channel browser</td></tr>
+<tr><td>New direct message</td><td><kbd>⇧⌘K</kbd></td><td><kbd>Shift+Ctrl+K</kbd></td><td>New message composer</td></tr>
+<tr><td>New channel</td><td><kbd>⇧⌘N</kbd></td><td><kbd>Shift+Ctrl+N</kbd></td><td>Create channel dialog</td></tr>
+<tr><td>Settings</td><td><kbd>⌘,</kbd></td><td><kbd>Ctrl+,</kbd></td><td>Open or close settings</td></tr>
+<tr><td>Go back</td><td><kbd>⌘[</kbd></td><td><kbd>Alt+←</kbd></td><td>Previous page</td></tr>
+<tr><td>Go forward</td><td><kbd>⌘]</kbd></td><td><kbd>Alt+→</kbd></td><td>Next page</td></tr>
+<tr><td>Find in channel</td><td><kbd>⌘F</kbd></td><td><kbd>Ctrl+F</kbd></td><td>Search current channel</td></tr>
+<tr><td>Home</td><td><kbd>⇧⌘A</kbd></td><td><kbd>Shift+Ctrl+A</kbd></td><td>Home feed</td></tr>
+<tr><td>Toggle sidebar</td><td><kbd>⌘S</kbd></td><td><kbd>Ctrl+S</kbd></td><td>Show/hide sidebar</td></tr>
+<tr><td>Mark as read</td><td><kbd>Escape</kbd></td><td><kbd>Escape</kbd></td><td>Current conversation</td></tr>
+<tr><td>Mark all as read</td><td><kbd>⇧Escape</kbd></td><td><kbd>Shift+Escape</kbd></td><td>All conversations</td></tr>
+</table>
+
+<h4>Messages</h4>
+<table>
+<tr><th>Action</th><th>macOS</th><th>Windows / Linux</th><th>Does</th></tr>
+<tr><td>Send message</td><td><kbd>Enter</kbd></td><td><kbd>Enter</kbd></td><td>Send</td></tr>
+<tr><td>New line</td><td><kbd>Shift+Enter</kbd></td><td><kbd>Shift+Enter</kbd></td><td>Line break in composer</td></tr>
+<tr><td>Publish note</td><td><kbd>⌘Enter</kbd></td><td><kbd>Ctrl+Enter</kbd></td><td>Publish a Pulse note</td></tr>
+<tr><td>Close dialog</td><td><kbd>Escape</kbd></td><td><kbd>Escape</kbd></td><td>Close dialog or settings</td></tr>
+<tr><td>Push to talk</td><td><kbd>Ctrl+Space</kbd></td><td><kbd>Ctrl+Space</kbd></td><td>Hold to unmute in a huddle</td></tr>
+</table>
+
+<h4>Formatting</h4>
+<table>
+<tr><th>Action</th><th>macOS</th><th>Windows / Linux</th></tr>
+<tr><td>Bold</td><td><kbd>⌘B</kbd></td><td><kbd>Ctrl+B</kbd></td></tr>
+<tr><td>Italic</td><td><kbd>⌘I</kbd></td><td><kbd>Ctrl+I</kbd></td></tr>
+<tr><td>Strikethrough</td><td><kbd>⌘⇧X</kbd></td><td><kbd>Ctrl+Shift+X</kbd></td></tr>
+<tr><td>Inline code</td><td><kbd>⌘E</kbd></td><td><kbd>Ctrl+E</kbd></td></tr>
+<tr><td>Insert link</td><td><kbd>⌘K</kbd></td><td><kbd>Ctrl+K</kbd></td></tr>
+</table>
+
+<h4>Zoom</h4>
+<table>
+<tr><th>Action</th><th>macOS</th><th>Windows / Linux</th></tr>
+<tr><td>Zoom in</td><td><kbd>⌘+</kbd></td><td><kbd>Ctrl+=</kbd></td></tr>
+<tr><td>Zoom out</td><td><kbd>⌘-</kbd></td><td><kbd>Ctrl+-</kbd></td></tr>
+<tr><td>Reset zoom</td><td><kbd>⌘0</kbd></td><td><kbd>Ctrl+0</kbd></td></tr>
+</table>
+<p class="src">desktop/src/shared/lib/keyboard-shortcuts.ts:18–227</p>
+<div class="note"><b>⌘K does two things</b>
+In the composer it inserts a link; everywhere else it opens search. Context decides, which is why both
+appear in the registry with the same binding.</div>
+</section>
+
+<!-- ============ FIRST WEEK ============ -->
+<section id="week">
+<h2>Your first week</h2>
+<p>Ordered so each step makes the next one useful. Nothing here is speculative — every action maps to a
+feature documented above.</p>
+
+<h4>Day 1 — Don't lose the account</h4>
+<ol>
+<li><kbd>Ctrl+,</kbd> → Personal → Profile → set a display name.</li>
+<li>Same page → <b>Identity</b> → back up your private key somewhere off this machine. Non-negotiable.</li>
+<li>Personal → Appearance → pick a theme.</li>
+<li>Personal → Notifications → turn off "notify while viewing".</li>
+</ol>
+
+<h4>Day 2 — Make the sidebar survivable</h4>
+<ol>
+<li><kbd>Shift+Ctrl+O</kbd> → join what's relevant, ignore the rest.</li>
+<li>Right-click your three most important channels → Star.</li>
+<li>Create one section per project; drag channels in.</li>
+<li>Mute anything you read but never act on.</li>
+</ol>
+
+<h4>Day 3 — First workflow</h4>
+<ol>
+<li>Sidebar → Workflows → Create Workflow.</li>
+<li>Pick a low-traffic channel. Click <b>Edit as YAML</b>.</li>
+<li>Paste <a href="#wf-recipes">recipe 1</a> (Daily Standup). Create.</li>
+<li>Tomorrow, open it and read the Execution Trace. You now understand the whole engine.</li>
+</ol>
+
+<h4>Day 4 — First agent</h4>
+<ol>
+<li><kbd>Ctrl+,</kbd> → App → Agents → set provider, model and API key in <b>Agent defaults</b>.</li>
+<li>Sidebar → Agents → New → pick a harness → Create.</li>
+<li>Add it to one channel. Mention it. Watch the session panel stream.</li>
+</ol>
+
+<h4>Day 5 — Wire code to conversation</h4>
+<ol>
+<li>Projects → New → create or bind a repository.</li>
+<li>Make a channel for it; bind the repo.</li>
+<li>Add your agent to that channel. Ask it something about the repo — no paths, no pasting.</li>
+<li>Add <a href="#wf-recipes">recipe 5</a> (Sensitive Path Watch) with your own paths.</li>
+</ol>
+
+<h4>Day 6–7 — Compound it</h4>
+<ol>
+<li>Personal → Local archive → turn on for channels holding decisions.</li>
+<li>Communities → Templates → save your project-channel shape as a template.</li>
+<li>App → Compute → if you have the GPU for it, share the machine.</li>
+<li>Add <a href="#wf-recipes">recipe 4</a> (Deploy Approval) and watch it land in Inbox → Needs action.</li>
+</ol>
+</section>
+
+<!-- ============ GAPS ============ -->
+<section id="gaps">
+<h2>What this doc doesn't cover</h2>
+<p>Stated plainly so you know where the edges are, rather than discovering them the hard way.</p>
+<ul>
+<li><b>Depth on Agents.</b> The Agents interface is around 40,000 lines — roughly a third of the entire
+desktop UI — on top of a large Rust subsystem. This document covers the concepts and the main paths, not
+every dialog. MCP servers, agent memory, team snapshots and the ACP custom-harness form each deserve
+their own page.</li>
+<li><b>Mobile and web clients.</b> Everything here is the desktop app at v0.5.3. The mobile client has
+its own screens.</li>
+<li><b>Relay operation.</b> Running your own relay, mesh relay topology and the admin console are
+separate subjects with their own docs in the repository.</li>
+<li><b>The Nostr protocol layer.</b> Event kinds and the NIP specifications live in the repo's
+<code>docs/nips/</code>. You don't need them to use Buzz; you do need them to extend it.</li>
+<li><b>Security review status.</b> As noted under <a href="#agents">Agents</a>, the managed-agents
+subsystem was never properly reviewed, and no audit lens examined indirect prompt injection. That's a
+known gap in the project's assurance, not in this document.</li>
+</ul>
+<hr>
+<p class="src" style="margin-top:24px">Written against the source at commit b1b283cd4, desktop v0.5.3.
+Click paths, labels, shortcuts and the workflow schema are quoted from the code rather than reproduced
+from memory. Where a claim came from a specific file, the file and line appear beneath it.</p>
+</section>
+
+</main>
+</div>
+</body>
+</html>
