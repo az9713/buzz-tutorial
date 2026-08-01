@@ -29,10 +29,10 @@ DOCS = [
      ["[verified]", "Buzz"]),
     ("managed-agents-deep-dive.md", "managed-agents.html",
      "managed_agents — the directory the audit never read",
-     "11 findings over 77 Rust files with no lint coverage: prompt injection and "
+     "12 findings over 77 Rust files with no lint coverage: prompt injection and "
      "confused deputy, plus unsafe and process control. Claude-verified only.",
      ["runtime/process.rs:63-66", "BUZZ_PRIVATE_KEY", "personaCatalogRelay.ts",
-      "Coverage — read vs skipped"]),
+      "TeamSnapshotMemberPreview", "Coverage — read vs skipped"]),
     ("audit-phase0-log.md", "phase0-log.html",
      "Phase 0 log — cartography, tooling, and calibration setup",
      "The raw record behind the advisory: tooling, the knowledge graph, the slice "

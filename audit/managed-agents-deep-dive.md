@@ -7,10 +7,15 @@ Target: `buzz/desktop/src-tauri/src/managed_agents/` — 77 Rust files, excluded
 from the root cargo workspace (`Cargo.toml:32`), never analysed by clippy, no
 applicable semgrep rules.
 
-Two lenses, one agent each. Every finding below carries `file:line` the agent
-read. The load-bearing lines of findings A1, B1 and B3 were re-read
-independently before publishing — the prior run's calibration showed reporters
-inflate, so claims that carry the verdict get checked by hand.
+Two lenses, one agent each. **12 findings — 3 high, 4 medium, 5 low.** Every
+finding carries `file:line` that was actually read. The load-bearing lines of A1,
+A2, B1 and B3 were re-read independently before publishing — the prior run's
+calibration showed reporters inflate, so claims that carry the verdict get
+checked by hand.
+
+**A2 was added after the first publication**, from following up the one thread
+the initial pass left open. It is the third HIGH here, and the guess the first
+pass attached to that open question turned out to be wrong. See the coverage note.
 
 ## A. Indirect prompt injection / confused deputy
 
@@ -46,7 +51,56 @@ bundled default (`discovery.rs:303-330`) — no arbitrary binary, no credential
 injection. Needs one user click, but the UI frames it as "add an agent," not
 "let strangers command it."
 
-### A2 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check
+### A2 — HIGH — a team snapshot arriving over the relay carries `respond_to: "anyone"` through an import dialog that cannot display it
+
+Added 1 Aug 2026, resolving what the first pass left as an open question and
+**correcting it**: that pass guessed team-pack import "looked local-directory-driven."
+It is not. Traced end to end.
+
+The network path: a team snapshot can arrive as a message card in the timeline.
+`AgentSnapshotCard.tsx:5,81-88` fetches the bytes from the message's own URL via
+`fetchSnapshotBytes` and hands them to the same importer the file picker uses —
+`AgentsView.tsx:108-109` states this directly ("a timeline AgentSnapshotCard click
+that navigated here"), routing through `useTeamActions.ts:261-281` →
+`commands/team_snapshot.rs:47` → `decode_team_snapshot_from_bytes`.
+
+The invisibility, which is the actual finding. `TeamSnapshotMemberPreview`
+(`commands/team_snapshot.rs:184-191`) carries `display_name`, `system_prompt`,
+`avatar_url`, `has_source_allowlist`, `source_allowlist_count` — **no `respond_to`
+field at all.** The confirm dialog cannot show the gate because the backend never
+sends it.
+
+Now the import policy. `resolve_snapshot_import_behavior`
+(`commands/personas/snapshot/import.rs:140-185`) has an explicit decision table
+at `:124-131` whose final row reads: non-allowlist mode, empty list → **preserve
+mode**, identically under Keep and Clear. `anyone` is a non-allowlist mode. And
+the Keep/Clear toggle only renders when `hasSourceAllowlist` is true
+(`TeamSnapshotImportDialog.tsx:193`), which is false for an empty list.
+
+So a snapshot set to `respond_to: "anyone"` with no allowlist imports with the
+gate preserved, the only control that appears to govern it never renders, and the
+preview is silent. The user confirms a dialog that cannot mention the one setting
+that matters. Impact matches A1 — an agent any npub may command — but delivered
+over the network with strictly less visibility.
+
+**Why this does not escalate A1:** import is still two user actions (click the
+card's import button, then confirm), so the click-bound holds. This is a second
+route to A1's outcome, not a removal of its precondition.
+
+**Worth stating plainly: the surrounding code is careful.** The decision table is
+deliberate and documented; allowlist-mode-with-empty-list is hard-rejected with a
+reasoned error (`import.rs:162-168`); pubkeys are validated before any write
+(`:151`). The defect is that `anyone` was filed under "non-allowlist modes to
+preserve" rather than treated as the privileged value the env layer already knows
+it is — `BUZZ_ACP_RESPOND_TO` sits in `RESERVED_ENV_KEYS` (`env_vars.rs:77`)
+*because it is a security gate*. Two layers, two different opinions about the same
+setting.
+
+**Cheapest fix, for whoever picks this up:** add `respond_to` to
+`TeamSnapshotMemberPreview` and render it. That makes the decision visible without
+touching the import policy, which is the part that was thought through.
+
+### A3 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check
 
 `commands/personas/inbound.rs:54-183` verifies the event signature
 (`parse_verified_inbound_event`, `:190-198`) but never compares `event.pubkey`
@@ -63,7 +117,7 @@ tombstone path *does* enforce owner scoping (`inbound.rs:219`), which makes the
 omission look accidental. If reached: silent rewrite of a running agent's system
 prompt at next spawn, no UI signal.
 
-### A3 — MEDIUM — attacker-controlled `display_name` lands in the AGENTS.md every agent reads
+### A4 — MEDIUM — attacker-controlled `display_name` lands in the AGENTS.md every agent reads
 
 `nest.rs:551-579` writes each agent's name and its persona's `display_name` into
 the managed table in `~/.buzz/AGENTS.md`. Sanitization is `escape_md_cell`
@@ -78,18 +132,18 @@ AGENTS.md is the shared orientation file loaded by *every* Buzz-spawned agent
 therefore reaches agents unrelated to it — wider blast radius than A1, lower
 ceiling on what it achieves.
 
-### A4 — LOW (UNVERIFIED) — `name_pool` passthrough
+### A5 — LOW (UNVERIFIED) — `name_pool` passthrough
 
 Arbitrary strings survive `personaCatalogRelay.ts:150-154` →
 `usePersonaActions.ts:328` → `create.rs:47-52` (trim + drop-empty).
 `pickBotName.ts:45-59` would pick one as an agent name, and names reach AGENTS.md
-with A3's weak escaping. **No production caller of `pickBotName` was found** —
+with A4's weak escaping. **No production caller of `pickBotName` was found** —
 not demonstrated today, a loaded gun if wired up.
 
-### A5 — LOW — agent `name` unvalidated
+### A6 — LOW — agent `name` unvalidated
 
 `commands/agents.rs:570-573` trims and rejects empty, no charset or length bound;
-the name is an AGENTS.md sink. Locally typed today; matters as A4's landing site.
+the name is an AGENTS.md sink. Locally typed today; matters as A5's landing site.
 
 ### Checked and sound
 
@@ -217,12 +271,23 @@ are curl-pipe-to-shell but from a hardcoded preset table, no interpolation.
 `discovery.rs:240-360`, `types.rs:931-991`, `agents.rs:560-620,800-920`,
 `usePersonaActions.ts:290-360`, `event_sync.rs:1-260`, `runtime_commands.rs:1-150`.
 Skipped: tests, `config_bridge/`, `readiness/`, `retention/`, `runtime/`
-internals, `teams.rs`/`team_events.rs`/`team_snapshot.rs`, and the *content* of
+internals, `teams.rs`/`team_events.rs`, and the *content* of
 `screenshot_skill.md`/`nest_skill.md` (verified as non-interpolated statics, not
-audited as text). **Open question:** whether team-pack import
-(`team_snapshot.rs:593-613`, which does carry `definition_respond_to`) has an
-untrusted-network source. Looked local-directory-driven; not chased far enough to
-claim either way. That is the obvious next thread.
+audited as text).
+
+**Resolved after the first pass — and it was wrong.** That pass left an open
+question on whether team-pack import has an untrusted-network source, guessed
+"looked local-directory-driven," and cited `team_snapshot.rs:593-613` as the
+relevant code. Both were mistakes: those lines are inside a `#[cfg(test)]` block,
+and the real import path *is* network-reachable. Followed to the end on 1 Aug
+2026 and written up as **A2**, now the third HIGH in this document. The lesson
+generalises — an unresolved question in an audit is not a neutral placeholder,
+and the guess attached to it was the part that turned out wrong.
+
+**Still not established:** whether any *other* consumer of the persona/agent
+snapshot import path (beyond teams and the timeline card) reaches it from an
+untrusted source. `commands/personas/snapshot/import.rs` is shared between both
+routes, so a third caller would inherit the same preview blindness.
 
 **Lens B.** Full: `process_lifecycle.rs`, `git_bash.rs`, `managed_node_paths.rs`,
 `runtime/process.rs`, `runtime/orphan_sweep.rs`, `runtime/stop.rs`, plus
@@ -248,9 +313,14 @@ both lenses stalled mid-stream; splitting it fixed that. All three subagent runs
 went idle without returning results and had to be prodded — the same harness
 behaviour recorded in the audit handoff notes.
 
+A2 was not agent-produced. It came from chasing the one question the agents left
+open, by hand, through eight hops from the timeline card to the import policy.
+That is worth recording: the highest-value finding of the follow-up sat behind a
+line the first pass wrote as "not chased far enough to claim either way."
+
 This is Claude-only verification. Gate B (cross-model check) is still quota-blocked
 until Aug 7, so the correlated-error caveat from the main advisory applies here in
-full — with the partial exception of A1, B1 and B3, whose decisive lines were
-re-read directly against the source rather than taken on the reporter's word.
+full — with the partial exception of A1, A2, B1 and B3, whose decisive lines were
+read directly against the source rather than taken on a reporter's word.
 
 Nothing in `buzz/` was modified.

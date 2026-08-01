@@ -236,7 +236,7 @@ Then, unblocked work in rough priority:
   the *last* `e` tag while the relay uses the *first*; fixing one platform alone
   leaves the differential. Details in `audit/advisory.html`.
 - ~~**A second audit for indirect prompt injection / agent confused-deputy.**~~
-  **Partly done 1 Aug 2026** — `audit/managed-agents-deep-dive.md`, 11 findings
+  **Partly done 1 Aug 2026** — `audit/managed-agents-deep-dive.md`, 12 findings
   over `managed_agents/` (the ~37,000 Rust lines with no lint coverage that the
   main run never read). Two lenses: prompt injection/confused deputy, and
   unsafe/process control. The load-bearing lines of the three top findings were
@@ -253,11 +253,21 @@ Then, unblocked work in rough priority:
   no `authors` filter and passes `respond_to: "anyone"` through verbatim, so one
   click can mint an agent that any npub may command.
 
-  **Still open in this lens:** whether team-pack import
-  (`team_snapshot.rs:593-613`, which carries `definition_respond_to`) has an
-  untrusted-network source — if it does, the persona finding loses its user-click
-  bound. Plus ~20 unread `unsafe` blocks in `runtime/instance_reaper.rs` and
-  `runtime/sweep.rs`. Live at
+  **Team-pack question: resolved 1 Aug, and the guess was wrong.** It *is*
+  network-reachable — a snapshot arrives as a timeline card, `AgentSnapshotCard.tsx:81-88`
+  fetches the bytes from the message URL into the same importer. But the click-bound
+  holds (import is click-then-confirm), so A1 does not escalate. The real defect is
+  that `TeamSnapshotMemberPreview` (`commands/team_snapshot.rs:184-191`) has **no
+  `respond_to` field**, so the confirm dialog cannot show the gate, and the
+  Keep/Clear toggle only renders when the allowlist is non-empty
+  (`TeamSnapshotImportDialog.tsx:193`) — which it isn't for `anyone`. Written up as
+  **A2**, third HIGH. Cheapest fix: add `respond_to` to the preview struct and
+  render it; leave the import policy alone, it was thought through.
+
+  **Still open in this lens:** ~20 unread `unsafe` blocks in
+  `runtime/instance_reaper.rs` and `runtime/sweep.rs`; and whether any third
+  caller reaches the shared `commands/personas/snapshot/import.rs` path from an
+  untrusted source (it would inherit the same preview blindness). Live at
   https://az9713.github.io/buzz-tutorial/audit/managed-agents.html
 - **Fold the two headline findings back into the older docs.** Neither
   `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download

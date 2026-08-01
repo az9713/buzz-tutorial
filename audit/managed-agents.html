@@ -96,7 +96,7 @@ h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
 <div class="wrap">
 <header class="hero">
 <h1>managed_agents — the directory the audit never read</h1>
-<p class="sub">11 findings over 77 Rust files with no lint coverage: prompt injection and confused deputy, plus unsafe and process control. Claude-verified only.</p>
+<p class="sub">12 findings over 77 Rust files with no lint coverage: prompt injection and confused deputy, plus unsafe and process control. Claude-verified only.</p>
 </header>
 <nav class="toc">
 <strong>Contents</strong>
@@ -104,10 +104,11 @@ h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
 <ul>
 <li><a href="#a-indirect-prompt-injection-confused-deputy">A. Indirect prompt injection / confused deputy</a><ul>
 <li><a href="#a1-high-a-strangers-persona-supplies-both-the-system-prompt-and-an-open-anyone-may-command-this-gate">A1 — HIGH — a stranger's persona supplies both the system prompt and an open "anyone may command this" gate</a></li>
-<li><a href="#a2-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A2 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</a></li>
-<li><a href="#a3-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A3 — MEDIUM — attacker-controlled display_name lands in the AGENTS.md every agent reads</a></li>
-<li><a href="#a4-low-unverified-name_pool-passthrough">A4 — LOW (UNVERIFIED) — name_pool passthrough</a></li>
-<li><a href="#a5-low-agent-name-unvalidated">A5 — LOW — agent name unvalidated</a></li>
+<li><a href="#a2-high-a-team-snapshot-arriving-over-the-relay-carries-respond_to-anyone-through-an-import-dialog-that-cannot-display-it">A2 — HIGH — a team snapshot arriving over the relay carries respond_to: "anyone" through an import dialog that cannot display it</a></li>
+<li><a href="#a3-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A3 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</a></li>
+<li><a href="#a4-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A4 — MEDIUM — attacker-controlled display_name lands in the AGENTS.md every agent reads</a></li>
+<li><a href="#a5-low-unverified-name_pool-passthrough">A5 — LOW (UNVERIFIED) — name_pool passthrough</a></li>
+<li><a href="#a6-low-agent-name-unvalidated">A6 — LOW — agent name unvalidated</a></li>
 <li><a href="#checked-and-sound">Checked and sound</a></li>
 </ul>
 </li>
@@ -133,10 +134,14 @@ overlaps its 27 findings, because no agent in that run read this directory.</p>
 <p>Target: <code>buzz/desktop/src-tauri/src/managed_agents/</code> — 77 Rust files, excluded
 from the root cargo workspace (<code>Cargo.toml:32</code>), never analysed by clippy, no
 applicable semgrep rules.</p>
-<p>Two lenses, one agent each. Every finding below carries <code>file:line</code> the agent
-read. The load-bearing lines of findings A1, B1 and B3 were re-read
-independently before publishing — the prior run's calibration showed reporters
-inflate, so claims that carry the verdict get checked by hand.</p>
+<p>Two lenses, one agent each. <strong>12 findings — 3 high, 4 medium, 5 low.</strong> Every
+finding carries <code>file:line</code> that was actually read. The load-bearing lines of A1,
+A2, B1 and B3 were re-read independently before publishing — the prior run's
+calibration showed reporters inflate, so claims that carry the verdict get
+checked by hand.</p>
+<p><strong>A2 was added after the first publication</strong>, from following up the one thread
+the initial pass left open. It is the third HIGH here, and the guess the first
+pass attached to that open question turned out to be wrong. See the coverage note.</p>
 <h2 id="a-indirect-prompt-injection-confused-deputy">A. Indirect prompt injection / confused deputy</h2>
 <h3 id="a1-high-a-strangers-persona-supplies-both-the-system-prompt-and-an-open-anyone-may-command-this-gate">A1 — HIGH — a stranger's persona supplies both the system prompt and an open "anyone may command this" gate</h3>
 <p>Buzz has a persona catalog: shareable agent configs published as kind:30175
@@ -166,7 +171,47 @@ sets <code>{}</code>), and <code>runtime</code> resolves through an id table fal
 bundled default (<code>discovery.rs:303-330</code>) — no arbitrary binary, no credential
 injection. Needs one user click, but the UI frames it as "add an agent," not
 "let strangers command it."</p>
-<h3 id="a2-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A2 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</h3>
+<h3 id="a2-high-a-team-snapshot-arriving-over-the-relay-carries-respond_to-anyone-through-an-import-dialog-that-cannot-display-it">A2 — HIGH — a team snapshot arriving over the relay carries <code>respond_to: "anyone"</code> through an import dialog that cannot display it</h3>
+<p>Added 1 Aug 2026, resolving what the first pass left as an open question and
+<strong>correcting it</strong>: that pass guessed team-pack import "looked local-directory-driven."
+It is not. Traced end to end.</p>
+<p>The network path: a team snapshot can arrive as a message card in the timeline.
+<code>AgentSnapshotCard.tsx:5,81-88</code> fetches the bytes from the message's own URL via
+<code>fetchSnapshotBytes</code> and hands them to the same importer the file picker uses —
+<code>AgentsView.tsx:108-109</code> states this directly ("a timeline AgentSnapshotCard click
+that navigated here"), routing through <code>useTeamActions.ts:261-281</code> →
+<code>commands/team_snapshot.rs:47</code> → <code>decode_team_snapshot_from_bytes</code>.</p>
+<p>The invisibility, which is the actual finding. <code>TeamSnapshotMemberPreview</code>
+(<code>commands/team_snapshot.rs:184-191</code>) carries <code>display_name</code>, <code>system_prompt</code>,
+<code>avatar_url</code>, <code>has_source_allowlist</code>, <code>source_allowlist_count</code> — <strong>no <code>respond_to</code>
+field at all.</strong> The confirm dialog cannot show the gate because the backend never
+sends it.</p>
+<p>Now the import policy. <code>resolve_snapshot_import_behavior</code>
+(<code>commands/personas/snapshot/import.rs:140-185</code>) has an explicit decision table
+at <code>:124-131</code> whose final row reads: non-allowlist mode, empty list → <strong>preserve
+mode</strong>, identically under Keep and Clear. <code>anyone</code> is a non-allowlist mode. And
+the Keep/Clear toggle only renders when <code>hasSourceAllowlist</code> is true
+(<code>TeamSnapshotImportDialog.tsx:193</code>), which is false for an empty list.</p>
+<p>So a snapshot set to <code>respond_to: "anyone"</code> with no allowlist imports with the
+gate preserved, the only control that appears to govern it never renders, and the
+preview is silent. The user confirms a dialog that cannot mention the one setting
+that matters. Impact matches A1 — an agent any npub may command — but delivered
+over the network with strictly less visibility.</p>
+<p><strong>Why this does not escalate A1:</strong> import is still two user actions (click the
+card's import button, then confirm), so the click-bound holds. This is a second
+route to A1's outcome, not a removal of its precondition.</p>
+<p><strong>Worth stating plainly: the surrounding code is careful.</strong> The decision table is
+deliberate and documented; allowlist-mode-with-empty-list is hard-rejected with a
+reasoned error (<code>import.rs:162-168</code>); pubkeys are validated before any write
+(<code>:151</code>). The defect is that <code>anyone</code> was filed under "non-allowlist modes to
+preserve" rather than treated as the privileged value the env layer already knows
+it is — <code>BUZZ_ACP_RESPOND_TO</code> sits in <code>RESERVED_ENV_KEYS</code> (<code>env_vars.rs:77</code>)
+<em>because it is a security gate</em>. Two layers, two different opinions about the same
+setting.</p>
+<p><strong>Cheapest fix, for whoever picks this up:</strong> add <code>respond_to</code> to
+<code>TeamSnapshotMemberPreview</code> and render it. That makes the decision visible without
+touching the import policy, which is the part that was thought through.</p>
+<h3 id="a3-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A3 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</h3>
 <p><code>commands/personas/inbound.rs:54-183</code> verifies the event signature
 (<code>parse_verified_inbound_event</code>, <code>:190-198</code>) but never compares <code>event.pubkey</code>
 to the workspace owner. <code>apply_inbound_persona</code> (<code>:342-363</code>) matches <strong>by d-tag
@@ -180,7 +225,7 @@ so no live bypass was demonstrated: hardening, not a proven exploit. The sibling
 tombstone path <em>does</em> enforce owner scoping (<code>inbound.rs:219</code>), which makes the
 omission look accidental. If reached: silent rewrite of a running agent's system
 prompt at next spawn, no UI signal.</p>
-<h3 id="a3-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A3 — MEDIUM — attacker-controlled <code>display_name</code> lands in the AGENTS.md every agent reads</h3>
+<h3 id="a4-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A4 — MEDIUM — attacker-controlled <code>display_name</code> lands in the AGENTS.md every agent reads</h3>
 <p><code>nest.rs:551-579</code> writes each agent's name and its persona's <code>display_name</code> into
 the managed table in <code>~/.buzz/AGENTS.md</code>. Sanitization is <code>escape_md_cell</code>
 (<code>nest.rs:547-549</code>): replaces <code>|</code> and <code>\n</code> only — <strong>not <code>\r</code></strong> — with no length
@@ -192,15 +237,15 @@ and reaches the store with only <code>trim_required</code> (<code>create.rs:26</
 (<code>nest.rs:673-700</code>). Multi-kilobyte injected prose from one added persona
 therefore reaches agents unrelated to it — wider blast radius than A1, lower
 ceiling on what it achieves.</p>
-<h3 id="a4-low-unverified-name_pool-passthrough">A4 — LOW (UNVERIFIED) — <code>name_pool</code> passthrough</h3>
+<h3 id="a5-low-unverified-name_pool-passthrough">A5 — LOW (UNVERIFIED) — <code>name_pool</code> passthrough</h3>
 <p>Arbitrary strings survive <code>personaCatalogRelay.ts:150-154</code> →
 <code>usePersonaActions.ts:328</code> → <code>create.rs:47-52</code> (trim + drop-empty).
 <code>pickBotName.ts:45-59</code> would pick one as an agent name, and names reach AGENTS.md
-with A3's weak escaping. <strong>No production caller of <code>pickBotName</code> was found</strong> —
+with A4's weak escaping. <strong>No production caller of <code>pickBotName</code> was found</strong> —
 not demonstrated today, a loaded gun if wired up.</p>
-<h3 id="a5-low-agent-name-unvalidated">A5 — LOW — agent <code>name</code> unvalidated</h3>
+<h3 id="a6-low-agent-name-unvalidated">A6 — LOW — agent <code>name</code> unvalidated</h3>
 <p><code>commands/agents.rs:570-573</code> trims and rejects empty, no charset or length bound;
-the name is an AGENTS.md sink. Locally typed today; matters as A4's landing site.</p>
+the name is an AGENTS.md sink. Locally typed today; matters as A5's landing site.</p>
 <h3 id="checked-and-sound">Checked and sound</h3>
 <p>Env boundary is genuinely hardened (<code>env_vars.rs:108-115</code> rejects non-POSIX keys,
 closing the <code>BUZZ_AUTH_TAG=x</code>→<code>getenv</code> bypass; <code>:58-90</code> reserves identity, relay
@@ -307,12 +352,21 @@ are curl-pipe-to-shell but from a hardcoded preset table, no interpolation.
 <code>discovery.rs:240-360</code>, <code>types.rs:931-991</code>, <code>agents.rs:560-620,800-920</code>,
 <code>usePersonaActions.ts:290-360</code>, <code>event_sync.rs:1-260</code>, <code>runtime_commands.rs:1-150</code>.
 Skipped: tests, <code>config_bridge/</code>, <code>readiness/</code>, <code>retention/</code>, <code>runtime/</code>
-internals, <code>teams.rs</code>/<code>team_events.rs</code>/<code>team_snapshot.rs</code>, and the <em>content</em> of
+internals, <code>teams.rs</code>/<code>team_events.rs</code>, and the <em>content</em> of
 <code>screenshot_skill.md</code>/<code>nest_skill.md</code> (verified as non-interpolated statics, not
-audited as text). <strong>Open question:</strong> whether team-pack import
-(<code>team_snapshot.rs:593-613</code>, which does carry <code>definition_respond_to</code>) has an
-untrusted-network source. Looked local-directory-driven; not chased far enough to
-claim either way. That is the obvious next thread.</p>
+audited as text).</p>
+<p><strong>Resolved after the first pass — and it was wrong.</strong> That pass left an open
+question on whether team-pack import has an untrusted-network source, guessed
+"looked local-directory-driven," and cited <code>team_snapshot.rs:593-613</code> as the
+relevant code. Both were mistakes: those lines are inside a <code>#[cfg(test)]</code> block,
+and the real import path <em>is</em> network-reachable. Followed to the end on 1 Aug
+2026 and written up as <strong>A2</strong>, now the third HIGH in this document. The lesson
+generalises — an unresolved question in an audit is not a neutral placeholder,
+and the guess attached to it was the part that turned out wrong.</p>
+<p><strong>Still not established:</strong> whether any <em>other</em> consumer of the persona/agent
+snapshot import path (beyond teams and the timeline card) reaches it from an
+untrusted source. <code>commands/personas/snapshot/import.rs</code> is shared between both
+routes, so a third caller would inherit the same preview blindness.</p>
 <p><strong>Lens B.</strong> Full: <code>process_lifecycle.rs</code>, <code>git_bash.rs</code>, <code>managed_node_paths.rs</code>,
 <code>runtime/process.rs</code>, <code>runtime/orphan_sweep.rs</code>, <code>runtime/stop.rs</code>, plus
 <code>runtime.rs:540-1024</code>, <code>discovery.rs:640-760/770-825/1020-1109</code>,
@@ -333,10 +387,14 @@ is still unread</strong> — better than the advisory's zero, still not coverage
 both lenses stalled mid-stream; splitting it fixed that. All three subagent runs
 went idle without returning results and had to be prodded — the same harness
 behaviour recorded in the audit handoff notes.</p>
+<p>A2 was not agent-produced. It came from chasing the one question the agents left
+open, by hand, through eight hops from the timeline card to the import policy.
+That is worth recording: the highest-value finding of the follow-up sat behind a
+line the first pass wrote as "not chased far enough to claim either way."</p>
 <p>This is Claude-only verification. Gate B (cross-model check) is still quota-blocked
 until Aug 7, so the correlated-error caveat from the main advisory applies here in
-full — with the partial exception of A1, B1 and B3, whose decisive lines were
-re-read directly against the source rather than taken on the reporter's word.</p>
+full — with the partial exception of A1, A2, B1 and B3, whose decisive lines were
+read directly against the source rather than taken on a reporter's word.</p>
 <p>Nothing in <code>buzz/</code> was modified.</p>
 <hr>
 <p class="backlink"><a href="../">← buzz-tutorial</a> ·
