@@ -14,10 +14,11 @@ it in a browser.
 - [How Buzz works](https://az9713.github.io/buzz-tutorial/how-buzz-works.html)
 - [The Buzz trust map](https://az9713.github.io/buzz-tutorial/trust-map.html)
 - [Hardening Buzz](https://az9713.github.io/buzz-tutorial/hardening.html)
+- [Codebase knowledge graph](https://az9713.github.io/buzz-tutorial/audit/graph/graph.html) — interactive, from the [audit](audit/)
 
 ## The documents
 
-### [`what-is-nostr.html`](what-is-nostr.html) — start here if the word "Nostr" is new
+### [`what-is-nostr.html`](https://az9713.github.io/buzz-tutorial/what-is-nostr.html) — start here if the word "Nostr" is new
 
 Nostr from zero, then how Buzz uses it.
 
@@ -36,7 +37,7 @@ Nostr from zero, then how Buzz uses it.
   Buzz is a deliberately narrowed single-relay workspace.
 - **Part three** is a short list of verified pointers for learning more.
 
-### [`how-buzz-works.html`](how-buzz-works.html) — read this if you want to build something like Buzz
+### [`how-buzz-works.html`](https://az9713.github.io/buzz-tutorial/how-buzz-works.html) — read this if you want to build something like Buzz
 
 The reasoning behind the architecture, aimed at an engineer who has never
 seen the project and wants the *why* rather than the API surface.
@@ -56,7 +57,7 @@ serialization and its `sig` signs that hash, so the serialization rules are
 frozen *in the data*: change them and every event you have already signed
 stops verifying. Everything else is bottom-up and replaceable behind a seam.
 
-### [`trust-map.html`](trust-map.html) — read this if you are deciding whether to deploy Buzz
+### [`trust-map.html`](https://az9713.github.io/buzz-tutorial/trust-map.html) — read this if you are deciding whether to deploy Buzz
 
 Six things Buzz is expected to keep safe — channel message content, DM
 content, channel membership, cross-community tenant isolation, agent authority
@@ -73,7 +74,7 @@ and the machine-checked tenant-isolation proof is stated relative to a
 Postgres row-level-security backstop that is not present in the repository, so
 a forgotten `WHERE community_id` predicate fails open rather than closed.
 
-### [`hardening.html`](hardening.html) — the remediation companion to the trust map
+### [`hardening.html`](https://az9713.github.io/buzz-tutorial/hardening.html) — the remediation companion to the trust map
 
 For each gap the trust map found: what an operator can do today with no upstream
 cooperation, what the upstream change would actually be, what it would cost, and

@@ -16,7 +16,7 @@ full. Details in the advisory.
 | [`AUDIT-HANDOFF.md`](AUDIT-HANDOFF.md) | Session handoff: headline results, what failed, harness notes |
 | [`buzz-blindspots.md`](buzz-blindspots.md) | Blindspot pass on the codebase |
 | `data/` | Raw evidence: findings at every stage, verifier votes, tool output (semgrep, clippy, cargo-audit), canary/backtest scores, and the scripts and workflows that produced them |
-| `graph/` | Knowledge graph: `GRAPH_REPORT.md` and a self-contained `graph.html` |
+| `graph/` | Knowledge graph: [`GRAPH_REPORT.md`](graph/GRAPH_REPORT.md) and an interactive [`graph.html`](https://az9713.github.io/buzz-tutorial/audit/graph/graph.html) (live, self-contained) |
 
 ## Regenerating the advisory
 
