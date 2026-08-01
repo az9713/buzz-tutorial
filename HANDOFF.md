@@ -11,14 +11,14 @@ this file deliberately does not name — it is a public repo):
 - **Working folder** — `<working folder>` holds an upstream clone
   of `block/buzz` plus local-only research notes
 
-Last session: 31 July 2026.
+Last session: 1 August 2026.
 
 ## Current state (as of latest push)
 
-Commit `e14b5f0` on `main`; local and remote hashes match; working tree clean.
+Commit `d1d3c37` on `main`; local and remote hashes match; working tree clean.
 
-**Four self-contained HTML documents, all live on GitHub Pages** (Pages enabled
-31 Jul 2026, `source: main /`, all four verified HTTP 200):
+**Seven self-contained HTML documents, all live on GitHub Pages** (Pages enabled
+31 Jul 2026, `source: main /`, every URL below verified HTTP 200 on 1 Aug 2026):
 
 | Document | Live URL | Landed in |
 |---|---|---|
@@ -26,6 +26,25 @@ Commit `e14b5f0` on `main`; local and remote hashes match; working tree clean.
 | `how-buzz-works.html` (~135 KB, 10 SVGs) | https://az9713.github.io/buzz-tutorial/how-buzz-works.html | `218464c` |
 | `trust-map.html` (~41 KB, 1 SVG) | https://az9713.github.io/buzz-tutorial/trust-map.html | `857e570` |
 | `hardening.html` (~25 KB) | https://az9713.github.io/buzz-tutorial/hardening.html | `e14b5f0` |
+| `audit/advisory.html` (~190 KB) | https://az9713.github.io/buzz-tutorial/audit/advisory.html | `a16a705` |
+| `audit/blindspots.html` (~45 KB) | https://az9713.github.io/buzz-tutorial/audit/blindspots.html | `3ee8ec8` |
+| `audit/phase0-log.html` (~29 KB) | https://az9713.github.io/buzz-tutorial/audit/phase0-log.html | `3ee8ec8` |
+
+Plus the interactive knowledge graph at
+https://az9713.github.io/buzz-tutorial/audit/graph/graph.html.
+
+**The multi-agent audit landed here on 1 Aug 2026** (`afec11f`), in `audit/`:
+the advisory (27 confirmed findings — 4 high, 12 medium, 11 low, no critical
+survived), the full evidence chain in `audit/data/`, and the knowledge graph.
+See `audit/README.md`. The 97 MB of derived graphify cache was deliberately
+left out as regenerable. **Every finding is Claude-verified only** — Gate B, the
+independent second-model cross-check, never ran (quota); the correlated-error
+caveat applies in full.
+
+`d1d3c37` stripped absolute local filesystem paths (they carried the local
+username) out of every published artifact and out of the helper scripts, which
+now resolve paths relative to themselves. Verified 0 username references on the
+live pages. **Don't reintroduce absolute paths into anything under this repo.**
 
 All are single pages with CSS/JS/SVG inlined, no CDN, theme-aware. Identical
 copies also sit in the working folder. `README.md` frames all
@@ -125,9 +144,29 @@ framed as a question not a PR; (4) a CI job for the ignored Postgres tests;
 
 ## Next task
 
-**Nothing is queued and nothing is blocked.** Both tasks carried by the previous
-handoff are done. Pick freely, or take one of these:
+**Two decisions are open and need the user, not more work:**
 
+1. **Gate B is runnable again after 7 Aug 2026.** `python audit/data/gate_b.py
+   audit/data/confirmed.json 27` re-verifies the 27 confirmed findings with a
+   non-Claude model. The script is correct — it failed on Codex quota, not code
+   (it was patched mid-run for two Windows issues: the npm shim is `codex.CMD`,
+   and prompts go via stdin). It now takes a `BUZZ_CLONE` env override. Until it
+   runs, the advisory's confidence claims stay capped.
+2. **`audit/buzz-blindspots.md` is public, reversing an earlier decision.**
+   Through 31 Jul 2026 it was deliberately kept out of git because it reads as a
+   critique of someone else's shipped codebase; the 1 Aug "commit all audit
+   artifacts" instruction overrode that. Flagged to the user 1 Aug; no answer
+   yet. Unpublishing now requires a history rewrite and force-push.
+
+Then, unblocked work in rough priority:
+
+- **Fix the F014/F015 parser differential** — the advisory's own top
+  recommendation. Desktop and mobile both resolve a `kind:40003` edit's target by
+  the *last* `e` tag while the relay uses the *first*; fixing one platform alone
+  leaves the differential. Details in `audit/advisory.html`.
+- **A second audit for indirect prompt injection / agent confused-deputy.** No
+  lens in the first audit looked for it, and it is the vulnerability class most
+  specific to a Nostr client that runs managed coding agents.
 - **Fold the two headline findings back into the older docs.** Neither
   `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download
   default or the absent RLS backstop, and both discuss the areas concerned.
@@ -148,6 +187,9 @@ If the user asks for something else, that takes precedence.
 
 - `README.md` (this repo) — what each document is and the provenance rules
 - `trust-map.html` / `hardening.html` — the security findings and their remedies
+- `audit/README.md` — the audit: what each artifact is and how to regenerate it
+- `audit/buzz-audit-advisory.md` — the 27 confirmed findings, ranked by value per
+  unit of remediation risk, with the coverage gaps and calibration numbers
 - `audit/buzz-blindspots.md` — research findings plus a
   master prompt for going deeper on any subsystem
 - `<working folder>/buzz/` — full upstream clone of `block/buzz`,
@@ -156,9 +198,22 @@ If the user asks for something else, that takes precedence.
 
 ## Session-transient scratch
 
-None this session. All four HTML documents were hand-written directly into the
-repo with no generator scripts; the committed `.html` files are the durable
-record and can be edited in place.
+**None outstanding — the generators are committed, not transient.** The audit's
+scripts were rescued out of a session-scoped scratchpad into `audit/data/` on
+1 Aug 2026, so nothing load-bearing lives in a temp directory any more.
+
+The four original explainers were hand-written directly into the repo with no
+generator; edit those `.html` files in place. The three audit pages are the
+opposite — **generated**, so edit the markdown and re-render, never the HTML:
+
+- `python audit/data/make_advisory.py` → `audit/buzz-audit-advisory.md` (from the
+  JSON in `audit/data/`, so no number is hand-copied)
+- `python audit/data/md2html.py` → `audit/{advisory,blindspots,phase0-log}.html`
+  (loops over a `DOCS` table; add a row for a fourth document). It lifts the
+  `<style>` block out of `hardening.html` at render time so there is only one
+  theme — **if that theme changes, re-run this or the audit pages drift.** Each
+  render self-checks content probes, and the advisory asserts exactly 27
+  severity badges.
 
 ## How to work
 
