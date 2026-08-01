@@ -14,8 +14,13 @@ it in a browser.
 - [How Buzz works](https://az9713.github.io/buzz-tutorial/how-buzz-works.html)
 - [The Buzz trust map](https://az9713.github.io/buzz-tutorial/trust-map.html)
 - [Hardening Buzz](https://az9713.github.io/buzz-tutorial/hardening.html)
-- [The audit advisory](https://az9713.github.io/buzz-tutorial/audit/advisory.html) — 27 confirmed findings, from the [audit](audit/)
-- [Codebase knowledge graph](https://az9713.github.io/buzz-tutorial/audit/graph/graph.html) — interactive, from the same audit
+
+From the [audit](audit/):
+
+- [The audit advisory](https://az9713.github.io/buzz-tutorial/audit/advisory.html) — 27 confirmed findings
+- [Blindspot pass](https://az9713.github.io/buzz-tutorial/audit/blindspots.html) — what the explainers above leave out
+- [Phase 0 log](https://az9713.github.io/buzz-tutorial/audit/phase0-log.html) — how the audit was set up and calibrated
+- [Codebase knowledge graph](https://az9713.github.io/buzz-tutorial/audit/graph/graph.html) — interactive
 
 ## The documents
 

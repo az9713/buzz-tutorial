@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blindspot pass: the technical creation of Buzz</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.ok{border-left-color:var(--ok)}
+.ok .lab{color:var(--ok)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.gap{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:2px 20px 14px;margin:1.8rem 0}
+.gap h3{margin-top:1.2rem}
+.rowhead{font-weight:650}
+
+/* audit-doc additions */
+.sevtag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:.28em .5em;border-radius:3px;
+  vertical-align:.12em;margin-left:.5em}
+.sev-high{background:rgba(138,61,18,.13);color:var(--warn)}
+.sev-medium{background:rgba(168,98,13,.13);color:var(--accent)}
+.sev-low{background:rgba(45,106,62,.13);color:var(--ok)}
+blockquote{margin:1.1rem 0;padding:.1rem 0 .1rem 16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-size:.95rem}
+h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
+.backlink{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>Blindspot pass: the technical creation of Buzz</h1>
+<p class="sub">What the architecture explainers leave out. Claims marked [verified] were re-checked directly against the clone at main @ 10d5a2641.</p>
+</header>
+<nav class="toc">
+<strong>Contents</strong>
+<div class="toc">
+<ul>
+<li><a href="#core-thesis">Core thesis</a></li>
+<li><a href="#false-framings-to-correct">False framings to correct</a><ul>
+<li><a href="#messages-are-end-to-end-encrypted-or-at-least-dms-are">"Messages are end-to-end encrypted, or at least DMs are."</a></li>
+<li><a href="#an-agent-is-just-another-keypair">"An agent is just another keypair."</a></li>
+<li><a href="#the-relay-is-the-single-source-of-truth-backed-by-postgres">"The relay is the single source of truth, backed by Postgres."</a></li>
+<li><a href="#architecturemd-is-the-ground-truth">"ARCHITECTURE.md is the ground truth."</a></li>
+</ul>
+</li>
+<li><a href="#stack-map">Stack map</a></li>
+<li><a href="#first-order-blindspots">First-order blindspots</a><ul>
+<li><a href="#1-the-client-is-the-bigger-half-of-the-engineering">1. The client is the bigger half of the engineering</a></li>
+<li><a href="#2-there-is-no-human-in-the-loop-gate-on-what-an-agent-may-do">2. There is no human-in-the-loop gate on what an agent may do</a></li>
+<li><a href="#3-the-formal-methods-are-more-honest-and-prove-less-than-tla-and-tamarin-suggests">3. The formal methods are more honest — and prove less — than "TLA+ and Tamarin" suggests</a></li>
+<li><a href="#4-the-load-bearing-safety-axiom-of-the-multi-tenancy-proof-has-no-implementation">4. The load-bearing safety axiom of the multi-tenancy proof has no implementation</a></li>
+<li><a href="#5-the-current-binding-constraint-is-redis-and-its-an-active-production-incident">5. The current binding constraint is Redis, and it's an active production incident</a></li>
+<li><a href="#6-postgres-is-carrying-correctness-in-triggers-not-just-in-queries">6. Postgres is carrying correctness in triggers, not just in queries</a></li>
+<li><a href="#7-mobile-is-a-full-hand-reimplementation-including-cryptography">7. Mobile is a full hand-reimplementation — including cryptography</a></li>
+<li><a href="#8-push-notifications-are-beautifully-specified-and-not-turned-on">8. Push notifications are beautifully specified and not turned on</a></li>
+<li><a href="#9-linking-a-second-device-copies-your-private-key">9. Linking a second device copies your private key</a></li>
+<li><a href="#10-there-is-no-offline-story-and-local-first-means-exactly-one-crdt">10. There is no offline story, and "local-first" means exactly one CRDT</a></li>
+<li><a href="#11-the-most-interesting-systems-work-in-the-repo-is-the-git-layer">11. The most interesting systems work in the repo is the git layer</a></li>
+<li><a href="#12-the-agent-failure-modes-are-documented-with-rare-candor-and-the-core-one-is-still-open">12. The agent failure modes are documented with rare candor, and the core one is still open</a></li>
+</ul>
+</li>
+<li><a href="#orthogonal-dimensions-worth-analyzing-separately">Orthogonal dimensions worth analyzing separately</a></li>
+<li><a href="#minimum-high-yield-prompt-set">Minimum high-yield prompt set</a><ul>
+<li><a href="#what-gets-missed-if-you-skip-them">What gets missed if you skip them</a></li>
+</ul>
+</li>
+<li><a href="#rat-hole-warning">Rat-hole warning</a></li>
+<li><a href="#acceptance-tests-how-youll-know-youre-no-longer-blind">Acceptance tests — how you'll know you're no longer blind</a></li>
+<li><a href="#master-prompt">Master prompt</a></li>
+<li><a href="#next-best-prompt-run-this-one-first">Next best prompt — run this one first</a></li>
+<li><a href="#note-on-this-pass">Note on this pass</a></li>
+</ul>
+</div>
+
+</nav>
+
+<p>Generated 31 July 2026. Grounded in the clone at <code>C:\Users\simon\Downloads\buzz_me\buzz</code>
+(main @ <code>10d5a2641</code>, 30 Jul 2026, 2,022 commits, 538 remote branches).</p>
+<p>Written as a follow-on to two explainers (<code>how-buzz-works.html</code>, <code>what-is-nostr.html</code>)
+that cover architectural reasoning and Nostr fundamentals. This document deliberately
+covers what those do <em>not</em>.</p>
+<p>Claims marked <strong>[verified]</strong> were re-checked directly against the repo rather than
+taken from a subagent report.</p>
+<hr />
+<h2 id="core-thesis">Core thesis</h2>
+<p>The two explainers describe the system's <em>reasoning</em> — the bet, the layering, the build
+order — accurately. The blindspot is not a missing topic. It's a missing <strong>layer</strong>:
+almost everything genuinely hard about Buzz lives one level below architectural
+reasoning, in places where the clean story is deliberately violated to survive contact
+with reality.</p>
+<p>The one-sentence correction:</p>
+<blockquote>
+<p><strong>Buzz is not a relay with clients attached; it is a client with a relay attached, and
+the relay's clean invariants are held up by database triggers, a prompt file, and an
+author allowlist.</strong></p>
+</blockquote>
+<hr />
+<h2 id="false-framings-to-correct">False framings to correct</h2>
+<h3 id="messages-are-end-to-end-encrypted-or-at-least-dms-are">"Messages are end-to-end encrypted, or at least DMs are."</h3>
+<p>They are not. <strong>[verified]</strong> A Buzz DM is a relay-side channel: <code>open_dm</code> publishes a
+<code>kind:41010</code> command, the relay allocates a channel id, and messages are ordinary
+<code>kind:9</code> events with an <code>#h</code> tag (<code>desktop/src-tauri/src/commands/dms.rs:17-45</code>).</p>
+<p><strong>The relay stores and can read every DM and every channel message.</strong> Confidentiality is
+enforced by relay-side authorization — NIP-43 membership and <code>#h</code> access checks — not by
+cryptography. There is no NIP-04 anywhere in <code>crates/</code> <strong>[verified]</strong>, no NIP-44 on
+message bodies, and no MLS in the tree. In the desktop client, <code>kind:1059</code> (gift wrap)
+appears only in test files <strong>[verified]</strong> — the relay supports gift wraps for
+<em>third-party</em> Nostr clients, but the Buzz app does not use them.</p>
+<p>NIP-44 v2 <em>is</em> used, but only for four narrow things:</p>
+<ol>
+<li>Self-encrypted personal state (read state, reminders, mutes)</li>
+<li>Agent↔owner traffic (observer frames 24200, turn metrics 44200, engrams 30174)</li>
+<li>Pairing payloads (24134)</li>
+<li>NIP-49 key backup</li>
+</ol>
+<p>This is the most important correction here, because a reader primed on Nostr's gift-wrap
+story will assume the opposite.</p>
+<h3 id="an-agent-is-just-another-keypair">"An agent is just another keypair."</h3>
+<p>Nearly right, and the repo sharpens it into something better. An agent is a keypair
+<em>with an attested owner</em>. NIP-OA (Owner Attestation) defines an <code>auth</code> tag by which an
+owner key authorizes an agent key — and it explicitly refuses to reuse NIP-26's
+semantics, because NIP-26 reassigns authorship to the delegator and "that semantic MUST
+NOT be reused for agent provenance." The event stays authored by the agent.</p>
+<p>NIP-OA has <strong>67 code references, the most of any draft NIP</strong> — it's the keystone. NIP-AA
+then makes an agent's relay access <em>derivative</em>: revoke the human, and their agents fail
+at next connect automatically.</p>
+<p>The correct sentence is therefore "an agent is a keypair whose authority is borrowed and
+revocable" — a stronger claim than the explainer makes.</p>
+<h3 id="the-relay-is-the-single-source-of-truth-backed-by-postgres">"The relay is the single source of truth, backed by Postgres."</h3>
+<p>True but too clean. There are read replicas with an LSN-based consistency fence, enforced
+by a <code>DEFERRABLE INITIALLY DEFERRED</code> constraint trigger that re-evaluates
+<code>clock_timestamp()</code> at COMMIT (not <code>now()</code>, which freezes at transaction start) and
+aborts any channel-bearing insert whose <code>created_at</code> is older than a GUC-configured floor
+(<code>migrations/0021_created_at_fence_floor.sql</code>). The header explains why: ingest checks
+<code>|created_at - now| ≤ 900s</code> at acceptance, but acceptance and commit are separated by
+unbounded async work, and several writers bypass ingest entirely.</p>
+<h3 id="architecturemd-is-the-ground-truth">"ARCHITECTURE.md is the ground truth."</h3>
+<p>Both explainers lean on it, and it has drifted:</p>
+<ul>
+<li>It states rate limiting is unimplemented. <code>buzz-pubsub/src/rate_limiter.rs</code> has a
+  working fixed-window Redis INCR+EXPIRE Lua script (human 60 msg/min, agent tiers to
+  600), with a documented ⚠️ that fixed windows allow 2× burst at boundaries.</li>
+<li>It states <code>MAX_FRAME_BYTES = 65,536</code>. <code>config.rs:14</code> defaults <code>BUZZ_MAX_FRAME_BYTES</code>
+  to 512 KiB.</li>
+</ul>
+<p>When doc and code disagree here, the code is newer.</p>
+<hr />
+<h2 id="stack-map">Stack map</h2>
+<pre><code>PRODUCT SURFACE      desktop (Tauri2+React19) · Flutter mobile · web · admin-web
+                     ~419k lines desktop alone — the largest artifact in the repo
+                            ↓ (274 #[tauri::command] IPC calls; two independent transports)
+PROTOCOL             NIP-01 wire + 15 in-tree draft NIPs (6 of them agent-specific)
+                            ↓
+AGENT PLANE          buzz-acp (ACP/JSON-RPC over stdio) → goose/claude/codex/buzz-agent
+                     auto-approved tool calls · per-channel queue · 1–32 process pool
+                            ↓
+RELAY                Axum · NIP-42 · 12-stage EVENT pipeline · 5-index DashMap fan-out
+                            ↓
+PERSISTENCE          Postgres 17 (partitioned, trigger-enforced invariants, read replicas)
+                     Redis/Valkey (pub/sub — CURRENT BINDING CONSTRAINT)
+                     S3/MinIO (Blossom blobs + git packs + manifest pointers)
+                            ↓
+FORMAL LAYER         4 machine-checked specs (1 unmerged) + Python bounded model checking
+                            ↓
+OPERATIONAL REALITY  ~3,100 communities/day · Redis load doubling every 3.45 days
+                     4 private sibling repos hold build + deploy
+</code></pre>
+<hr />
+<h2 id="first-order-blindspots">First-order blindspots</h2>
+<h3 id="1-the-client-is-the-bigger-half-of-the-engineering">1. The client is the bigger half of the engineering</h3>
+<p>Desktop is ~302k lines of TS/TSX plus ~116k lines of Rust. The entire 26-crate server
+workspace is ~244k lines of Rust. Mobile adds 80k Dart. The explainers are ~90% relay.</p>
+<p><em>Misconception:</em> the desktop app is a thin view over the relay.
+<em>Reality:</em> it's a Tauri app with two entirely separate relay transports — a JS
+long-lived WebSocket state machine (<code>relayClientSession.ts:71</code>, 16 ms event batching,
+1s→30s reconnect backoff, 60s stall watchdog) running over a <strong>Rust</strong> socket plugin, <em>and</em>
+a Rust-side one-shot HTTP bridge that NIP-98-signs every <code>/query</code> and <code>/events</code> call.
+The shared <code>buzz-ws-client</code> crate is <strong>not used by desktop at all</strong> — only by <code>buzz-cli</code>
+and <code>buzz-test-client</code>. Desktop reimplements NIP-42 auth separately.</p>
+<p><strong>Prompt:</strong> "Trace one desktop message send end-to-end: React component → Tauri IPC →
+signing → which of the two transports → relay pipeline → fan-out → other client. Name the
+layer boundary at each hop and what could silently fail there."</p>
+<h3 id="2-there-is-no-human-in-the-loop-gate-on-what-an-agent-may-do">2. There is no human-in-the-loop gate on what an agent may do</h3>
+<p><strong>[verified]</strong> <code>buzz-acp</code> auto-approves every <code>session/request_permission</code> from the agent
+— it finds the <code>allow_once</code> option and returns it
+(<code>crates/buzz-acp/src/acp.rs:1856-1859</code>; doc comment: <em>"Auto-approve a
+<code>session/request_permission</code> request from the agent... If no <code>allow_once</code> option exists,
+falls back to <code>reject_once</code>."</em>). There is no config knob to make it ask a human.</p>
+<p>Meanwhile <code>queue.rs:1097-1109</code> splices Nostr event <code>content</code> <strong>raw</strong> into the prompt — no
+escaping, no delimiting, no untrusted-data preamble — and attacker-controlled text sits in
+the last, most-recent prompt position.</p>
+<p>The chain: relay event → prompt → LLM → permission request → auto-approved → shell tool →
+bash at operator privilege with <code>BUZZ_PRIVATE_KEY</code> in the environment. The entire security
+argument rests on the <em>author</em> gate (<code>--respond-to owner-only</code>, fail-closed, plus
+cryptographically verified NIP-OA sibling admission).</p>
+<p>Sharpest detail: running Codex under Buzz injects <code>CODEX_CONFIG</code> enabling <code>network_access</code>,
+which widens Codex's own macOS Seatbelt sandbox to full outbound TCP/TLS for <em>all</em> the
+agent's subprocesses — because otherwise <code>buzz-cli</code> can't reach the relay
+(<code>config.rs:721-772</code>). <code>VISION_AGENT.md:57</code> states the posture plainly: <em>"The shell runs
+at the operator's trust level, like bash itself."</em></p>
+<p>Note the contrast: the repo <em>does</em> handle injection deliberately for MCP hook output
+(JSON-encoded, labelled <code>[Post-compact hook output — untrusted]</code>), just not for Nostr
+content.</p>
+<p><strong>Prompt:</strong> "Given that buzz-acp auto-approves tool permissions and splices event content
+raw into prompts, enumerate the full attack path from a channel message to code execution,
+then evaluate each existing mitigation (author gate, NIP-OA verification, filter
+fail-closed, keyfile shim) for what it does and does not stop."</p>
+<h3 id="3-the-formal-methods-are-more-honest-and-prove-less-than-tla-and-tamarin-suggests">3. The formal methods are more honest — and prove less — than "TLA+ and Tamarin" suggests</h3>
+<p>Four things a one-paragraph treatment can't convey:</p>
+<p><strong>(a) Bounds.</strong> <code>MultiTenantRelay.cfg</code> runs 2 communities, 5 channels, 3 hosts — but
+<strong>1 actor and 1 worker</strong>. Cross-pod and multi-actor races are structurally outside the
+model. The conformance crate's <code>LIMITS.md</code> says the same independently: "The harness
+traces one process."</p>
+<p><strong>(b) A real vacuity bug shipped.</strong> The Tamarin lemma
+<code>other_community_key_compromise_does_not_authorize</code> bound <code>Neq(commA, commB)</code> to the same
+timepoint as the compromise, but no rule emits <code>Neq</code> there — the premise was
+unsatisfiable, so the lemma verified while asserting nothing. Found, fixed by decoupling
+onto a witness timepoint, confirmed with an exists-trace probe. This is the best available
+lesson that "machine-checked" can mean "checked nothing."</p>
+<p><strong>(c) Non-vacuity is engineered in.</strong> The TLA+ model ships intentionally-false probes
+(<code>Probe_OpenAuthRegistration_Unreachable</code>, etc.) that must go red, plus 13 mutations
+M1–M13 with confirmed counterexample trace depths.</p>
+<p><strong>(d) The conformance gate defaults to <code>NoopTracer</code> in production</strong>, and its read half is
+not yet armed.</p>
+<p><strong>Prompt:</strong> "Read docs/spec/MultiTenantRelay.tla and its .cfg. State exactly what
+Inv_NonInterference claims, what the model bounds exclude, and construct a concrete
+production bug that would satisfy every invariant and still leak."</p>
+<h3 id="4-the-load-bearing-safety-axiom-of-the-multi-tenancy-proof-has-no-implementation">4. The load-bearing safety axiom of the multi-tenancy proof has no implementation</h3>
+<p><code>docs/multi-tenant-relay.md</code> states axioms A-RLS-1..5 — every tenant-bearing table has
+row-level security with a restrictive <code>community_id = current_setting('app.community_id')</code>
+policy, request role <code>NOBYPASSRLS</code>, <code>SET LOCAL</code> before every query — and Theorem I4
+(Fail-closed backstop) explicitly says <em>"removing the RLS guard makes the dropped
+predicate produce a cross-label row — proving RLS load-bearing, not decorative."</em> The
+Implementation Correspondence section claims <em>"every DB entry point takes <code>TenantContext</code>
+and <code>SET LOCAL app.community_id</code>."</em></p>
+<p><strong>[verified]</strong> Grepping <code>migrations/</code> and <code>crates/</code> for <code>ROW LEVEL SECURITY</code>,
+<code>CREATE POLICY</code>, <code>SET LOCAL</code>, and <code>app.community_id</code> returns <strong>zero occurrences</strong>. The
+only <code>current_setting</code> uses are two unrelated GUCs (<code>buzz.nip_rs_hard_delete</code>,
+<code>buzz.created_at_floor</code>).</p>
+<p>Isolation today is 100% application-level <code>WHERE community_id = $1</code> predicates with no
+database backstop — exactly the failure mode I4 exists to cover.</p>
+<p>In fairness: the doc is marked <code>draft</code>, and the conformance checklist lists RLS as a
+<strong>gate that must exist before multi-tenant mode is admitted</strong>. But the newest commit on
+main is <code>feat(relay): raise hosted community limit to five (#3829)</code>, and communities are
+being created at ~3,100/day. The honest framing is a question, not an accusation: <em>is
+multi-community shipping ahead of its own admission gate, or is the RLS suite in a private
+deploy repo?</em></p>
+<p><strong>Prompt:</strong> "Compare the axioms in docs/multi-tenant-relay.md against migrations/ and
+crates/buzz-db/. For each axiom, mark it implemented / gated / absent, and say what breaks
+first if it's absent."</p>
+<h3 id="5-the-current-binding-constraint-is-redis-and-its-an-active-production-incident">5. The current binding constraint is Redis, and it's an active production incident</h3>
+<p>On the unmerged branch <code>origin/eva/redis-cluster-mode-spec</code> there is a <strong>fourth</strong> formal
+spec (<code>RedisClusterFencingMigration.tla</code>, 9 mutants, all killed) and a doc that opens
+with: Valkey executes one engine thread per node, "the deployed primary's engine core is
+the relay's hard scaling ceiling, and it is filling on a measured doubling curve."</p>
+<p>A commit on main folds in the incident analysis: onset moved 18:00Z→16:40Z, attributed to
+organic community creation (58→425 in two hours), <strong>~3,100 communities/day, 3.45-day
+doubling, 5.2–9.0 day planning band</strong>, watch metric is channels-per-community.</p>
+<p>The killer structural fact: <strong>classic Redis pub/sub broadcasts every message to every node
+regardless of shard count</strong>, so sharding does not help fan-out — converting to
+<code>SPUBLISH</code>/<code>SSUBSCRIBE</code> is a prerequisite, not a detail.</p>
+<p>The explainer's line that "Redis holds only what is allowed to be lost" is architecturally
+right and operationally beside the point: it's the ceiling anyway.</p>
+<p><strong>Prompt:</strong> "Explain why sharding a Redis cluster does not reduce classic pub/sub load,
+what sharded pub/sub changes, and what a fenced session directory is — then explain why
+cluster mode forcing keys into one hash slot creates a live migration of fencing
+authority."</p>
+<h3 id="6-postgres-is-carrying-correctness-in-triggers-not-just-in-queries">6. Postgres is carrying correctness in triggers, not just in queries</h3>
+<p>Four examples, each worth understanding:</p>
+<ul>
+<li>The commit-time <code>created_at</code> floor guard (see "single source of truth" above).</li>
+<li>A NIP-RS hard-delete guard (<code>0011</code>) that raises unless the session sets
+  <code>buzz.nip_rs_hard_delete='on'</code>, so a pre-upgrade binary gets its whole transaction
+  aborted rather than silently skipping the rule during a rolling deploy.</li>
+<li>A deferred TTL-refresh trigger that takes <code>SELECT … FOR UPDATE</code> on the channel row
+  before testing <code>ttl_seconds</code>, wrapped in <code>EXCEPTION WHEN OTHERS → RAISE WARNING</code> so a
+  TTL failure can never reject a valid event.</li>
+<li>Constraint triggers cloned automatically onto new partitions so monthly rotation keeps
+  the guard.</li>
+</ul>
+<p>Also: tags are a JSONB column with a <strong><code>jsonb_path_ops</code></strong> GIN index (not the default
+<code>jsonb_ops</code>, because only <code>@&gt;</code> is used), added in migration <code>0004</code> whose header carries
+the measurement that justified it — unindexed <code>#e</code> containment cost ~900 ms per hop, two
+hops per scroll-back page, ~1.7 s of a ~2.1 s page. And FTS uses the <strong><code>'simple'</code></strong>
+dictionary — no stemming, no stopwords — deliberately, to match prior Typesense-ish
+semantics.</p>
+<p><strong>Prompt:</strong> "Read migrations/0021, 0022, and 0011. For each, state the race it closes, why
+it had to be a database trigger rather than application code, and what a rolling deploy
+would break without it."</p>
+<h3 id="7-mobile-is-a-full-hand-reimplementation-including-cryptography">7. Mobile is a full hand-reimplementation — including cryptography</h3>
+<p>234 Dart files, no FFI, no <code>flutter_rust_bridge</code>, no codegen. Kind constants are manually
+synced, with a comment saying so: <code>mobile/lib/shared/relay/nostr_models.dart:7</code> — <em>"Keep
+in sync with <code>desktop/src/shared/constants/kinds.ts</code>."</em></p>
+<p><strong>NIP-44 v2 is reimplemented from scratch in Dart on pointycastle</strong>
+(<code>mobile/lib/shared/crypto/nip44.dart</code>, 169 lines, plus its own <code>ecdh.dart</code> and
+<code>hkdf.dart</code>); there is a <code>nip_oa_test.dart</code> but no NIP-44 test-vector file. Media
+sanitization exists a <em>third</em> and <em>fourth</em> time in Swift (<code>MediaSanitizer.swift</code>) and
+Kotlin (<code>AndroidMediaSanitizer.kt</code>), against 2,595 lines of Rust validation on the relay.</p>
+<p>Set that against: <strong>no <code>fuzz/</code> directory, no cargo-fuzz, no AFL, no loom, no miri, no
+shuttle anywhere in the repo; proptest in 3 of 28 crates; criterion in zero.</strong></p>
+<p><em>Misconception:</em> buzz-core is the single source of truth for event verification.
+<em>Reality:</em> the canonical serialization and the AEAD have multiple independent
+implementations that must agree byte-for-byte or signatures and decryption break, and
+nothing systematically tests that they do.</p>
+<p><strong>Prompt:</strong> "Design a differential test harness that proves the Rust and Dart NIP-44 v2
+implementations agree, including the padding scheme and the HMAC, and say which classes of
+bug it would still miss."</p>
+<h3 id="8-push-notifications-are-beautifully-specified-and-not-turned-on">8. Push notifications are beautifully specified and not turned on</h3>
+<p>The design is genuinely novel: the protocol object is the <em>authorization</em> (a signed,
+expiring, revocable filter — kind:30350 lease), not the transport artifact, inverting
+notepush and the NIP-9a draft. The APNs body is a <strong>compile-time constant</strong> —
+<code>{"aps":{"alert":{"body":"Reconnect to your relay now"},"mutable-content":1}}</code> — and the
+relay's delivery request is <code>deny_unknown_fields</code>, so a relay attempting to send
+notification text is <em>rejected, not ignored</em>. The gateway never sees the APNs token (it
+resolves through encrypted DB state), enrollment uses Apple App Attest with a PEM-pinned
+root, and there are two independent AEAD keyrings whose reuse is forbidden. Modeled in
+Python by exhaustive bounded exploration with mutation testing (8 checked properties).</p>
+<p><strong>And no client publishes a lease.</strong> Grep for kind 30350 across desktop/mobile/web returns
+zero. <code>AppDelegate.swift:17</code> requests only <code>[.badge]</code> and never calls
+<code>registerForRemoteNotifications</code>. There are no notifications when the app isn't running,
+on any platform. Six of 26 migrations are push infrastructure.</p>
+<p><strong>Prompt:</strong> "Explain the NIP-PL threat model: what does Apple learn, what does the gateway
+learn, what does the relay learn, and what leaks regardless — then explain why timing and
+frequency are explicitly conceded as unhideable."</p>
+<h3 id="9-linking-a-second-device-copies-your-private-key">9. Linking a second device copies your private key</h3>
+<p>NIP-AB is an 818-line spec with its own Tamarin proof, ephemeral ECDH, HKDF with three
+domain-separated labels, a 128-byte transcript hash, constant-time comparison, and a
+120-second session. The payload it transfers is <code>{"relayUrl", "pubkey", "nsec"}</code>
+(<code>desktop/src-tauri/src/commands/pairing.rs:107-121</code>). No per-device subkeys, no NIP-46
+remote signing — the spec states this as an accepted tradeoff.</p>
+<p>The SAS is ~20 bits (6 digits) and is the <em>only</em> MITM defense. <code>NIP-AB.md:316</code> is blunt
+that the source sends immediately after <code>sas-confirm</code> without waiting for an ack: <em>"The
+transcript hash is a </em><em>detection</em><em> mechanism, not a prevention gate."</em> It cites Signal's
+device-linking exploit as the motivating counterexample.</p>
+<p>Pairing runs on a separate no-persistence, no-auth, loopback-bound sidecar relay
+(<code>buzz-pair-relay</code>, MAX_CONNS 128, 6 events per connection) because a NIP-43
+membership-gated relay can't admit an unpaired peer.</p>
+<p><strong>Prompt:</strong> "Walk NIP-AB step by step, then argue both sides: why 'device linking = key
+copy' is defensible for this product, and what a subkey or NIP-46 design would cost and
+buy."</p>
+<h3 id="10-there-is-no-offline-story-and-local-first-means-exactly-one-crdt">10. There is no offline story, and "local-first" means exactly one CRDT</h3>
+<p>No outbox, no send queue, no <code>navigator.onLine</code> handling on any platform; publishes simply
+throw after 25 s. No local message database anywhere — the desktop SQLite (<code>archive.db</code>)
+is an opt-in "save this scope" archive that re-verifies against the relay before insert,
+not a cache; mobile has no DB at all. The real cache is <strong>localStorage</strong>, 255 usages,
+paint-then-revalidate; each community mounts a <em>fresh</em> React-Query client, so switching
+communities starts cold and the snapshot exists purely to hide that.</p>
+<p>The one genuine CRDT is NIP-RS read state: grow-only max registers merged by <code>max()</code>, with
+each <em>client installation</em> owning its own <code>d = read-state:&lt;slot-id&gt;</code> coordinate so two
+devices never write the same address, plus a mandatory slot rotation if a <code>client_id</code>
+mismatch is detected. Mark-as-unread is deliberately impossible — the merge rule is
+monotonic by design.</p>
+<p><strong>Prompt:</strong> "Explain why NIP-RS chose per-installation slots plus max-merge over a single
+shared coordinate, and what product feature that choice permanently forecloses."</p>
+<h3 id="11-the-most-interesting-systems-work-in-the-repo-is-the-git-layer">11. The most interesting systems work in the repo is the git layer</h3>
+<p>Three independent mechanisms:</p>
+<p><strong>(a) git-on-object-storage</strong> — git hosting with <em>no persistent filesystem</em>. Content is
+create-only content-addressed packs, and a repo's entire ref state is one mutable manifest
+pointer advanced by S3 conditional PUT. Every request hydrates an ephemeral tree, shells
+out to git, and drops it. Three theorems (durability-ordering, manifest reconstruction,
+linearizable refs), eight invariants, TLA+ with 3 concurrent pushers. The intellectual
+claim is precise and unusually humble: the <em>algorithm</em> isn't novel — it's git's
+post-reftable model with <code>rename()</code> swapped for a conditional PUT — the contribution is
+the formal characterization, which is <strong>parametric over the atomic primitive</strong> and admits
+a backend by empirical probe because "a finite probe cannot prove a universal axiom." The
+bug it was built to kill is named in-spec: the fallible-snapshot skip,
+<code>MustPublish == DidChange ∨ snapErr</code> — never treat a failed read as "no change."</p>
+<p><strong>(b) git-sign-nostr</strong> — your npub <em>is</em> your commit signing key, via git's
+<code>gpg.x509.program</code> hook and GPG's status-fd CLI contract; it can carry a NIP-OA tag so an
+agent's commits prove which human authorized them.</p>
+<p><strong>(c) git-credential-nostr</strong> — NIP-98 replaces the PAT; requires git ≥2.46 for the
+<code>authtype</code> capability.</p>
+<p>The repo dogfoods all of it — commits carry
+<code>Signed-off-by: npub1…@buzz.block.builderlab.xyz</code>.</p>
+<p><strong>Prompt:</strong> "Explain the manifest-pointer CAS scheme as if to someone who knows git but not
+S3 semantics, then explain why the proof is stated as parametric over the atomic primitive
+and what that buys."</p>
+<h3 id="12-the-agent-failure-modes-are-documented-with-rare-candor-and-the-core-one-is-still-open">12. The agent failure modes are documented with rare candor, and the core one is still open</h3>
+<p><code>docs/welcome-kickoff-silent-failures.md</code>, 502 lines, is the most honest document in the
+repo. Its thesis: <em>"the kickoff decides what to say from a timer and the absence of
+evidence, then writes that guess in permanent ink… The facts decorate; the timers
+decide."</em></p>
+<p>The distinction it names — <strong>"the agent crashed" is a fact; "no intro yet" is ignorance,
+and announcing ignorance on a deadline produces the wrong story</strong> — is transferable well
+beyond this codebase.</p>
+<p>It documents a runaway agent-to-agent reply loop caused by two prompt rules composing into
+perpetual motion (every turn MUST publish; when done you MUST @mention the delegator), and
+observes that <em>"'Don't get into a loop' is not a rule an agent can follow"</em> — a loop is a
+global property, each agent sees only its own turn — so it had to become a local per-turn
+test. The fix is visible in the shipped <code>base_prompt.md</code>.</p>
+<p>But the doc is explicit that <strong>there is still no reply-depth counter, hop limit, cooldown,
+or agent-to-agent budget anywhere in the path</strong>, and it enumerates and dismisses every
+existing guard. Meanwhile the <em>opposite</em> failure — an agent doing real work and ending the
+turn without publishing, so the result is thrown away — is being fixed on an unmerged
+branch via <code>BUZZ_AGENT_REQUIRE_REPLY</code>, defaulted on for small local mesh models,
+"advisory, never a trap," at most two reminders.</p>
+<p>Both failure modes are live, they pull in opposite directions, and neither is in the
+explainers.</p>
+<p><strong>Prompt:</strong> "Read docs/welcome-kickoff-silent-failures.md. Extract the general design
+principles about timers-as-evidence and local-vs-global rules, then design a reply-depth
+circuit breaker that doesn't misfire on a legitimately long agent chain."</p>
+<hr />
+<h2 id="orthogonal-dimensions-worth-analyzing-separately">Orthogonal dimensions worth analyzing separately</h2>
+<p>Beyond the two the explainers cover well (protocol design; architectural layering):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Why it's independent</th>
+<th>What you'd learn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cryptographic implementation</td>
+<td>Distinct from protocol design</td>
+<td>Three implementations of NIP-44/NIP-01 must agree; nothing tests that they do</td>
+</tr>
+<tr>
+<td>Adversarial / trust boundary</td>
+<td>Distinct from access control</td>
+<td>The agent plane is the soft spot, not the relay</td>
+</tr>
+<tr>
+<td>Operational load</td>
+<td>Distinct from architecture</td>
+<td>Redis is the ceiling; growth is exponential</td>
+</tr>
+<tr>
+<td>Verification epistemics</td>
+<td>Distinct from "we used TLA+"</td>
+<td>Bounds, vacuity, and arming determine what a proof means</td>
+</tr>
+<tr>
+<td>Doc-vs-code drift</td>
+<td>Distinct from either</td>
+<td>ARCHITECTURE.md and the RLS axioms both drift</td>
+</tr>
+<tr>
+<td>Client engineering</td>
+<td>Distinct from server</td>
+<td>Larger than the server; 4 reimplementations</td>
+</tr>
+<tr>
+<td>Release &amp; supply chain</td>
+<td>Distinct from build</td>
+<td>5 repos, 4 justified advisory ignores, <code>evalexpr</code> pinned &lt;13 because v13 relicensed MIT→AGPL</td>
+</tr>
+<tr>
+<td>Governance</td>
+<td>Distinct from licensing</td>
+<td><code>GOVERNANCE.md</code> is one line pointing at Block's OSPO; support matrix is <code>main</code> only</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="minimum-high-yield-prompt-set">Minimum high-yield prompt set</h2>
+<p>If you run only five:</p>
+<ol>
+<li><strong>"Which parts of Buzz are encrypted, which are only authorized, and where exactly is
+   the boundary?"</strong> → kills the biggest false framing.</li>
+<li><strong>"Trace the path from an untrusted Nostr event to shell execution in buzz-acp, and
+   evaluate every mitigation on that path."</strong> → the sharpest live risk.</li>
+<li><strong>"For each of the four formal specs, state what is proven, under what bounds, and give
+   a real bug it would not catch."</strong> → converts "formally verified" from a badge into a
+   claim you can size.</li>
+<li><strong>"What is the current binding constraint on the deployed system, and what is the
+   evidence?"</strong> → surfaces the Redis/Valkey incident and the growth math.</li>
+<li><strong>"Compare the desktop, mobile, and relay implementations of event construction and
+   NIP-44. Where must they agree byte-for-byte, and what tests that?"</strong> → the client half
+   plus the crypto-duplication risk.</li>
+</ol>
+<h3 id="what-gets-missed-if-you-skip-them">What gets missed if you skip them</h3>
+<p>Skip #1 and you'll describe Buzz's privacy properties wrongly in public — the most likely
+way to embarrass yourself with this material. Skip #2 and you'll present the agent design
+as the system's strength while missing that it's the least-defended surface. Skip #3/#4
+and "machine-checked" becomes a thought-terminating credential; you'll also miss that a
+documented vacuity bug is the single best teaching example in the repo. Skip #5 and you'll
+keep the "one relay, thin clients" mental model, which is wrong by line count and wrong
+about where bugs will come from. Skip the Redis question and you'll analyze a 2026-Q1
+architecture while the team fights a 3.45-day doubling curve.</p>
+<hr />
+<h2 id="rat-hole-warning">Rat-hole warning</h2>
+<p><strong>Do not start with the 15 draft NIPs, the kind-number registry, or the crate dependency
+graph.</strong> They are legible, enumerable, and feel like progress — and the explainers already
+cover them. Two of the fifteen (NIP-AA, NIP-MP) have <strong>zero code references</strong>; NIP-AO has
+one, NIP-WP has two. Reading all fifteen equally weights paper and production.</p>
+<p>Also a rat hole: the Tauri/WebKitGTK Linux rendering issues. Genuinely well-diagnosed (a
+FreeType 2.11→2.13 struct-layout change growing <code>FT_ColorStopIterator</code> 16→20 bytes and
+corrupting Skia's color-stop arithmetic; the fix raised the glibc floor 2.35→2.39 and
+dropped Ubuntu 22.04 AppImage users). Fascinating, zero leverage on understanding the
+system.</p>
+<p>The dominant game:</p>
+<pre><code>what is actually trusted  →  what enforces it (crypto? SQL predicate? prompt? allowlist?)
+  →  what proves the enforcement (test? trigger? bounded model? nothing?)
+  →  what is currently binding in production
+  →  what you would build differently
+</code></pre>
+<p>Your first useful target is the <strong>trust map</strong>: for each of message content, channel
+membership, tenant isolation, agent authority, and media access, name the single mechanism
+that enforces it and the single artifact that verifies it. Four of those five have
+surprising answers.</p>
+<hr />
+<h2 id="acceptance-tests-how-youll-know-youre-no-longer-blind">Acceptance tests — how you'll know you're no longer blind</h2>
+<ul>
+<li>You can state which Buzz data is encrypted and which is merely authorized, without
+  hedging.</li>
+<li>You can explain why NIP-OA deliberately rejects NIP-26 semantics.</li>
+<li>You can name the model bound that makes the TLA+ relay proof silent about cross-pod
+  races.</li>
+<li>You can say what the current scaling ceiling is and why sharding doesn't fix it.</li>
+<li>You can explain, unprompted, why "don't get into a loop" is not an instruction an agent
+  can follow.</li>
+</ul>
+<hr />
+<h2 id="master-prompt">Master prompt</h2>
+<blockquote>
+<p>I'm studying the Buzz codebase (github.com/block/buzz) — a self-hostable Nostr relay
+that doubles as a human/AI-agent workspace: 26-crate Rust workspace, Axum relay,
+Postgres with partitioning and trigger-enforced invariants, Redis pub/sub, S3/Blossom
+media, Tauri+React desktop (~419k lines), Flutter mobile (~80k, no shared code), an ACP
+agent harness, four machine-checked formal specs, and 15 draft NIPs.</p>
+<p>I already understand the architectural reasoning and Nostr fundamentals. Do not
+re-explain those. Instead, for the area I name below, work at the implementation layer
+and answer:</p>
+<ol>
+<li>What invariant is claimed, and where is it <em>actually</em> enforced — cryptography, a SQL
+   predicate, a database trigger, a type-level fence, a prompt file, or an allowlist?</li>
+<li>What verifies that enforcement, and what are that verification's explicit bounds?</li>
+<li>Where do the docs and the code disagree, and which is newer?</li>
+<li>What is the honest failure mode, including anything the repo's own comments admit is
+   unbuilt?</li>
+</ol>
+<p>Cite files and line numbers. Separate "the repo says X" from "my inference." If
+something is specified but has zero code references, say so.</p>
+<p>Area: <code>&lt;X&gt;</code></p>
+</blockquote>
+<h2 id="next-best-prompt-run-this-one-first">Next best prompt — run this one first</h2>
+<blockquote>
+<p>Across the Buzz repo, build a trust map. For each of: (a) channel message content,
+(b) DM content, (c) channel membership, (d) cross-community tenant isolation, (e) agent
+authority to act, and (f) media blob access — name the single mechanism that actually
+enforces it, the artifact that verifies that mechanism, and whether that verification is
+armed in production by default. Flag every case where the enforcing mechanism is weaker
+than a reader of ARCHITECTURE.md would assume.</p>
+</blockquote>
+<hr />
+<h2 id="note-on-this-pass">Note on this pass</h2>
+<p>One subagent's report tripped an instruction-shaped-pattern filter, solely because the
+repo contains permission-mode string literals (<code>bypassPermissions</code>, <code>dontAsk</code>) in
+<code>crates/buzz-acp/src/config.rs</code>. That's repo content being reported on, not anything that
+influenced behavior.</p>
+<p>The RLS finding, the DM finding, the NIP-04 absence, and the auto-approve behavior were
+each re-verified directly against the repo rather than taken on report.</p>
+<hr>
+<p class="backlink"><a href="../">← buzz-tutorial</a> ·
+<a href="advisory.html">advisory</a> ·
+<a href="blindspots.html">blindspots</a> ·
+<a href="phase0-log.html">phase 0 log</a> ·
+<a href="graph/graph.html">knowledge graph</a></p>
+</div>
+</body>
+</html>

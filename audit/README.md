@@ -12,17 +12,19 @@ full. Details in the advisory.
 |---|---|
 | [`buzz-audit-advisory.md`](buzz-audit-advisory.md) | **The deliverable.** Confirmed findings ranked by value per unit of remediation risk, plus refuted/triaged lists, coverage gaps, and calibration numbers. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/advisory.html) |
 | [`AUDIT-PLAN.md`](AUDIT-PLAN.md) | Original spec (historical — the run deviated where Phase 0 said to) |
-| [`audit-phase0-log.md`](audit-phase0-log.md) | Phase 0 record: tooling, graph build, slice list, two mid-run corrections |
+| [`audit-phase0-log.md`](audit-phase0-log.md) | Phase 0 record: tooling, graph build, slice list, two mid-run corrections. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/phase0-log.html) |
 | [`AUDIT-HANDOFF.md`](AUDIT-HANDOFF.md) | Session handoff: headline results, what failed, harness notes |
-| [`buzz-blindspots.md`](buzz-blindspots.md) | Blindspot pass on the codebase |
+| [`buzz-blindspots.md`](buzz-blindspots.md) | Blindspot pass on the codebase. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/blindspots.html) |
 | `data/` | Raw evidence: findings at every stage, verifier votes, tool output (semgrep, clippy, cargo-audit), canary/backtest scores, and the scripts and workflows that produced them |
 | `graph/` | Knowledge graph: [`GRAPH_REPORT.md`](graph/GRAPH_REPORT.md) and an interactive [`graph.html`](https://az9713.github.io/buzz-tutorial/audit/graph/graph.html) (live, self-contained) |
 
 ## Regenerating the advisory
 
 `python data/make_advisory.py` rebuilds `buzz-audit-advisory.md` from the JSON in
-`data/`, and `python data/md2html.py` re-renders `advisory.html` from that
-markdown (it borrows the site's stylesheet from `hardening.html`).
+`data/`, and `python data/md2html.py` re-renders all three HTML pages
+(`advisory.html`, `blindspots.html`, `phase0-log.html`) from their markdown —
+it borrows the site's stylesheet from `hardening.html`, so re-run it if that
+theme changes.
 
 ## Not included
 

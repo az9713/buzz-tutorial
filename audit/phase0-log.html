@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 0 log — cartography, tooling, and calibration setup</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.ok{border-left-color:var(--ok)}
+.ok .lab{color:var(--ok)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.gap{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:2px 20px 14px;margin:1.8rem 0}
+.gap h3{margin-top:1.2rem}
+.rowhead{font-weight:650}
+
+/* audit-doc additions */
+.sevtag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:.28em .5em;border-radius:3px;
+  vertical-align:.12em;margin-left:.5em}
+.sev-high{background:rgba(138,61,18,.13);color:var(--warn)}
+.sev-medium{background:rgba(168,98,13,.13);color:var(--accent)}
+.sev-low{background:rgba(45,106,62,.13);color:var(--ok)}
+blockquote{margin:1.1rem 0;padding:.1rem 0 .1rem 16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-size:.95rem}
+h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
+.backlink{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>Phase 0 log — cartography, tooling, and calibration setup</h1>
+<p class="sub">The raw record behind the advisory: tooling, the knowledge graph, the slice list, and two corrections made mid-run. Target: buzz/ @ b1b283cd4.</p>
+</header>
+<nav class="toc">
+<strong>Contents</strong>
+<div class="toc">
+<ul>
+<li><a href="#01-skill-search">0.1 Skill search</a></li>
+<li><a href="#02-static-analysis-what-ran-what-it-found-and-where-it-is-blind">0.2 Static analysis — what ran, what it found, and where it is blind</a><ul>
+<li><a href="#cargo-audit-4-vulnerabilities-6-warnings">cargo audit — 4 vulnerabilities, 6 warnings</a></li>
+<li><a href="#cargo-clippy-workspace-all-targets-zero-warnings">cargo clippy --workspace --all-targets — zero warnings</a></li>
+<li><a href="#pnpm-audit-prod-1-moderate">pnpm audit --prod — 1 moderate</a></li>
+<li><a href="#semgrep-config-auto-146-hits-683-rules-2953-files">semgrep --config auto — 146 hits, 683 rules, 2,953 files</a></li>
+</ul>
+</li>
+<li><a href="#03-graphify-and-how-it-changed-the-plan">0.3 Graphify — and how it changed the plan</a><ul>
+<li><a href="#highest-blast-radius-files">Highest-blast-radius files</a></li>
+<li><a href="#coupling-that-directory-names-hide">Coupling that directory names hide</a></li>
+<li><a href="#changes-graphify-forced-on-the-provisional-plan">Changes graphify forced on the provisional plan</a></li>
+</ul>
+</li>
+<li><a href="#final-slice-list">Final slice list</a></li>
+<li><a href="#04-calibration-harness">0.4 Calibration harness</a><ul>
+<li><a href="#gate-a-mechanical-evidence-check-gate_apy-zero-tokens">Gate A — mechanical evidence check (gate_a.py, zero tokens)</a></li>
+<li><a href="#gate-b-cross-model-verification">Gate B — cross-model verification</a></li>
+<li><a href="#gate-c-corroboration-index-tool_indexpy">Gate C — corroboration index (tool_index.py)</a></li>
+<li><a href="#planted-bug-canary-recall">Planted-bug canary (recall)</a></li>
+<li><a href="#historical-backtest-the-only-test-with-verified-ground-truth">Historical backtest (the only test with verified ground truth)</a></li>
+</ul>
+</li>
+<li><a href="#addendum-cartography-reproducibility">Addendum — cartography reproducibility</a></li>
+<li><a href="#correction-the-tauri-backend-was-outside-the-static-analysis-scope">Correction — the Tauri backend was outside the static-analysis scope</a></li>
+</ul>
+</div>
+
+</nav>
+
+<p>Run date: 2026-07-31 / 2026-08-01. Target: <code>buzz/</code> @ <code>b1b283cd4</code>, clean tree.
+This is the raw record; the advisory summarises it.</p>
+<hr />
+<h2 id="01-skill-search">0.1 Skill search</h2>
+<pre><code>npx skills find nostr protocol security
+npx skills find static analysis rust
+</code></pre>
+<p><strong>Installed:</strong> <code>soapbox-pub/nostr-skills@nostr</code> → <code>.agents/skills/nostr</code>.</p>
+<p><strong>Assessment: low value.</strong> The skill is a pointer, not knowledge — it tells the
+reader to fetch NIPs from <code>github.com/nostr-protocol/nips</code>. The repo ships its
+own <code>docs/nips/</code> (17 files) plus <code>NOSTR.md</code> and <code>SECURITY.md</code>, which are better
+ground truth for <em>this</em> implementation than the upstream spec. The audit agents
+were given Nostr threat-model context directly in their prompts instead.</p>
+<p><strong>Not installed, with reasons:</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Why skipped</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>athola/claude-night-market@rust-review</code></td>
+<td>Generic Rust review checklist; the Phase 2 lens prompts already cover it, and <code>cargo clippy</code> is the real tool</td>
+</tr>
+<tr>
+<td><code>mohitmishra786/low-level-dev-skills@static-analysis</code></td>
+<td>Wraps tooling we invoke directly</td>
+</tr>
+<tr>
+<td><code>aibtcdev/skills@nostr</code>, <code>purrgrammer/grimoire@nostr-tools</code></td>
+<td>Implementation helpers for <em>writing</em> Nostr code, not auditing it</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="02-static-analysis-what-ran-what-it-found-and-where-it-is-blind">0.2 Static analysis — what ran, what it found, and where it is blind</h2>
+<h3 id="cargo-audit-4-vulnerabilities-6-warnings"><code>cargo audit</code> — 4 vulnerabilities, 6 warnings</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Advisory</th>
+<th>Crate</th>
+<th>Severity</th>
+<th>Title</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RUSTSEC-2026-0194</td>
+<td>quick-xml 0.38.4 <strong>and</strong> 0.39.4</td>
+<td>7.5 high</td>
+<td>Quadratic run time checking a start tag for duplicate attribute names</td>
+</tr>
+<tr>
+<td>RUSTSEC-2026-0195</td>
+<td>quick-xml 0.38.4 <strong>and</strong> 0.39.4</td>
+<td>7.5 high</td>
+<td>Unbounded namespace-declaration allocation in <code>NsReader</code> → memory-exhaustion DoS</td>
+</tr>
+</tbody>
+</table></div>
+<p>Both fixed in quick-xml ≥ 0.41.0. Note <strong>two versions of quick-xml are in the
+tree simultaneously</strong>, so a single bump will not clear it.</p>
+<p>Warnings: <code>instant 0.1.13</code> unmaintained (RUSTSEC-2024-0384), <code>paste 1.0.15</code>
+unmaintained (RUSTSEC-2024-0436), <code>event-listener 5.4.1</code> unsound
+(RUSTSEC-2026-0221, <code>!Send</code> tags crossing thread boundaries via <code>StackSlot</code>),
+and three yanked crates: <code>async-utility 0.3.1</code>, <code>spin 0.9.8</code>, <code>spin 0.10.0</code>.</p>
+<h3 id="cargo-clippy-workspace-all-targets-zero-warnings"><code>cargo clippy --workspace --all-targets</code> — <strong>zero warnings</strong></h3>
+<p>The workspace is clippy-clean on default lints, almost certainly CI-enforced.
+This is good hygiene but it means <strong>default clippy provided no ground truth at
+all</strong>. Re-run on the nine security-relevant crates with lints CI would not gate
+on:</p>
+<pre><code>-W clippy::indexing_slicing -W clippy::arithmetic_side_effects
+-W clippy::cast_possible_truncation -W clippy::cast_sign_loss
+-W clippy::unwrap_used -W clippy::panic_in_result_fn -W clippy::integer_division
+</code></pre>
+<p>→ <strong>795 hits</strong>: 368 arithmetic-with-side-effects, 204 "indexing may panic",
+67 truncating casts, 57 "slicing may panic", 22 <code>unwrap</code> on an <code>Option</code>/<code>Result</code>,
+6 integer divisions, plus assorted. These are <em>not</em> findings — they are lint
+classes, mostly benign. They are used only as <strong>Gate C corroboration</strong>: an agent
+finding that lands within 5 lines of one of these carries independent evidence.</p>
+<h3 id="pnpm-audit-prod-1-moderate"><code>pnpm audit --prod</code> — 1 moderate</h3>
+<p><code>npm audit</code> fails on this repo (<code>ENOLOCK</code>; it is a pnpm workspace). Via
+<code>pnpm@11.4.0</code>, across 478 dependencies (442 prod, 36 optional):</p>
+<ul>
+<li><strong>GHSA-6v5v-wf23-fmfq</strong> — <code>markdown-it ≤ 14.1.1</code>, quadratic-complexity DoS in
+  the smartquotes rule (CWE-400/407). Reached twice through
+  <code>desktop &gt; tiptap-markdown &gt; markdown-it</code> and
+  <code>desktop &gt; tiptap-markdown &gt; prosemirror-markdown &gt; markdown-it</code>. Fixed in
+  14.1.2. This is a <em>message renderer</em> parsing attacker-authored content, so
+  reachability is plausible and worth Phase 3 attention.</li>
+</ul>
+<h3 id="semgrep-config-auto-146-hits-683-rules-2953-files"><code>semgrep --config auto</code> — 146 hits, 683 rules, 2,953 files</h3>
+<p>First run crashed on Windows writing UTF-8 output through a cp1252 codec;
+re-run with <code>PYTHONUTF8=1</code>.</p>
+<p>110 of the 146 are one rule, <code>detect-insecure-websocket</code> (<code>ws://</code>), overwhelmingly
+localhost and test fixtures. The remainder worth seeding:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>detected-private-key</code></td>
+<td><code>desktop/src-tauri/src/commands/agent_discovery/install_report_redaction_tests.rs:306</code></td>
+</tr>
+<tr>
+<td><code>detected-telegram-bot-api-key</code></td>
+<td><code>docs/nips/NIP-MP.fixtures.json:1250</code></td>
+</tr>
+<tr>
+<td><code>detected-generic-secret</code></td>
+<td><code>desktop/src/shared/ui/styled-qr-code.test.mjs:9</code>, <code>desktop/src/testing/e2eBridge.ts:12011</code></td>
+</tr>
+<tr>
+<td><code>incomplete-sanitization</code></td>
+<td><code>desktop/src/features/profile/ui/ProfileAvatarEditor.utils.ts:357</code></td>
+</tr>
+<tr>
+<td><code>detect-replaceall-sanitization</code></td>
+<td><code>desktop/src/features/messages/lib/agentSnapshotClipboard.ts:23</code> (×4)</td>
+</tr>
+<tr>
+<td><code>detect-non-literal-regexp</code></td>
+<td><code>mentionPattern.ts:36,43</code>, <code>customEmojiNode.ts:101</code>, <code>hasMention.ts:145</code>, <code>mentionHighlightExtension.ts:109,124</code>, <code>remarkCustomEmoji.ts:44</code>, <code>detectPrefixQuery.ts:34</code> — user-controlled input compiled into regexes is a ReDoS surface</td>
+</tr>
+<tr>
+<td><code>ifs-tampering</code></td>
+<td><code>scripts/build-sprig.sh:122</code>, <code>scripts/post-screenshots.sh:83</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The blind spots matter more than the hits.</strong> Semgrep's <code>auto</code> config has
+essentially <strong>no Rust security rules</strong> (its Rust output here is the websocket
+rule alone) and <strong>no Dart rules at all</strong>. So:</p>
+<ul>
+<li><code>crates/</code> (384 files) rests on <code>cargo clippy</code> plus model reading.</li>
+<li><code>mobile/lib</code> (234 Dart files) has <strong>no static analysis whatsoever</strong> — model
+  reading only. This is the audit's weakest evidentiary ground and the advisory
+  must say so.</li>
+</ul>
+<p><strong>Tool index:</strong> 941 hits (146 semgrep + 795 clippy) across 157 files were indexed
+by <code>file:line</code> (<code>tool_index.py</code>) so any agent finding can be checked for
+independent tool corroboration within ±5 lines.</p>
+<hr />
+<h2 id="03-graphify-and-how-it-changed-the-plan">0.3 Graphify — and how it changed the plan</h2>
+<p>Scope: <code>crates/</code> + <code>desktop/src-tauri/</code> = 597 code files → <strong>20,140 nodes,
+53,273 edges, 695 communities</strong> (AST-structural pass; the LLM semantic pass was
+skipped to stay in the time box). Output in <code>graphify-out/</code>.</p>
+<p>The full corpus (3,236 files, ~3.65M words) is far past graphify's practical
+thresholds, so <code>desktop/src</code>, <code>mobile/</code>, and <code>web/</code> were left out of the graph.
+Their slicing therefore rests on directory structure, which is a stated weakness.</p>
+<h3 id="highest-blast-radius-files">Highest-blast-radius files</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Degree</th>
+<th>Node</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>255</td>
+<td><code>builders.rs</code> (incl. <code>sign()</code>)</td>
+<td><code>crates/buzz-sdk/src/builders.rs</code></td>
+</tr>
+<tr>
+<td>243</td>
+<td><code>Db</code></td>
+<td><code>crates/buzz-db/src/lib.rs</code></td>
+</tr>
+<tr>
+<td>234</td>
+<td><code>llm.rs</code></td>
+<td><code>crates/buzz-agent/src/llm.rs</code></td>
+</tr>
+<tr>
+<td>213</td>
+<td><code>handlers::ingest</code></td>
+<td><code>crates/buzz-relay/src/handlers/ingest.rs</code></td>
+</tr>
+<tr>
+<td>199</td>
+<td><code>pool.rs</code></td>
+<td><code>crates/buzz-acp/src/pool.rs</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="coupling-that-directory-names-hide">Coupling that directory names hide</h3>
+<ul>
+<li><code>ingest_event_inner()</code> in <code>crates/buzz-relay/src/handlers/ingest.rs</code> makes its
+  privilege-relevant kind checks — <code>is_relay_admin_kind()</code>,
+  <code>is_identity_archive_request_kind()</code> — by calling into
+  <code>crates/buzz-core/src/kind.rs</code>. A crate-scoped review of the relay would read
+  only half of its own admission logic.</li>
+<li><code>buzz-auth</code> ↔ <code>buzz-pubsub</code> form one 49-node community: pub/sub is <em>entangled
+  with</em> auth rather than merely downstream of it. Both crates independently
+  contain a <code>nip98_replay.rs</code>.</li>
+<li><code>buzz-dev-mcp</code> ↔ <code>buzz-relay</code> ↔ <code>desktop/src-tauri/src/egress_guard.rs</code>: a
+  developer/MCP tooling crate sits in the same community as the relay's network
+  <strong>egress guard</strong>.</li>
+<li><code>desktop/src-tauri/src/commands/</code> and <code>managed_agents/</code> are heavily co-mingled.</li>
+<li><strong>205 <code>#[tauri::command]</code> handlers across 76 files.</strong> The surface is not
+  uniform: 17 command files reach <code>buzz-core</code>, and 8 reach <code>buzz-sdk</code> and can
+  therefore drive <code>sign()</code>.</li>
+</ul>
+<h3 id="changes-graphify-forced-on-the-provisional-plan">Changes graphify forced on the provisional plan</h3>
+<ol>
+<li><strong><code>crates/buzz-auth</code> was missing from the plan's slice table entirely</strong> —
+   nine files containing NIP-42, NIP-98, replay defence, scopes, and rate
+   limiting. Now a depth slice. (Found by file census, confirmed by graphify's
+   auth↔pubsub community.)</li>
+<li><code>crates/buzz-db</code> promoted breadth → depth, and <code>crates/buzz-sdk</code> pulled out of
+   a catch-all breadth slice to join it, on centrality grounds.</li>
+<li><code>desktop/src-tauri</code> split: <code>commands/</code> (the IPC trust boundary) became its own
+   depth slice, separate from the rest of the backend.</li>
+<li>About <strong>100 crate files</strong> the provisional table never assigned — <code>buzz-pubsub</code>,
+   <code>buzz-relay-mesh</code>, <code>buzz-persona</code>, <code>buzz-voice</code>, <code>buzz-audit</code>, <code>buzz-workflow</code>,
+   <code>buzz-search</code>, <code>buzz-ws-client</code>, <code>git-credential-nostr</code>, <code>git-sign-nostr</code>,
+   <code>buzz-pairing-cli</code>, <code>buzz-admin</code>, <code>sprig</code> — were given owners.</li>
+<li><code>mobile/ios</code> and <code>mobile/android</code> (94 files: entitlements, <code>Info.plist</code>,
+   <code>AndroidManifest</code> permissions, exported components, deep-link intent filters)
+   added to the mobile slice. The plan had Dart only.</li>
+</ol>
+<hr />
+<h2 id="final-slice-list">Final slice list</h2>
+<p><strong>17 breadth slices</strong> (one Sonnet 5 agent each) → <strong>9 of them also depth slices</strong>
+(3 Fable 5 lenses each: hostile input / crypto+identity / correctness) = <strong>44 agents</strong>.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Slice</th>
+<th>Files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>depth</td>
+<td>relay</td>
+<td>79</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>core</td>
+<td>24</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>auth (<code>buzz-auth</code> + <code>buzz-acp</code>)</td>
+<td>26</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>media</td>
+<td>27</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>tauri-commands</td>
+<td>97</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>db (<code>buzz-db</code> + <code>migrations</code> + <code>buzz-sdk</code>)</td>
+<td>56</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>desktop-shared</td>
+<td>328</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>desktop-messages</td>
+<td>367</td>
+</tr>
+<tr>
+<td>depth</td>
+<td>mobile (Dart + iOS + Android)</td>
+<td>330</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>gateway-mesh</td>
+<td>40</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>agent-surface</td>
+<td>52</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>tooling-identity</td>
+<td>106</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>tauri-core</td>
+<td>183</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>desktop-agents</td>
+<td>322</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>desktop-rest</td>
+<td>604</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>web (+ admin-web)</td>
+<td>58</td>
+</tr>
+<tr>
+<td>breadth</td>
+<td>supply-chain</td>
+<td>205</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Assigned: 2,904 of 3,435 tracked files (84.5%).</strong></p>
+<p>Unassigned 531, all deliberate: <code>desktop/tests</code> (149) and <code>mobile/test</code> (97) are
+read by the Phase 4 critic as evidence of the project's own threat model but not
+audited for vulnerabilities; <code>desktop/src-tauri</code> non-source (74: icons,
+resources); <code>benchmarks/</code> (40); <code>docs/</code> (41); <code>examples/</code> (10); assets (15);
+agent-config files (~6).</p>
+<hr />
+<h2 id="04-calibration-harness">0.4 Calibration harness</h2>
+<h3 id="gate-a-mechanical-evidence-check-gate_apy-zero-tokens">Gate A — mechanical evidence check (<code>gate_a.py</code>, zero tokens)</h3>
+<p>Every finding carries an <code>evidence</code> field. Before any verification token is
+spent, a script checks that the file exists, that the quoted evidence actually
+appears in it (whitespace-normalised), and that it appears within ±10 lines of
+the claimed line. Failures are dropped as hallucination and counted — that count
+is the audit's raw hallucination rate. Self-checked with a <code>--test</code> mode that
+asserts invented files, invented code, and wrong line numbers are all rejected
+while re-indented real code is accepted.</p>
+<h3 id="gate-b-cross-model-verification">Gate B — cross-model verification</h3>
+<p>Status pending; the plan's fallback (state that findings are Claude-verified
+only, and that the correlated-error caveat applies in full) is in force unless
+Codex authentication is confirmed.</p>
+<h3 id="gate-c-corroboration-index-tool_indexpy">Gate C — corroboration index (<code>tool_index.py</code>)</h3>
+<p>941 tool hits indexed by file:line, so a critical/high finding can be checked for
+independent static-analysis agreement.</p>
+<h3 id="planted-bug-canary-recall">Planted-bug canary (recall)</h3>
+<p>442 files (<code>crates/buzz-{relay,core,auth,acp,media}</code>, <code>web/src</code>, <code>mobile/lib</code>)
+copied to a scratch tree; 10 synthetic defects of known type and location planted
+across Rust, TypeScript, and Dart at three difficulty levels. Breadth agents
+sweep the copy blind; the fraction recovered is the recall estimate.
+<strong>First planting agent stalled with zero edits after ~60 minutes and was
+replaced</strong> — recorded here because it delayed the calibration, not the audit.</p>
+<h3 id="historical-backtest-the-only-test-with-verified-ground-truth">Historical backtest (the only test with verified ground truth)</h3>
+<p>Commit <code>047533c56</code> — <em>"fix(mobile): keep TLS on relays joined by invite"</em> — is a
+real, documented security fix. Before it, <code>RelayConfig.baseUrl</code> was stored as
+<code>wss://…</code> by the invite-join path but as <code>https://…</code> by the pairing path, while
+the socket getter read:</p>
+<pre><code class="language-dart">final scheme = uri.scheme == 'https' ? 'wss' : 'ws';   // 'wss' is not 'https'
+</code></pre>
+<p>so a <code>wss://</code> origin fell through to plaintext <code>ws://</code> — a <strong>silent TLS
+downgrade</strong> after <code>validateInviteRelayUri</code> had insisted on <code>wss://</code>, also
+malforming <code>/query</code>, media upload, and Blossom auth requests built from the same
+value.</p>
+<p>29 Dart files from the <strong>parent</strong> commit were extracted to a scratch tree and one
+agent was pointed at them blind, told only to look at transport security and
+onboarding input handling. Whether it rediscovers the downgrade is the single
+result in this audit measured against a known answer.</p>
+<hr />
+<h2 id="addendum-cartography-reproducibility">Addendum — cartography reproducibility</h2>
+<p>The graphify agent, having lost track of run state, re-ran the entire Phase 0.3
+cartography from scratch late in the session. It produced <strong>identical</strong> numbers:
+597 code files, 20,140 nodes, 53,273 edges, 695 communities, the same god-node
+ranking, and the same <code>buzz-auth</code> ↔ <code>buzz-pubsub</code> and
+<code>buzz-dev-mcp</code> ↔ <code>buzz-relay</code> ↔ <code>egress_guard.rs</code> couplings.</p>
+<p>Unplanned, but it is a free reproducibility check: the structural analysis the
+slice list was built on is deterministic and not an artefact of one run. The
+duplicate run was stopped once noticed; its only cost was tokens.</p>
+<hr />
+<h2 id="correction-the-tauri-backend-was-outside-the-static-analysis-scope">Correction — the Tauri backend was outside the static-analysis scope</h2>
+<p><strong>The Phase 0.2 claim "the workspace is clippy-clean" was too broad, and the
+completeness critics caught it.</strong></p>
+<p>The root <code>Cargo.toml:32</code> contains <code>exclude = ["desktop/src-tauri"]</code>, and
+<code>desktop/src-tauri/Cargo.toml</code> declares its own <code>[workspace]</code>. So
+<code>cargo clippy --workspace</code> and <code>cargo audit</code> at the repo root never analysed the
+Tauri backend's <strong>354 Rust files</strong> — which is where the repo's <code>unsafe</code> blocks
+actually live (<code>managed_agents/runtime/instance_reaper.rs</code>,
+<code>managed_agents/process_lifecycle.rs</code>,
+<code>commands/agent_discovery/install_exec.rs</code>, <code>commands/media.rs</code>, and others).</p>
+<p>Re-run inside <code>desktop/src-tauri/</code> after the fact:</p>
+<p><strong><code>cargo audit</code> — ran successfully</strong> (it reads the lockfile and needs no build):</p>
+<ul>
+<li>RUSTSEC-2026-0194 and RUSTSEC-2026-0195, <code>quick-xml 0.38.4</code> — the same two
+  high-severity DoS advisories as the main workspace (availability impact, fixed
+  in ≥ 0.41.0).</li>
+<li>Three warnings the main workspace does <strong>not</strong> have:
+  <code>unic-ucd-version 0.9.0</code> unmaintained (RUSTSEC-2025-0098), <code>glib 0.18.5</code>
+  unsound (RUSTSEC-2024-0429), <code>event-listener 5.4.1</code> unsound (RUSTSEC-2026-0221).</li>
+<li>Plus yanked <code>async-utility 0.3.1</code>, <code>spin 0.9.8</code>, <code>spin 0.10.0</code>.</li>
+</ul>
+<p><strong><code>cargo clippy</code> — could not run.</strong> The build fails before analysis:</p>
+<pre><code>error: failed to run custom build command for `buzz-desktop v0.5.3`
+  panicked at build.rs:136: failed to build Tauri application:
+  resource path `binaries\buzz-acp-x86_64-pc-windows-msvc.exe` doesn't exist
+error: failed to run custom build command for `audiopus_sys v0.2.2`
+  CMake Error at CMakeLists.txt:7 (project)
+</code></pre>
+<p>Two independent blockers: a prebuilt <code>buzz-acp</code> sidecar binary that is not in the
+tree, and a missing CMake toolchain for <code>audiopus_sys</code>. The plan's declared
+fallback is <code>cargo check</code>, but that also executes <code>build.rs</code> and fails
+identically. Producing the sidecar would mean writing into <code>buzz/binaries/</code>,
+which the read-only-clone rule forbids.</p>
+<p><strong>Consequence, stated plainly:</strong> the 354 Rust files of the Tauri backend —
+including every <code>unsafe</code> block in the repository and the ~37,000-line
+<code>managed_agents/</code> subsystem — have <strong>no lint coverage whatsoever</strong>. Their only
+scrutiny in this audit is model reading, and the completeness critics
+independently judged <code>managed_agents/</code> "essentially unexamined" even by that
+standard. Dependency scanning did reach them; lint analysis did not.</p>
+<hr>
+<p class="backlink"><a href="../">← buzz-tutorial</a> ·
+<a href="advisory.html">advisory</a> ·
+<a href="blindspots.html">blindspots</a> ·
+<a href="phase0-log.html">phase 0 log</a> ·
+<a href="graph/graph.html">knowledge graph</a></p>
+</div>
+</body>
+</html>
