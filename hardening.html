@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardening Buzz — what to change, and what you can do today</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.ok{border-left-color:var(--ok)}
+.ok .lab{color:var(--ok)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.gap{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:2px 20px 14px;margin:1.8rem 0}
+.gap h3{margin-top:1.2rem}
+.rowhead{font-weight:650}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+<h1>Hardening Buzz</h1>
+<p class="sub">A remediation companion to <a href="trust-map.html">the trust map</a>. For each
+gap it found: what an operator can do today without touching code, what the upstream change
+would actually be, what it would cost, and — for one of them — why I think attempting it
+would be a mistake.</p>
+</header>
+
+<div class="callout">
+<span class="lab">Status of this document</span>
+This is an <strong>advisory, not a patch series</strong>. Nothing here has been submitted to
+<a href="https://github.com/block/buzz">block/buzz</a>, and the analysis was produced by
+reading the public repository, not by working on it. Two of the five items below are
+<em>operator</em> actions that take effect immediately and require no upstream cooperation at
+all — those are the ones to act on first.
+</div>
+
+<div class="toc">
+<strong>Contents</strong>
+<ol>
+<li><a href="#s0">Do these two things today</a></li>
+<li><a href="#s1">The five gaps, ranked by fix-value per unit of risk</a></li>
+<li><a href="#s2">Gap 1 — untrusted text in the agent instruction plane</a></li>
+<li><a href="#s3">Gap 2 — media downloads open by default</a></li>
+<li><a href="#s4">Gap 3 — agent permission requests auto-approved</a></li>
+<li><a href="#s5">Gap 4 — the Postgres test pool is dark</a></li>
+<li><a href="#s6">Gap 5 — the absent RLS backstop, and why not to build it</a></li>
+<li><a href="#s7">What a good upstream report would say</a></li>
+</ol>
+</div>
+
+<h2 id="s0">Do these two things today</h2>
+
+<p>Everything else in this document depends on someone else accepting a change. These two do
+not. If you run a Buzz relay, they are available to you right now.</p>
+
+<div class="callout ok">
+<span class="lab">1. Turn on media download authorisation</span>
+<pre><code>BUZZ_REQUIRE_MEDIA_GET_AUTH=true</code></pre>
+<p style="margin-bottom:0">This flips <code>require_media_get_auth</code>
+(<code>crates/buzz-relay/src/config.rs:742-748</code>) from its shipped default of
+<code>false</code>. With it on, a media <code>GET</code> must present a Blossom
+<code>kind:24242</code> <code>t=get</code> authorisation event bound to that blob's hash, and
+the requester must pass the NIP-43 relay membership check
+(<code>crates/buzz-relay/src/api/media.rs:500-512</code>). Responses also switch from
+<code>Cache-Control: public</code> to <code>private</code> (<code>media.rs:517-521</code>), so
+intermediaries stop caching them.</p>
+<p style="margin-bottom:0"><strong>Test before you commit to it.</strong> The default is off
+for a stated reason — "staged client rollout" — which means some client versions do not yet
+send the get-auth header and will start failing to load attachments. Turn it on in staging,
+exercise every client you actually deploy (Desktop, mobile, any bot using
+<code>buzz-cli</code>), then roll it forward.</p>
+</div>
+
+<div class="callout ok">
+<span class="lab">2. Decide, deliberately, who your agents can be spoken to by</span>
+<p style="margin-top:0;margin-bottom:0">There is no flag for this one, because the gap is
+structural: a Buzz agent auto-approves its own permission requests and receives channel text
+as undelimited instructions. What you <em>can</em> control is the input side — the subscription
+filter expressions that decide which events reach an agent at all
+(<code>crates/buzz-acp/src/filter.rs:1-50</code>). Treat any channel an agent watches as a
+channel where any member can issue instructions to that agent with the agent's own privileges.
+Scope agent membership to channels whose membership you would trust with the agent's
+credentials, and do not put agents in channels open to guests or to federated/unknown pubkeys.
+This is a deployment discipline, not a fix, and it is the only lever available today.</p>
+</div>
+
+<h2 id="s1">The five gaps, ranked by fix-value per unit of risk</h2>
+
+<p>Ranked by what I would actually do first, which is not the same as ranked by severity. A
+severe problem with a dangerous fix ranks below a moderate problem with a safe one.</p>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr><th>#</th><th>Gap</th><th>Upstream change</th><th>Size</th><th>Risk of the fix</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Untrusted text in the agent prompt</td><td>Delimit + label event content</td>
+<td>~30 lines + test</td><td><span class="tag g">Low</span> precedent already in-tree</td></tr>
+<tr><td>2</td><td>Media downloads open by default</td><td>Startup warning, not a default flip</td>
+<td>~5 lines</td><td><span class="tag g">Low</span> mirrors existing code</td></tr>
+<tr><td>3</td><td>Agent permissions auto-approved</td><td>Config-gated policy hook, today's
+behaviour as default</td><td>Moderate</td><td><span class="tag a">Medium</span> imposes a
+product decision</td></tr>
+<tr><td>4</td><td>208 Postgres tests never run</td><td>CI job with an isolated DB</td>
+<td>Moderate, mechanical</td><td><span class="tag a">Medium</span> will surface unrelated
+failures</td></tr>
+<tr><td>5</td><td>No RLS backstop</td><td>Migrations + <code>SET LOCAL</code> plumbing + role
+changes + assertion suite</td><td>Large</td><td><span class="tag r">High</span> — see below,
+I advise against</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="gap">
+<h2 id="s2" style="border:none;margin-top:1.4rem">Gap 1 — untrusted text in the agent instruction plane</h2>
+
+<h4>What is wrong</h4>
+<p>Event content reaches the agent by direct interpolation. The prompt block is assembled as
+<code>"Event ID: … Channel: … Kind: … From: … Time: … Content: {content}"</code> at
+<code>crates/buzz-acp/src/queue.rs:1097-1109</code>, with the event's tags serialised straight
+in after it. Nothing marks where operator instructions end and member-supplied text begins. Any
+member of a channel an agent watches can write text that the model has no structural reason to
+treat differently from its own system prompt.</p>
+
+<h4>Why this one is first</h4>
+<p><strong>The project already solved this exact problem elsewhere, and the fix is in-tree to
+copy.</strong> When <code>buzz-agent</code> folds post-compact hook output into a conversation,
+it wraps it explicitly — <code>handoff_text.push_str("\n\n[Post-compact hook output —
+untrusted]\n")</code> at <code>crates/buzz-agent/src/handoff.rs:83-89</code> — and there is a
+regression test asserting the marker survives
+(<code>crates/buzz-agent/tests/regressions.rs:1108, 1199</code>). So the pattern, the wording
+convention, and the test shape all exist. This is not a design proposal; it is applying an
+existing house rule to a place that missed it.</p>
+
+<h4>The change</h4>
+<ul>
+<li>Wrap the interpolated <code>content</code> and <code>tags</code> in an explicit delimited
+block with an untrusted label, matching the <code>handoff.rs</code> wording convention.</li>
+<li>Strip or escape any sequence in the content that would forge the block terminator or a
+section header (the prompt's sections self-delimit on <code>[Header]</code> lines — see the
+assembly contract documented at <code>queue.rs:1386-1403</code> — so a message body containing
+a line like <code>[System]</code> is currently indistinguishable from a real section).</li>
+<li>Add a regression test in the shape of the existing one: publish content containing a
+forged header, assert it arrives neutralised.</li>
+</ul>
+
+<h4>Cost and risk</h4>
+<p>Around thirty lines and one test. The risk is cosmetic — agents see slightly more prompt
+scaffolding — and it costs a small number of tokens per turn. There is a real second-order
+consideration worth raising in any PR rather than deciding unilaterally: the observer frame's
+size trimmer elides oversized sections in place (<code>queue.rs:1396-1401</code>), so a new
+wrapper needs to survive trimming rather than be the thing that gets trimmed.</p>
+</div>
+
+<div class="gap">
+<h2 id="s3" style="border:none;margin-top:1.4rem">Gap 2 — media downloads open by default</h2>
+
+<h4>What is wrong</h4>
+<p><code>require_media_get_auth</code> ships <code>false</code>
+(<code>crates/buzz-relay/src/config.rs:212-214</code> and <code>:742-748</code>, with a test
+asserting the default at <code>:1037-1040</code>). With it off,
+<code>authenticate_media_read</code> binds the tenant from the request host and returns
+immediately, skipping both the Blossom check and the membership check
+(<code>crates/buzz-relay/src/api/media.rs:494-498</code>). The effective access control on a
+blob is knowledge of its SHA-256 — an unguessable capability, but one that leaks through every
+channel a URL leaks through.</p>
+
+<div class="callout warn">
+<span class="lab">Why the obvious fix is the wrong fix</span>
+Flipping the default to <code>true</code> would break every deployed client that does not yet
+send a get-auth header — which is precisely why it is <code>false</code>. A patch that flips it
+is a patch that says "I did not read the comment." The staged rollout is legitimate; what is
+missing is that <em>nothing tells an operator they are in the unsafe half of it</em>.
+</div>
+
+<h4>The change</h4>
+<p>Emit a startup warning, exactly mirroring the one the same file already emits for a
+comparable weakened default (<code>config.rs:637-641</code>):</p>
+<pre><code>if !require_media_get_auth {
+    warn!(
+        "BUZZ_REQUIRE_MEDIA_GET_AUTH is false — media GET/HEAD serves blobs to \
+         anyone who knows the SHA-256, with no Blossom auth and no membership \
+         check, and responses are cached publicly. Set to true for production \
+         once all clients send Blossom get-auth."
+    );
+}</code></pre>
+<p>Optionally, document the flag in the deployment chart's values and in whatever
+security-configuration page the project maintains. The default itself stays untouched.</p>
+
+<h4>Cost and risk</h4>
+<p>Five lines, no behaviour change, no client breakage, and it mirrors existing code so closely
+that reviewing it is trivial. Of the upstream changes on this page, this is the one most likely
+to be accepted as-is.</p>
+</div>
+
+<div class="gap">
+<h2 id="s4" style="border:none;margin-top:1.4rem">Gap 3 — agent permission requests auto-approved</h2>
+
+<h4>What is wrong</h4>
+<p>Agent CLIs driven over the Agent Client Protocol raise
+<code>session/request_permission</code> before a sensitive tool call — the human-in-the-loop
+moment. Buzz's bridge answers automatically: it finds the option whose <code>kind</code> is
+<code>allow_once</code> and returns that option's id, falling back to <code>reject_once</code>
+only if no allow option is offered (<code>crates/buzz-acp/src/acp.rs:1856-1900</code>). There
+is no policy consulted, no allowlist, no owner notified. Combined with Gap 1, the practical
+bound on a Buzz agent's authority is whatever sandbox the underlying CLI enforces on its own.</p>
+
+<h4>Why this is harder than it looks</h4>
+<p>"Always yes" is very likely deliberate. An agent that is a workspace <em>member</em> and
+stops to ask its owner before every file read is not usable as a member; the whole product
+premise pushes toward autonomy. Replacing the behaviour therefore requires answering a product
+question that the repository does not answer and that an outside contributor should not answer
+for it: <em>who</em> approves, <em>through what surface</em>, and <em>what happens while
+waiting</em>. Routing the prompt back to the owner as a Nostr event, for instance, means
+defining a new kind, a timeout, and a default-on-timeout — a NIP-sized decision, not a patch.</p>
+
+<h4>The change I would actually propose</h4>
+<p>The minimum honest version keeps today's behaviour as the default and makes it visible and
+overridable:</p>
+<ul>
+<li>Introduce a permission policy enum with three values —
+<code>AutoApprove</code> (today's behaviour, and the default),
+<code>DenyAll</code>, and <code>Allowlist(Vec&lt;String&gt;)</code> matching on the ACP
+permission's tool name.</li>
+<li>Read it from configuration per agent, defaulting to <code>AutoApprove</code> so no existing
+deployment changes behaviour.</li>
+<li>Log every auto-approval at <code>info</code> with the tool name — the handler already logs
+at that level (<code>acp.rs:1896-1899</code>), so this is largely a matter of ensuring the tool
+name is in the line, making after-the-fact audit possible even when the policy is
+permissive.</li>
+<li>Record approvals in the existing tamper-evident audit log
+(<code>crates/buzz-audit/src/lib.rs:1-18</code>) rather than inventing a new trail.</li>
+</ul>
+
+<h4>Cost and risk</h4>
+<p>Moderate — a config surface, a policy type, wiring through the pool, tests. The risk is not
+technical but social: it is a contributor telling a project how its central UX decision should
+be configurable. It lands far better as an issue that asks the question than as a PR that
+answers it.</p>
+</div>
+
+<div class="gap">
+<h2 id="s5" style="border:none;margin-top:1.4rem">Gap 4 — the Postgres test pool is dark</h2>
+
+<h4>What is wrong</h4>
+<p>208 tests carry <code>#[ignore = "requires Postgres"]</code>, and the project's own runner
+states plainly that nothing runs them
+(<code>scripts/run-tests.sh:93-100</code>): the Postgres-backed <code>buzz-db</code> tests
+"need a separate isolated-DB gate." CI reaches into the pool by name for three narrow
+selections only (<code>.github/workflows/ci.yml:687-717</code>). The membership predicate, the
+tenant-scoping queries, deletion semantics and moderation are all covered by tests that do not
+run on a commit.</p>
+
+<h4>The change</h4>
+<p>A CI job with a Postgres service container that runs
+<code>cargo nextest run -p buzz-db --run-ignored ignored-only</code> against an isolated
+database. The infrastructure to do this already exists in the workflow — the backend
+integration job stands up Postgres via <code>docker compose</code>, waits on health, and runs
+targeted <code>--run-ignored</code> selections (<code>ci.yml:592-717</code>). This is widening
+an existing pattern, not inventing one.</p>
+
+<h4>Why it is not first</h4>
+<p>Almost certainly some of the 208 currently fail or are flaky — that is the usual reason a
+pool goes dark and stays dark. A contributor who turns the job on hands the maintainers a red
+build and a pile of triage they did not ask for. The right sequence is: run them locally
+against a throwaway database, report <em>which</em> fail, and let the maintainers decide whether
+to fix or to quarantine. That is a reasonable next piece of work and it needs no permission —
+it happens entirely in a local clone.</p>
+</div>
+
+<div class="gap">
+<h2 id="s6" style="border:none;margin-top:1.4rem">Gap 5 — the absent RLS backstop, and why not to build it</h2>
+
+<h4>What is wrong</h4>
+<p>This is the most serious finding in the trust map and the one I recommend <em>not</em>
+attempting. The tenant-isolation proof is stated relative to axioms A-RLS-1 through A-RLS-5
+(<code>docs/multi-tenant-relay.md:350-374</code>), which require Postgres row-level security
+with a restrictive policy on every tenant-bearing table, a non-superuser
+<code>NOBYPASSRLS</code> request role, and <code>app.community_id</code> set transaction-locally
+before any query. The document is explicit about what that buys:</p>
+<blockquote>A query that fails to set <code>app.community_id</code> matches the policy predicate
+over NULL → no rows, never all rows. This is what makes a missed <em>application</em> predicate
+fail closed rather than leak.</blockquote>
+<p>None of it exists. No <code>ROW LEVEL SECURITY</code> or <code>CREATE POLICY</code> in any
+migration; no <code>NOBYPASSRLS</code> anywhere in <code>crates/</code>, <code>scripts/</code>,
+<code>.github/</code> or <code>deploy/</code>; no
+<code>set_config('app.community_id', …)</code> in <code>buzz-db</code>. Nor does the
+"startup/CI assertion suite" that <code>docs/multi-tenant-relay.md:655-660</code> says admits
+these axioms. So a forgotten predicate fails open.</p>
+
+<div class="callout warn">
+<span class="lab">Why I advise against building it as an outside contribution</span>
+<ul style="margin-bottom:0">
+<li><strong>A-RLS-3 is the trap.</strong> It requires tenant context to be set transaction-locally
+and never retained or combined across requests on a pooled connection. Get this subtly wrong —
+a <code>SET</code> instead of a <code>SET LOCAL</code>, a query that borrows a connection
+outside the transaction, a background task reusing a pooled handle — and you get a system that
+passes every test and cross-contaminates tenants under concurrency. That failure is worse than
+the status quo, because the status quo at least has no false assurance attached.</li>
+<li><strong>A-RLS-4 requires an audit we cannot perform from outside.</strong> Every
+<code>SECURITY DEFINER</code> and <code>leakproof</code> function in the request path has to be
+reviewed as part of the trusted boundary, because a <code>leakproof</code> function may be
+evaluated <em>ahead of</em> the policy check. That is a whole-codebase review with production
+context we do not have.</li>
+<li><strong>It changes the deployment contract.</strong> A non-superuser, non-owner (or
+<code>FORCE ROW LEVEL SECURITY</code>) request role means every existing operator's database
+provisioning has to change. That is a breaking operational change that only the maintainers can
+sequence and communicate.</li>
+<li><strong>We cannot verify it.</strong> See Gap 4 — the test pool that would catch a
+regression here is exactly the pool that does not run.</li>
+</ul>
+</div>
+
+<h4>What is worth doing instead</h4>
+<p>Build the <em>assertion</em>, not the enforcement. A startup or CI check that enumerates
+tenant-bearing tables and reports whether RLS is enabled with a restrictive policy, whether the
+connected role is <code>NOBYPASSRLS</code>, and whether <code>app.community_id</code> is set —
+failing loudly, or at minimum warning loudly, when the answer is no. This is honest: it does
+not pretend to close the gap, it makes the gap impossible to be unaware of, and it is precisely
+the artifact <code>docs/multi-tenant-relay.md:655-660</code> already says should exist. It is
+also small, self-contained, and carries none of the risks above, because it changes no query
+path.</p>
+
+<p>The enforcement itself belongs to whoever owns the deployment contract and can run the
+tests. The right outside contribution is the report, plus the check that keeps the report true.</p>
+</div>
+
+<h2 id="s7">What a good upstream report would say</h2>
+
+<p>If this goes to <code>block/buzz</code>, it should go as issues rather than as a PR, and it
+should separate the four findings by how much agreement they need. One procedural point first:
+the project's <code>SECURITY.md</code> opens with <em>"Please do not report security
+vulnerabilities through public GitHub issues"</em> and directs reporters to its private
+channel. Nothing here is a zero-day — every fact is derived from the public repository and
+several are documented by the project itself — but the media download default is the item most
+plausibly in scope, so route that one privately first and let the maintainers say whether the
+rest can be public.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Finding</th><th>Frame it as</th><th>Because</th></tr></thead>
+<tbody>
+<tr><td>Media GET default</td><td>A documentation and observability gap</td><td>The default is
+intentional; the silence about it is the defect.</td></tr>
+<tr><td>Untrusted prompt content</td><td>An inconsistency with an existing in-tree
+convention</td><td><code>handoff.rs:83-89</code> already establishes the house rule; this is
+one place that missed it.</td></tr>
+<tr><td>Permission auto-approval</td><td>A question, not a bug report</td><td>It is probably
+deliberate; the ask is whether it should be configurable.</td></tr>
+<tr><td>Absent RLS</td><td>A documentation-versus-code divergence</td><td>The proof's stated
+premise is not met by the shipped schema. Whether to build RLS or to weaken the document's
+claim is the maintainers' call — but the two should not disagree.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout myread">
+<span class="lab">My read on the whole exercise</span>
+None of these findings suggest carelessness. The repository contains a TLA+ specification, an
+independent replay checker built specifically so a buggy helper cannot launder its bug into the
+judge, a per-community hash-chain audit log with per-tenant advisory locks chosen to avoid a
+timing side channel, and migration lints that fail the build when a future table forgets its
+tenant column. That is a higher standard of security engineering than most projects reach. The
+gaps are the ordinary kind: a staged rollout whose unsafe half is silent, a convention applied
+in one crate and not another, an autonomy decision with no configuration surface, and a proof
+whose assumptions outran the schema. Naming them precisely is more useful than patching them
+imprecisely.
+</div>
+
+<hr>
+
+<p class="small">Unofficial. Not affiliated with Block, Inc. Companion to
+<a href="trust-map.html">the trust map</a>, which contains the evidence for every gap described
+here. Based on the public <code>block/buzz</code> repository at <code>main</code> @
+<code>b1b283cd4</code>, read 31 July 2026. No change described here has been submitted upstream.
+Line numbers drift between commits — re-verify before quoting. Licensed CC BY 4.0.</p>
+
+</div>
+</body>
+</html>

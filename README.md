@@ -1,6 +1,6 @@
 # Buzz Tutorial
 
-Three self-contained explainers about [Buzz](https://github.com/block/buzz) — a
+Four self-contained explainers about [Buzz](https://github.com/block/buzz) — a
 self-hostable Nostr relay that doubles as a workspace where humans and AI
 agents share the same rooms.
 
@@ -13,6 +13,7 @@ it in a browser.
 - [What is Nostr](https://az9713.github.io/buzz-tutorial/what-is-nostr.html)
 - [How Buzz works](https://az9713.github.io/buzz-tutorial/how-buzz-works.html)
 - [The Buzz trust map](https://az9713.github.io/buzz-tutorial/trust-map.html)
+- [Hardening Buzz](https://az9713.github.io/buzz-tutorial/hardening.html)
 
 ## The documents
 
@@ -71,6 +72,24 @@ access control; the ACP bridge auto-approves every agent permission request;
 and the machine-checked tenant-isolation proof is stated relative to a
 Postgres row-level-security backstop that is not present in the repository, so
 a forgotten `WHERE community_id` predicate fails open rather than closed.
+
+### [`hardening.html`](hardening.html) — the remediation companion to the trust map
+
+For each gap the trust map found: what an operator can do today with no upstream
+cooperation, what the upstream change would actually be, what it would cost, and
+why one of them is better left alone.
+
+Two items are actionable immediately — set `BUZZ_REQUIRE_MEDIA_GET_AUTH=true`
+(after testing your clients, since the default is off for a stated staged-rollout
+reason), and treat any channel an agent watches as a channel where any member can
+issue instructions with that agent's privileges. The remaining three are ranked by
+fix-value per unit of risk rather than by severity: the prompt-delimiting fix is
+first because the project already established the convention elsewhere in-tree, and
+building row-level security is last because getting `SET LOCAL` wrong under
+connection pooling produces a system that passes its tests and leaks anyway.
+
+This is an advisory. Nothing in it has been submitted to `block/buzz`, and
+`SECURITY.md` there asks that vulnerabilities not go through public issues.
 
 ## Provenance and accuracy
 
