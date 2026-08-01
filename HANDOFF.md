@@ -87,7 +87,7 @@ clone before quoting them anywhere public.
 
 ## Next task
 
-**Pick one; nothing is blocked.**
+**Two open tasks, both decided on 31 Jul 2026. Nothing is blocked.**
 
 1. **Enable GitHub Pages** so the HTML renders instead of showing source:
    `gh api -X POST repos/az9713/buzz-tutorial/pages -f source[branch]=main -f source[path]=/`
@@ -99,10 +99,8 @@ clone before quoting them anywhere public.
    access: name the mechanism that enforces it, the artifact that verifies it, and
    whether that verification is armed in production. Four of the six have
    surprising answers.
-3. **Open a PR to `block/buzz`** with the four `buzz-docs/` files, if you want
-   them upstream. Fork, copy `buzz-docs/{index,key-concepts}.md` and the two
-   subfolders into `docs/`, drop `buzz-docs/README.md`, confirm the relative
-   links resolve from that location, then open the PR.
+**Dropped** — an upstream PR to `block/buzz` with the four `buzz-docs/` files was
+considered and declined on 31 Jul 2026. Don't re-propose it. The docs stay here.
 
 ## Where to read things
 

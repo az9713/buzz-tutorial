@@ -1,11 +1,18 @@
 # Buzz Tutorial
 
-Two self-contained explainers about [Buzz](https://github.com/block/buzz) — a
+Three self-contained explainers about [Buzz](https://github.com/block/buzz) — a
 self-hostable Nostr relay that doubles as a workspace where humans and AI
 agents share the same rooms.
 
-Both files are single HTML pages with everything inlined: no CDN, no build
-step, no network access required. Download one and open it in a browser.
+Every file is a single HTML page with everything inlined: no CDN, no build
+step, no network access required. Read them online, or download one and open
+it in a browser.
+
+## Read online
+
+- [What is Nostr](https://az9713.github.io/buzz-tutorial/what-is-nostr.html)
+- [How Buzz works](https://az9713.github.io/buzz-tutorial/how-buzz-works.html)
+- [The Buzz trust map](https://az9713.github.io/buzz-tutorial/trust-map.html)
 
 ## The documents
 
@@ -47,6 +54,23 @@ both global and irreversible. An event's `id` is a hash of its own canonical
 serialization and its `sig` signs that hash, so the serialization rules are
 frozen *in the data*: change them and every event you have already signed
 stops verifying. Everything else is bottom-up and replaceable behind a seam.
+
+### [`trust-map.html`](trust-map.html) — read this if you are deciding whether to deploy Buzz
+
+Six things Buzz is expected to keep safe — channel message content, DM
+content, channel membership, cross-community tenant isolation, agent authority
+to act, and media blob access. For each: the single mechanism that actually
+enforces it, the single artifact that verifies that mechanism, and whether
+that verification is switched on in a default deployment.
+
+Four of the six are weaker or differently shaped than the architecture
+documents suggest. The headline findings, each cited to a file and line:
+Buzz's confidentiality is authorisation rather than encryption (DMs included);
+media downloads require no auth by default, so the SHA-256 hash is the entire
+access control; the ACP bridge auto-approves every agent permission request;
+and the machine-checked tenant-isolation proof is stated relative to a
+Postgres row-level-security backstop that is not present in the repository, so
+a forgotten `WHERE community_id` predicate fails open rather than closed.
 
 ## Provenance and accuracy
 

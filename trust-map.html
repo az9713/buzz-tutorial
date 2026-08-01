@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Buzz trust map — what actually enforces each guarantee</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+figure{margin:1.8rem 0;padding:0}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{color:var(--muted);font-size:.86rem;line-height:1.5;margin-top:.6rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+figcaption::before{content:"Fig. " counter(figc) ". ";font-weight:600;color:var(--fg)}
+body{counter-reset:figc}
+figure{counter-increment:figc}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.v{font-style:italic}
+.rowhead{font-weight:650}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+<h1>The Buzz trust map</h1>
+<p class="sub">Six things Buzz is expected to keep safe. For each one: the single mechanism
+that actually enforces it, the single artifact that verifies that mechanism, and whether that
+verification is switched on in a default production deployment. Four of the six answers are
+weaker or differently shaped than the architecture documents lead you to expect.</p>
+</header>
+
+<div class="toc">
+<strong>Contents</strong>
+<ol>
+<li><a href="#s0">What this document is, and how to read it</a></li>
+<li><a href="#s1">The map at a glance</a></li>
+<li><a href="#s2">(a) Channel message content</a></li>
+<li><a href="#s3">(b) DM content</a></li>
+<li><a href="#s4">(c) Channel membership</a></li>
+<li><a href="#s5">(d) Cross-community tenant isolation</a></li>
+<li><a href="#s6">(e) Agent authority to act</a></li>
+<li><a href="#s7">(f) Media blob access</a></li>
+<li><a href="#s8">What is armed, and what only looks armed</a></li>
+<li><a href="#s9">Where the documents have drifted from the code</a></li>
+<li><a href="#s10">The honest one-paragraph summary</a></li>
+</ol>
+</div>
+
+<h2 id="s0">What this document is, and how to read it</h2>
+
+<p>Buzz is a self-hostable Nostr relay that doubles as a team workspace where AI agents are
+members rather than bots. Like any such system, it carries a set of implicit promises: your
+private messages stay private, only members see a channel, one organisation's data does not
+leak into another's, an agent cannot do more than it is allowed, and uploaded files are not
+world-readable.</p>
+
+<p>This document takes each of those promises and asks three questions in order. They are
+deliberately narrow.</p>
+
+<ol>
+<li><strong>What actually stops it from breaking?</strong> Not what the documentation says —
+the specific thing in the running code. Is it mathematics (encryption nobody can undo)? A
+database predicate (<code>WHERE community_id = $1</code>)? A schema constraint the database
+itself refuses to violate? A compile-time fence? A hardcoded allowlist? Or — the weakest kind —
+a paragraph of English in a prompt file, politely asking a language model to behave?</li>
+<li><strong>What proves that thing works?</strong> A test, a formal proof, a runtime monitor,
+or nothing.</li>
+<li><strong>Is that proof switched on in the shipped product?</strong> A test that only runs
+behind a flag nobody sets, or a monitor bound to a no-op sink in production, is not a live
+guarantee. It may still be a perfectly good engineering artifact — but it is verifying the
+code, not watching the deployment.</li>
+</ol>
+
+<div class="callout">
+<span class="lab">Why this framing catches real errors</span>
+An earlier version of the companion document <a href="what-is-nostr.html">What is Nostr</a>
+implied that Buzz's own direct messages were end-to-end encrypted, because the Nostr
+specification NIP-17 <em>sounds</em> like it must apply. It does not. That mistake came from
+mapping a plausible spec onto a code path nobody had opened. Doing the check systematically —
+six properties, same three questions — is what this page is.
+</div>
+
+<div class="callout myread">
+<span class="lab">Sourcing rule</span>
+Every claim below is cited to a file and line in the upstream repository
+(<code>github.com/block/buzz</code>), read directly, on 31 July 2026 against
+<code>main</code> @ <code>b1b283cd4</code>. Where I am reporting what a document asserts, I say
+<em>the docs say</em>. Where I am supplying an inference, I say so. Line numbers drift — an
+earlier pass found <code>buzz-agent/src/config.rs</code> had moved about thirteen lines between
+sessions. Re-verify before quoting any of these anywhere that matters.
+</div>
+
+<h2 id="s1">The map at a glance</h2>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr><th>Property</th><th>What actually enforces it</th><th>What verifies that</th><th>Armed by default?</th></tr>
+</thead>
+<tbody>
+<tr>
+<td class="rowhead">(a) Channel message content</td>
+<td>Server-side SQL membership predicate. <strong>Not encryption</strong> — content is
+plaintext in Postgres.</td>
+<td>208 Postgres-backed tests, plus a formal trace-conformance checker.</td>
+<td><span class="tag r">Mostly not</span> The DB tests are <code>#[ignore]</code>d and only a
+named handful run in CI.</td>
+</tr>
+<tr>
+<td class="rowhead">(b) DM content</td>
+<td>The same SQL membership predicate. DMs are ordinary channels. <strong>No end-to-end
+crypto in the Desktop path.</strong></td>
+<td>Same as (a).</td>
+<td><span class="tag r">Mostly not</span> — and the relay operator can read every DM by
+construction.</td>
+</tr>
+<tr>
+<td class="rowhead">(c) Channel membership</td>
+<td>Database rows the client cannot write. Membership-snapshot events are a relay-only
+kind and forged ones are rejected.</td>
+<td>A live end-to-end test that forges a snapshot and asserts rejection.</td>
+<td><span class="tag g">Yes</span> — named explicitly in the CI relay-e2e job.</td>
+</tr>
+<tr>
+<td class="rowhead">(d) Tenant isolation</td>
+<td>Application-level <code>WHERE community_id</code> predicates + composite primary keys
++ a migration lint. <strong>Postgres row-level security does not exist in the repo.</strong></td>
+<td>A TLA+ specification and an independent Rust replay checker — but the proof is stated
+<em>relative to</em> RLS axioms that are unimplemented.</td>
+<td><span class="tag a">Partly</span> The checker runs in CI; production binds a no-op
+tracer; the RLS backstop is absent.</td>
+</tr>
+<tr>
+<td class="rowhead">(e) Agent authority</td>
+<td>OAuth-style scopes, an event filter expression, and a prompt file. The agent's own
+permission prompts are <strong>auto-approved</strong> by the bridge.</td>
+<td>Unit tests on the filter and scopes. Nothing verifies the prompt.</td>
+<td><span class="tag r">No meaningful bound</span> beyond whatever sandbox the underlying
+agent CLI provides.</td>
+</tr>
+<tr>
+<td class="rowhead">(f) Media blob access</td>
+<td>Uploads: signed Blossom auth + relay membership. Downloads: <strong>knowledge of the
+SHA-256 hash, and nothing else, by default.</strong></td>
+<td>The auth path has tests; the default-open download path is asserted <em>to be
+open</em> by a config test.</td>
+<td><span class="tag r">Off by default</span> —
+<code>require_media_get_auth</code> defaults to <code>false</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<figure>
+<svg viewBox="0 0 720 232" role="img" aria-label="A ladder of enforcement strength from cryptography at the strongest down to prose in a prompt file at the weakest, with each Buzz property placed on a rung.">
+<style>
+.lb{font:600 12px ui-sans-serif,system-ui,sans-serif;fill:currentColor}
+.ls{font:11px ui-sans-serif,system-ui,sans-serif;fill:currentColor;opacity:.62}
+.lt{font:600 10.5px ui-sans-serif,system-ui,sans-serif;fill:currentColor;opacity:.85}
+</style>
+<g stroke="currentColor" stroke-opacity=".2" fill="none">
+<rect x="8" y="8" width="704" height="30" rx="4"/>
+<rect x="8" y="46" width="704" height="30" rx="4"/>
+<rect x="8" y="84" width="704" height="30" rx="4"/>
+<rect x="8" y="122" width="704" height="30" rx="4"/>
+<rect x="8" y="160" width="704" height="30" rx="4"/>
+<rect x="8" y="198" width="704" height="26" rx="4"/>
+</g>
+<text class="lb" x="20" y="27">Cryptography</text>
+<text class="ls" x="168" y="27">signature nobody can forge, ciphertext nobody can read</text>
+<text class="lt" x="560" y="27">event signatures only</text>
+<text class="lb" x="20" y="65">Schema constraint</text>
+<text class="ls" x="168" y="65">the database itself refuses the write</text>
+<text class="lt" x="560" y="65">(c) membership, (d) keys</text>
+<text class="lb" x="20" y="103">Application SQL predicate</text>
+<text class="ls" x="168" y="103">correct only if every call site remembers it</text>
+<text class="lt" x="560" y="103">(a) (b) (d)</text>
+<text class="lb" x="20" y="141">Config flag</text>
+<text class="ls" x="168" y="141">enforced only when an operator turns it on</text>
+<text class="lt" x="560" y="141">(f) media downloads</text>
+<text class="lb" x="20" y="179">Filter expression</text>
+<text class="ls" x="168" y="179">a boolean over event fields, evaluated with a timeout</text>
+<text class="lt" x="560" y="179">(e) which events reach an agent</text>
+<text class="lb" x="20" y="216">Prose in a prompt file</text>
+<text class="ls" x="168" y="216">a request, not a fence</text>
+<text class="lt" x="560" y="216">(e) what the agent then does</text>
+</svg>
+<figcaption>The enforcement ladder. Strength falls as you go down: the top two rungs hold
+even against a buggy caller, the middle rungs hold only if every call site and every operator
+gets it right, and the bottom rung holds only if a language model chooses to cooperate. Buzz's
+six properties do not cluster at the top.</figcaption>
+</figure>
+
+<h2 id="s2">(a) Channel message content</h2>
+
+<h4>What enforces it</h4>
+
+<p>A SQL predicate computed once per read request. When a client opens a Nostr
+<code>REQ</code> subscription, the relay builds a list of the channels that connection's
+public key may see, and pushes that list into the database query rather than filtering after
+the fact. The list comes from one function
+(<code>crates/buzz-db/src/channel.rs:746-774</code>) which is the union of two arms: rows in
+<code>channel_members</code> where the member has not been removed, and every channel whose
+visibility is <code>'open'</code>. Both arms carry <code>WHERE community_id = $1</code>.</p>
+
+<p>That vector is built at <code>crates/buzz-relay/src/handlers/req.rs:88-106</code> and
+applied to the query at <code>req.rs:291</code> via
+<code>apply_access_scope_to_query</code>. There is a further per-filter check at
+<code>req.rs:376</code> for subscriptions naming an explicit channel.</p>
+
+<p>The lookup is cached for ten seconds
+(<code>crates/buzz-relay/src/state.rs:748-753</code>, read at <code>state.rs:1090-1107</code>)
+with explicit invalidation on membership change, propagated across relay nodes
+(<code>state.rs:864-895</code>). So the worst case after removing someone, if the cross-node
+invalidation message is lost, is ten seconds of continued read access — not indefinite.</p>
+
+<div class="callout warn">
+<span class="lab">The part people get wrong</span>
+Channel message content is <strong>not encrypted at rest and not encrypted in transit beyond
+ordinary TLS</strong>. The <code>content</code> column holds the plaintext. The protection is
+that the relay declines to <em>select</em> rows you are not entitled to. This is a real
+protection with a real threat model — it stops other users — but it fails differently from
+encryption: anyone with database access, or a bug in one query's predicate, reads everything.
+The one place the repository does store ciphertext in <code>content</code> is the NIP-ER event
+reminder kind (<code>crates/buzz-db/src/event.rs:1390</code>), which is self-encrypted by its
+author; that is the exception, not the rule.
+</div>
+
+<h4>What verifies it, and whether it is armed</h4>
+
+<p>This is where it gets interesting. There are <strong>208</strong> tests in the crates
+directory carrying <code>#[ignore = "requires Postgres"]</code>. The project's own test runner
+is explicit that nothing runs them
+(<code>scripts/run-tests.sh:93-100</code>):</p>
+
+<pre><code># buzz-db migrator/lint unit tests (no infra) ... The Postgres-backed
+# buzz-db tests are #[ignore]d; nothing here (or in integration mode below,
+# which runs `cargo test -p buzz-db` without --ignored) runs them — they need a
+# separate isolated-DB gate, so --lib keeps this step infra-free.</code></pre>
+
+<p>Continuous integration does reach into that pool, but by name, not wholesale. The backend
+integration job runs three narrow selections with
+<code>--run-ignored ignored-only</code>: the invite security tests, the NIP-ER reminder
+end-to-end binary, and a single named deletion-ordering test
+(<code>.github/workflows/ci.yml:687-717</code>). Everything else in the 208 is dark unless a
+developer runs it locally against a live Postgres.</p>
+
+<div class="callout myread">
+<span class="lab">My read</span>
+This is a defensible engineering position — Postgres-backed tests are slow and the project has
+built cheaper substitutes (the migration lints and the conformance replay checker, both
+infra-free and both genuinely armed). But it means the sentence "the membership predicate is
+tested" is true of the test file and not of the pipeline. If you are evaluating Buzz for a
+deployment, the honest statement is: the read-path membership gate is enforced by code that is
+reviewed, formally modelled, and largely not exercised against a real database on every commit.
+</div>
+
+<h2 id="s3">(b) DM content</h2>
+
+<h4>What enforces it</h4>
+
+<p>Exactly the same thing as (a), because a Buzz direct message <em>is</em> a channel. The
+Desktop client's <code>open_dm</code> command publishes a <code>kind:41010</code> event and
+the relay replies with an allocated channel id
+(<code>desktop/src-tauri/src/commands/dms.rs:17-44</code>; the kind constant is
+<code>KIND_DM_OPEN</code> at <code>crates/buzz-core/src/kind.rs:494</code>). From that point
+the conversation is ordinary <code>kind:9</code> messages tagged with the channel via
+<code>#h</code>, stored in the same table, read through the same
+<code>accessible_channels</code> gate.</p>
+
+<div class="callout warn">
+<span class="lab">The most important correction on this page</span>
+<strong>Buzz Desktop DMs are not end-to-end encrypted.</strong> Their confidentiality rests
+entirely on the relay's willingness to authorise a read. The relay operator can read every
+direct message on their server. This is a different security property from what most people
+mean by "DM", and it is the property that the naming does not advertise.
+</div>
+
+<p>The precise wording matters here, because it is easy to overstate in the other direction.
+Nostr's gift-wrap primitive, <code>kind:1059</code>, <em>is</em> real production code in the
+Buzz relay: it is in the push-notification kind list
+(<code>crates/buzz-relay/src/handlers/push_lease.rs:15</code>), it has a dedicated
+authorisation carve-out in the read path
+(<code>crates/buzz-relay/src/handlers/req.rs:937</code>), and it has a match-time
+authorisation gate in the push runtime because — in the code's own words —
+"Kind 1059 is globally stored and leaks recipient activity through wake timing, so a lease may
+only match gift wraps addressed to its own author"
+(<code>crates/buzz-relay/src/push_runtime.rs:289-291</code>). Third-party Nostr clients can
+use gift-wrapped messaging against a Buzz relay.</p>
+
+<p>What is absent is any use of it in the Desktop application's own DM-building path. A search
+of <code>desktop/src-tauri/src</code> for <code>1059</code> returns hits in exactly one file:
+<code>desktop/src-tauri/src/archive/mod_tests.rs</code>, where it appears as a subscription
+filter in an archive test. So: <em>"gift wrap only exists in test files"</em> is too strong.
+<em>"The Buzz Desktop DM path does not use gift wrap"</em> is correct.</p>
+
+<h2 id="s4">(c) Channel membership</h2>
+
+<h4>What enforces it</h4>
+
+<p>Rows in the <code>channel_members</code> table, which no client can write. This is the
+strongest of the six, and the mechanism is worth naming precisely: Buzz publishes membership
+as a Nostr event kind (<code>kind:13534</code>, the NIP-43 membership snapshot), but that kind
+is <em>relay-only</em>. A client that signs and submits its own snapshot claiming to be an
+owner is refused.</p>
+
+<h4>What verifies it, and whether it is armed</h4>
+
+<p>A live end-to-end test does precisely that attack
+(<code>crates/buzz-test-client/tests/e2e_relay.rs:219-237</code>). It first proves the actor
+can submit a normal event, so the subsequent rejection cannot be dismissed as a broad
+authorisation failure, then forges a <code>kind:13534</code> snapshot tagging itself as
+<code>owner</code> and asserts the relay's reply is exactly
+<code>"restricted: relay-only kind"</code> — over WebSocket and over HTTP.</p>
+
+<p>That test is named explicitly in the CI relay-e2e job
+(<code>.github/workflows/ci.yml:755</code>), running against a live relay. It is one of the
+few security invariants in this document with a genuine adversarial test that fires on every
+qualifying commit.</p>
+
+<div class="callout">
+<span class="lab">Verdict</span>
+Membership is the property whose enforcement most closely matches what a reader would assume:
+server-authoritative state, client assertions rejected, an adversarial test armed in CI.
+</div>
+
+<h2 id="s5">(d) Cross-community tenant isolation</h2>
+
+<p>This is the property with the largest gap between the documentation's sophistication and
+the code's actual defences — not because the code is bad, but because the documentation
+describes a two-layer defence and the second layer is unbuilt.</p>
+
+<h4>What enforces it</h4>
+
+<p>Three things, all at the application and schema level:</p>
+
+<ol>
+<li><strong>Predicates.</strong> Every tenant-bearing query carries
+<code>WHERE community_id = $1</code>. The access-checker trait is documented with an unusually
+clear statement of why (<code>crates/buzz-auth/src/access.rs:22-30</code>): channel UUIDs are
+not globally unique, the primary key is <code>(community_id, id)</code>, so a bare
+<code>WHERE id = $1</code> would be "a cross-community existence oracle".</li>
+<li><strong>Composite keys.</strong> Uniqueness and foreign-key constraints lead with
+<code>community_id</code>, so a conflict result cannot reveal the existence of another
+tenant's row.</li>
+<li><strong>A migration lint.</strong> This is the clever part. Rather than trusting future
+authors to remember, a unit test parses the concatenated SQL of <em>every</em> embedded
+migration and rejects tables missing <code>community_id</code>, or scoped key constraints not
+led by it (<code>crates/buzz-db/src/migration.rs:368-507</code>, with the lint's own tests at
+<code>925-988</code>). It runs in <code>cargo test -p buzz-db --lib</code>, needs no
+infrastructure, and is armed in CI.</li>
+</ol>
+
+<h4>What verifies it</h4>
+
+<p>Two artifacts, and they are serious. There is a TLA+ specification,
+<code>docs/spec/MultiTenantRelay.tla</code>, encoding a non-interference invariant — an
+observation made under community B's context must never carry a row labelled A. And there is
+an independent replay checker, the <code>buzz-conformance</code> crate, whose design note is
+worth quoting because it states the right ambition
+(<code>crates/buzz-conformance/src/lib.rs:1-36</code>):</p>
+
+<blockquote>Don't ask "did the model pass"; ask "did the running code emit a trace the model
+accepts."</blockquote>
+
+<p>The checker deliberately shares no type machinery with production — it defines its own
+community-label newtype rather than reusing <code>buzz_core::CommunityId</code>, on the stated
+grounds that a shared normalisation helper could hide its own bug from both the emitter and
+the judge. It also treats missing coverage as a failure: a critical seam exited without
+emitting a trace step is itself a breach, because "without it, trace conformance is decorative
+logging."</p>
+
+<h4>Whether it is armed — two separate answers</h4>
+
+<p><strong>The replay checker is armed in CI, and deliberately inert in production.</strong>
+Production binds a no-op tracer (<code>crates/buzz-relay/src/state.rs:799</code>); the
+JSONL-emitting tracer is for conformance tests and the CI replay job
+(<code>crates/buzz-relay/src/conformance/tracers.rs:1-2</code>). That is a reasonable design —
+it is a verification of the code, not a runtime intrusion detector — but it means no deployed
+Buzz relay is checking its own traces against the model while serving traffic.</p>
+
+<div class="callout warn">
+<span class="lab">The headline finding: the fail-closed backstop does not exist</span>
+<p style="margin-top:0">The non-interference proof is explicitly stated as holding
+<em>relative to</em> a set of axioms, and the first block of them is Postgres row-level
+security (<code>docs/multi-tenant-relay.md:350-374</code>). A-RLS-1 requires every
+tenant-bearing table to have RLS enabled with a restrictive policy
+<code>community_id = current_setting('app.community_id')::uuid</code>. A-RLS-2 requires the
+relay's database role to be non-superuser and <code>NOBYPASSRLS</code>. A-RLS-3 requires
+<code>app.community_id</code> to be set transaction-locally before any query. The document is
+precise about why this matters:</p>
+<blockquote style="margin:.6rem 0">A query that fails to set <code>app.community_id</code>
+matches the policy predicate over NULL → no rows, never all rows. This is what makes a missed
+<em>application</em> predicate fail closed rather than leak.</blockquote>
+<p>The design document says these are "admitted by a startup/CI assertion suite" that
+enumerates every tenant-bearing table and "A failing assertion rejects the deployment"
+(<code>docs/multi-tenant-relay.md:655-660</code>).</p>
+<p><strong>Neither the RLS nor the assertion suite is present in the repository.</strong>
+Searching every migration in <code>migrations/</code> for <code>ROW LEVEL SECURITY</code> or
+<code>CREATE POLICY</code> returns nothing. Searching <code>crates/</code>,
+<code>scripts/</code>, <code>.github/</code> and <code>deploy/</code> for
+<code>NOBYPASSRLS</code> returns nothing. Searching <code>crates/buzz-db</code> for
+<code>set_config('app.community_id'…)</code> returns nothing — the only
+<code>set_config</code> calls set unrelated session variables
+(<code>buzz.created_at_floor</code>, <code>buzz.nip_rs_hard_delete</code>).</p>
+<p><strong>Consequence, stated plainly:</strong> a query that forgets its
+<code>WHERE community_id</code> predicate today fails <em>open</em>, returning every tenant's
+matching rows, not closed. The single mechanism enforcing tenant isolation is therefore
+application-level discipline plus composite keys plus a migration lint — a good three-layer
+story, but one layer thinner than the proof's own stated premise. This is my inference from
+the absence of the code; the document may describe an obligation the project intends to place
+on the operator rather than ship, but no deployment chart, script, or startup check in the
+repository establishes it either.</p>
+</div>
+
+<h2 id="s6">(e) Agent authority to act</h2>
+
+<p>Buzz's distinguishing claim is that AI agents are members of a workspace rather than
+webhooks bolted onto it. That makes "what is an agent allowed to do" a first-class security
+question, and it is the softest of the six.</p>
+
+<h4>Layer one: scopes (real, but incomplete)</h4>
+
+<p>There is a proper OAuth-style scope enum —
+<code>MessagesRead</code>, <code>MessagesWrite</code>, <code>AdminChannels</code>,
+<code>FilesWrite</code> and so on (<code>crates/buzz-auth/src/scope.rs:16-56</code>). Two of
+its variants document their own gaps, which is admirable and also load-bearing:
+<code>ReposRead</code> is <em>"Reserved for future use. Not currently enforced by git HTTP
+routes"</em> (<code>scope.rs:46-50</code>), and <code>ReposWrite</code> is enforced on
+WebSocket ingest but <em>"NOT enforced by git HTTP push routes"</em>
+(<code>scope.rs:51-56</code>). Those routes fall back to NIP-98 auth plus an owner check
+instead. So the scope vocabulary is wider than the scope enforcement.</p>
+
+<h4>Layer two: the event filter (real, narrow)</h4>
+
+<p>Which events reach an agent at all is decided by boolean expressions evaluated over event
+fields — content, author, kind, channel, timestamp — with a hard timeout and a length bound
+(<code>crates/buzz-acp/src/filter.rs:1-50</code>). First matching subscription rule wins. This
+is a genuine gate, but it governs <em>input selection</em>, not what the agent may do once
+triggered.</p>
+
+<h4>Layer three: the prompt (not a fence)</h4>
+
+<p>The rest of the agent's constraints live in <code>crates/buzz-acp/src/base_prompt.md</code>
+as prose: never post to a different channel than the one you were tagged in, do not format
+mentions with bold or backticks, never publish a bare acknowledgement, never run recursive
+searches over <code>$HOME</code>. These are instructions to a language model. They are
+requests. A model that ignores them has broken no fence.</p>
+
+<div class="callout warn">
+<span class="lab">The gap: permission prompts are auto-approved</span>
+<p style="margin-top:0">Buzz drives real agent CLIs — Claude Code, Codex, Goose — over the
+Agent Client Protocol. Those CLIs raise a <code>session/request_permission</code> request
+before a sensitive tool call: the human-in-the-loop moment. Buzz's bridge answers it
+automatically. The handler at <code>crates/buzz-acp/src/acp.rs:1856-1900</code> is documented
+as <em>"Auto-approve a <code>session/request_permission</code> request from the agent"</em>;
+it locates the option whose <code>kind</code> is <code>allow_once</code> and responds with
+that option's id, falling back to <code>reject_once</code> only if no allow option is offered.
+There is no policy check, no allowlist, no owner consultation.</p>
+<p>The engineering care in that function is real — it never hardcodes an option id, it handles
+both numeric and string JSON-RPC ids, it guards a double-response race. It is careful code
+that implements "always yes".</p>
+</div>
+
+<div class="callout warn">
+<span class="lab">The compounding gap: untrusted text sits in the instruction plane</span>
+Channel content reaches the agent by direct string interpolation. The prompt block is built as
+<code>"Event ID: … Channel: … Kind: … From: … Time: … Content: {content}"</code> at
+<code>crates/buzz-acp/src/queue.rs:1097-1109</code>, with the event's tags serialised in
+immediately after. There is no escaping, no delimiter, no untrusted-data preamble, no
+structural separation between the operator's instructions and text that any channel member —
+or anyone who can get a message into a channel an agent watches — controls. Combined with
+unconditional permission approval, the practical bound on what a Buzz agent will do is whatever
+sandbox the underlying CLI enforces on its own, not anything Buzz imposes.
+</div>
+
+<h4>What verifies it</h4>
+
+<p>Unit tests on filter evaluation and on scope checks. Nothing verifies the prompt, because
+nothing can: there is no test that asserts a language model obeys a paragraph. This is not a
+Buzz failing so much as a property of the category, but it is the reason the agent plane —
+not the relay — is where the trust boundary is thin.</p>
+
+<h2 id="s7">(f) Media blob access</h2>
+
+<p>Uploads and downloads have completely different security postures, and the asymmetry is the
+finding.</p>
+
+<h4>Uploads: strongly gated</h4>
+
+<p>An upload must present a Blossom <code>kind:24242</code> authorisation event, and the
+extractor validates it before a single byte of the body is buffered — deliberately, so an
+unauthenticated caller cannot force the server to read a large body
+(<code>crates/buzz-relay/src/api/media.rs:26-32</code>). Validation covers the Schnorr
+signature, the kind, the verb tag, a future expiration, a past <code>created_at</code> with
+five seconds of clock-skew tolerance, and the server-domain tag
+(<code>crates/buzz-media/src/auth.rs:20-70</code>). Then the <code>X-SHA-256</code> header must
+match an <code>x</code> tag inside the signed event, so the authorisation is bound to this
+exact blob. Then NIP-43 relay membership is enforced, described in the code as
+<em>"the only upload authority: independent of bearer-token / api_tokens storage"</em>
+(<code>media.rs:203-218</code>). Then a rate limit and a concurrency permit. Five gates.</p>
+
+<div class="callout warn">
+<span class="lab">Downloads: open by default</span>
+<p style="margin-top:0">The corresponding read gate is behind a config flag that ships off.
+<code>require_media_get_auth</code> is documented as <em>"Require Blossom kind:24242
+<code>t=get</code> auth plus relay membership before serving media GET/HEAD. Default off for
+staged client rollout"</em> (<code>crates/buzz-relay/src/config.rs:212-214</code>), read from
+<code>BUZZ_REQUIRE_MEDIA_GET_AUTH</code> at <code>config.rs:742-748</code>. A config test
+asserts the default and explains it:
+<code>assert!(!config.require_media_get_auth, "require_media_get_auth should default to false
+for staged client rollout")</code> (<code>config.rs:1037-1040</code>).</p>
+<p>With the flag off, <code>authenticate_media_read</code> binds the tenant from the request
+host and returns immediately, skipping both the Blossom check and the membership check
+(<code>crates/buzz-relay/src/api/media.rs:494-498</code>). The response is served with
+<code>Cache-Control: public, max-age=31536000, immutable</code> rather than
+<code>private</code> (<code>media.rs:517-521</code>), so intermediaries may cache it.</p>
+<p><strong>So the default access control on a Buzz media blob is knowledge of its SHA-256
+hash.</strong> That is a capability URL: a 256-bit unguessable secret, which is genuinely
+strong against brute force and genuinely weak against every way a URL leaks — a pasted link, a
+<code>Referer</code> header, a browser history sync, a screenshot, a cache. Channel membership
+is not consulted. A file shared into a private channel is retrievable by anyone who obtains
+its hash, from outside the community, with no credential at all.</p>
+</div>
+
+<div class="callout myread">
+<span class="lab">My read</span>
+The flag's own comment tells you this is a migration in progress: the enforcement is written,
+tested and ready, and it is off so that clients that do not yet send Blossom get-auth headers
+keep working. That is a normal staged rollout. But "written and off" is exactly the state this
+document exists to catch, and an operator reading <code>ARCHITECTURE.md</code> would not
+discover it. If you self-host Buzz and care about attachment confidentiality, set
+<code>BUZZ_REQUIRE_MEDIA_GET_AUTH=true</code> and verify your clients still work.
+</div>
+
+<h2 id="s8">What is armed, and what only looks armed</h2>
+
+<p>Pulling the verification question out on its own, because it is where the surprises
+concentrate.</p>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr><th>Artifact</th><th>What it checks</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>NIP-43 forged-snapshot e2e test</td><td>Clients cannot assert their own
+membership</td><td><span class="tag g">Armed in CI</span> named at <code>ci.yml:755</code></td></tr>
+<tr><td>Migration tenant lints</td><td>No new table without <code>community_id</code>; scoped
+keys lead with it</td><td><span class="tag g">Armed in CI</span> infra-free,
+<code>-p buzz-db --lib</code></td></tr>
+<tr><td><code>buzz-conformance</code> replay checker</td><td>Emitted traces satisfy the TLA+
+non-interference relation</td><td><span class="tag a">Armed in CI, inert in production</span>
+<code>NoopTracer</code> at <code>state.rs:799</code></td></tr>
+<tr><td>Invite security tests</td><td>Invite token handling</td><td><span class="tag g">Armed</span>
+via <code>--run-ignored ignored-only</code>, <code>ci.yml:687-694</code></td></tr>
+<tr><td>Tamper-evident audit log</td><td>Per-community SHA-256 hash chain; a row lifted from
+one community's chain cannot verify in another's</td><td><span class="tag g">On by default</span>
+<code>BUZZ_AUDIT_ENABLED</code> defaults true, <code>config.rs:853</code></td></tr>
+<tr><td>The other ~200 Postgres tests</td><td>Membership, tenant scoping, deletion semantics,
+moderation</td><td><span class="tag r">Not run</span> <code>run-tests.sh:93-100</code></td></tr>
+<tr><td>RLS assertion suite (A-RLS-1..5)</td><td>The fail-closed backstop the proof assumes
+</td><td><span class="tag r">Does not exist</span> zero matches repo-wide</td></tr>
+<tr><td><code>base_prompt.md</code></td><td>Agent behaviour</td><td><span class="tag r">Unverifiable
+by construction</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One artifact deserves a note of genuine credit. The audit log
+(<code>crates/buzz-audit/src/lib.rs:1-18</code>) is a per-community SHA-256 hash chain in which
+the community id is folded into the hash, so — in the crate's own words — "a row lifted out of
+one community's chain can never verify inside another's; chain identity carries the tenant."
+Writes are serialised by a <em>per-community</em> Postgres advisory lock rather than one global
+lock, which avoids making every tenant's write latency observable to every other tenant. That
+is a timing-side-channel consideration most projects would not have made, and it is on by
+default.</p>
+
+<h2 id="s9">Where the documents have drifted from the code</h2>
+
+<p>Two drifts surfaced during this pass. In both, the code is newer and safer than the
+document.</p>
+
+<p><strong>The <code>get_accessible_channel_ids</code> "landmine" is fixed.</strong> The TLA+
+specification's source-grounding note states that this function "currently unions all open
+channels in the DB; that unscoped variant is the explicit I1 mutation"
+(<code>docs/spec/MultiTenantRelay.tla:38-40</code>), and the design document repeats it,
+citing <code>crates/buzz-db/src/channel.rs:545-560</code>
+(<code>docs/multi-tenant-relay.md:896-899</code>). The function now lives at
+<code>channel.rs:746-774</code> and both of its arms carry
+<code>WHERE community_id = $1</code>. The hazard the documents warn about no longer exists in
+the code they cite. This is the healthy direction of drift, but it means a reader trusting the
+spec's source notes would be hunting a fixed bug.</p>
+
+<p><strong>The RLS backstop drifts the other way.</strong> Unlike the case above, here the
+document describes something stronger than the code provides — see (d). That is the drift
+direction that matters, and it is the one to re-check on every future pass.</p>
+
+<p>These join the two drifts already recorded in the companion documents: the rate-limiting
+description and the <code>MAX_FRAME_BYTES</code> value in <code>ARCHITECTURE.md</code>. The
+working rule for this repository holds — <strong>when the documents and the code disagree, the
+code is newer</strong> — but the RLS case shows the rule is not a safety guarantee, only a
+recency one.</p>
+
+<h2 id="s10">The honest one-paragraph summary</h2>
+
+<p>Buzz's confidentiality is <em>authorisation</em>, not <em>encryption</em>. Channel messages
+and direct messages alike are plaintext rows in Postgres, protected by a membership predicate
+the relay pushes into every read query; the relay operator can read everything, and the
+difference between a private channel and a public one is a <code>WHERE</code> clause, not a
+key. Membership itself is the strongest link — server-authoritative, client assertions
+rejected, adversarially tested in CI on every commit. Tenant isolation is enforced by three
+real application-and-schema layers and modelled by a serious TLA+ specification with an
+independent replay checker, but that proof is stated relative to a Postgres row-level-security
+backstop that is not present anywhere in the repository, so a forgotten predicate fails open
+rather than closed. Media uploads pass five gates; media downloads pass none by default, making
+the SHA-256 hash the entire access control. And agent authority — the thing that makes Buzz
+distinctive — is bounded by scopes with documented enforcement gaps, an input filter, a prompt
+file that is a request rather than a fence, an ACP bridge that auto-approves every permission
+request the agent raises, and raw attacker-controllable channel text interpolated straight into
+the instruction plane. None of this makes Buzz unsound for its stated purpose, which is a
+self-hosted workspace among people who already trust the operator. It does mean that four of
+the six properties — DM content, tenant isolation, agent authority, and media access — are
+weaker or differently shaped than a careful reader of <code>ARCHITECTURE.md</code> would
+assume, and each of those four has a concrete, actionable fix: publish the authorisation model
+honestly, ship the RLS policies, gate agent permissions, and flip
+<code>BUZZ_REQUIRE_MEDIA_GET_AUTH</code> on.</p>
+
+<hr>
+
+<p class="small">Unofficial. Not affiliated with Block, Inc. Written by reading the public
+<code>block/buzz</code> repository at <code>main</code> @ <code>b1b283cd4</code> on 31 July
+2026. Every file and line citation was opened directly rather than inferred; line numbers drift
+between commits and should be re-verified before being quoted. Where a claim is my inference
+from the absence of code rather than the presence of it, it is labelled as such in the text.
+Licensed CC BY 4.0.</p>
+
+</div>
+</body>
+</html>
