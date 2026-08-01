@@ -11,13 +11,14 @@ this file deliberately does not name — it is a public repo):
 - **Working folder** — `<working folder>` holds an upstream clone
   of `block/buzz` plus local-only research notes
 
-Last session: 1 August 2026 (second session that day — the onboarding page).
+Last session: 1 August 2026 (third session that day — the `managed_agents`
+security deep dive).
 
 ## Current state (as of latest push)
 
-Commit `e892b76` on `main`; local and remote hashes match; working tree clean.
+Commit `da1c20f` on `main`; local and remote hashes match; working tree clean.
 
-**Eight self-contained HTML documents, all live on GitHub Pages** (Pages enabled
+**Nine self-contained HTML documents, all live on GitHub Pages** (Pages enabled
 31 Jul 2026, `source: main /`, every URL below verified HTTP 200 on 1 Aug 2026):
 
 | Document | Live URL | Landed in |
@@ -30,7 +31,7 @@ Commit `e892b76` on `main`; local and remote hashes match; working tree clean.
 | `audit/advisory.html` (~190 KB) | https://az9713.github.io/buzz-tutorial/audit/advisory.html | `a16a705` |
 | `audit/blindspots.html` (~45 KB) | https://az9713.github.io/buzz-tutorial/audit/blindspots.html | `3ee8ec8` |
 | `audit/phase0-log.html` (~29 KB) | https://az9713.github.io/buzz-tutorial/audit/phase0-log.html | `3ee8ec8` |
-| `audit/managed-agents.html` (~28 KB) | https://az9713.github.io/buzz-tutorial/audit/managed-agents.html | `bc8952d` + this |
+| `audit/managed-agents.html` (~33 KB) | https://az9713.github.io/buzz-tutorial/audit/managed-agents.html | `bc8952d`, `ac10df6`, `da1c20f` |
 
 **`buzz-onboarding.html` is new (1 Aug 2026)** and is the first *user-facing*
 document here — the other four explain how Buzz works; this one explains how to
@@ -189,7 +190,41 @@ framed as a question not a PR; (4) a CI job for the ignored Postgres tests;
 
 Then, unblocked work in rough priority:
 
-- **START HERE — the Agents deep-dive companion page.** Agreed with the user on
+- **START HERE — draft a private upstream security report.** Promoted to top on
+  1 Aug 2026. Two findings are now operator-relevant and one of them is already
+  public: **A1/A2** (a stranger's persona or a relayed team snapshot can mint an
+  agent any npub commands, and the team import dialog structurally cannot show
+  the gate) and **B1** (Windows orphan cleanup is entirely no-ops; orphans hold
+  the agent nsec and a live relay connection with no reap path). Both are in
+  `audit/managed-agents-deep-dive.md` with full citations.
+
+  `block/buzz`'s `SECURITY.md` opens with "please do not report security
+  vulnerabilities through public GitHub issues," and `audit/managed-agents.html`
+  went live 1 Aug. That is not a disaster — this is a client-side confused-deputy
+  class, not a remote relay compromise — but the gap between published and
+  maintainers-notified should be hours, not weeks. **This is drafting, not
+  research**: `hardening.html` §"What a good upstream report would say" already
+  has the framing per finding, and the media-download default (`require_media_get_auth`
+  defaults false) was always queued for this same private channel. Fold the
+  F014/F015 parser differential in here too — it is advisory-only anyway, so
+  "mention it upstream" is its whole remaining action.
+
+  Suggested per-finding fix to include, cheapest first: add `respond_to` to
+  `TeamSnapshotMemberPreview` and render it (leaves the import policy alone —
+  that part was thought through); make `anyone` a privileged value at the import
+  layer the way `env_vars.rs:77` already treats it; implement the Windows arms of
+  `process_is_running` / `process_has_buzz_marker` or make the stop path refuse to
+  clear a PID it could not verify dead.
+
+- **Get `desktop/src-tauri` to compile, then run clippy over it.** Highest
+  coverage-per-effort left, and unlike a one-off pass it makes every future audit
+  cheaper. The build fails on a missing prebuilt `buzz-acp` sidecar and a missing
+  CMake toolchain; `cargo check` fails the same way (`cargo audit` does work).
+  Fixing the toolchain puts all 77 files under lint at once — including the ~20
+  `unsafe` blocks in `runtime/instance_reaper.rs` and `runtime/sweep.rs` that no
+  agent has read.
+
+- **The Agents deep-dive companion page.** Agreed with the user on
   1 Aug 2026 as the next document, explicitly deferred to a fresh session because
   it needs a reading pass over ~40,000 lines and the previous session was past
   173k context. Goal: give **Agents** the reference treatment that
@@ -231,10 +266,12 @@ Then, unblocked work in rough priority:
   running the app — and this documents the interface to `managed_agents/`, ~37,000
   Rust lines with no lint coverage that nobody has properly reviewed.
 
-- **Fix the F014/F015 parser differential** — the advisory's own top
-  recommendation. Desktop and mobile both resolve a `kind:40003` edit's target by
-  the *last* `e` tag while the relay uses the *first*; fixing one platform alone
-  leaves the differential. Details in `audit/advisory.html`.
+- **F014/F015 parser differential** — the advisory's own top recommendation, but
+  advisory-only like everything else here, so its remaining action is a paragraph
+  in the upstream report above, not a patch. Desktop and mobile both resolve a
+  `kind:40003` edit's target by the *last* `e` tag while the relay uses the
+  *first*; fixing one platform alone leaves the differential. Details in
+  `audit/advisory.html`.
 - ~~**A second audit for indirect prompt injection / agent confused-deputy.**~~
   **Partly done 1 Aug 2026** — `audit/managed-agents-deep-dive.md`, 12 findings
   over `managed_agents/` (the ~37,000 Rust lines with no lint coverage that the
@@ -272,11 +309,9 @@ Then, unblocked work in rough priority:
 - **Fold the two headline findings back into the older docs.** Neither
   `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download
   default or the absent RLS backstop, and both discuss the areas concerned.
-- **Report upstream.** `block/buzz`'s `SECURITY.md` opens with "please do not
-  report security vulnerabilities through public GitHub issues" — route the media
-  default privately first, let maintainers say whether the rest can be public.
-  `hardening.html` §"What a good upstream report would say" has the framing per
-  finding.
+- ~~**Report upstream.**~~ Promoted to START HERE above on 1 Aug 2026 — the
+  media default, F014/F015 and the new A1/A2/B1 findings all route through that
+  one private report.
 - **Run the ignored Postgres tests locally** against a throwaway DB and report
   which fail. Needs no permission — happens entirely in the local clone — and it
   is the prerequisite for gap 4 ever being fixable.
