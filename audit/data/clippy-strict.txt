@@ -1,0 +1,811 @@
+crates\buzz-core\src\engram.rs:88:74: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:102:17: warning: indexing may panic
+crates\buzz-core\src\engram.rs:106:16: warning: slicing may panic
+crates\buzz-core\src\engram.rs:136:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-core\src\engram.rs:144:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-core\src\engram.rs:388:11: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:390:12: warning: indexing may panic
+crates\buzz-core\src\engram.rs:390:32: warning: indexing may panic
+crates\buzz-core\src\engram.rs:390:38: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:391:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:398:19: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:399:20: warning: indexing may panic
+crates\buzz-core\src\engram.rs:399:40: warning: indexing may panic
+crates\buzz-core\src\engram.rs:399:46: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:403:20: warning: indexing may panic
+crates\buzz-core\src\engram.rs:403:40: warning: indexing may panic
+crates\buzz-core\src\engram.rs:403:46: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:407:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:417:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:425:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\engram.rs:468:36: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-core\src\git_perms.rs:125:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\git_perms.rs:130:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\git_perms.rs:136:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\git_perms.rs:176:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\git_perms.rs:182:20: warning: slicing may panic
+crates\buzz-core\src\git_perms.rs:184:22: warning: slicing may panic
+crates\buzz-core\src\git_perms.rs:334:37: warning: indexing may panic
+crates\buzz-core\src\git_perms.rs:342:23: warning: slicing may panic
+crates\buzz-core\src\git_perms.rs:414:33: warning: slicing may panic
+crates\buzz-core\src\kind.rs:249:32: warning: indexing may panic
+crates\buzz-core\src\kind.rs:250:16: warning: indexing may panic
+crates\buzz-core\src\kind.rs:253:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-core\src\kind.rs:254:40: warning: indexing may panic
+crates\buzz-core\src\pairing\crypto.rs:41:26: warning: slicing may panic
+crates\buzz-core\src\pairing\session.rs:46:27: warning: casting `u32` to `u16` may truncate the value
+warning: `buzz-core` (lib) generated 36 warnings
+crates\buzz-sdk\src\builders.rs:271:22: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:513:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\builders.rs:525:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:944:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:961:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1068:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1110:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1164:38: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\builders.rs:1166:54: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\builders.rs:1190:32: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1191:45: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1192:34: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1193:33: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1390:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1455:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1473:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1491:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1507:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1513:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1538:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1555:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1562:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1580:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1596:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1626:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1633:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1652:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1659:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1701:39: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1814:40: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\builders.rs:1835:40: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-sdk\src\mentions.rs:74:12: warning: indexing may panic
+crates\buzz-sdk\src\mentions.rs:75:44: warning: indexing may panic
+crates\buzz-sdk\src\mentions.rs:75:50: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:76:34: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:77:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:80:29: warning: indexing may panic
+crates\buzz-sdk\src\mentions.rs:82:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:88:40: warning: slicing may panic
+crates\buzz-sdk\src\mentions.rs:96:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:123:34: warning: indexing may panic
+crates\buzz-sdk\src\mentions.rs:123:53: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:127:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:217:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:264:35: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:268:48: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:277:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:279:32: warning: indexing may panic
+crates\buzz-sdk\src\mentions.rs:279:51: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:287:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:290:60: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:293:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:313:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:317:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:361:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\mentions.rs:362:26: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-sdk\src\nip_oa.rs:192:17: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:201:28: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:204:22: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:207:19: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:262:17: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:271:28: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:281:22: warning: indexing may panic
+crates\buzz-sdk\src\nip_oa.rs:287:19: warning: indexing may panic
+warning: `buzz-sdk` (lib) generated 64 warnings
+crates\buzz-auth\src\scope.rs:170:1: warning: docs for function which may panic missing `# Panics` section
+warning: `buzz-auth` (lib) generated 1 warning
+crates\buzz-conformance\src\checker.rs:83:18: warning: indexing may panic
+warning: `buzz-conformance` (lib) generated 1 warning
+crates\buzz-persona\src\pack.rs:329:31: warning: indexing may panic
+crates\buzz-persona\src\persona.rs:265:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-persona\src\persona.rs:293:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-persona\src\persona.rs:295:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-persona\src\persona.rs:310:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-persona` (lib) generated 5 warnings
+crates\buzz-search\src\query.rs:231:18: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-search` (lib) generated 1 warning
+crates\buzz-audit\src\service.rs:110:19: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-audit` (lib) generated 1 warning
+crates\buzz-media\src\auth.rs:102:18: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\auth.rs:105:14: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:251:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:252:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:270:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:271:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:291:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:292:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:295:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:296:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:315:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:316:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\bucket_index.rs:392:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\storage.rs:173:23: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `result.content_length.unwrap_or(0).cast_unsigned()`
+crates\buzz-media\src\upload.rs:372:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\upload.rs:379:28: warning: slicing may panic
+crates\buzz-media\src\upload.rs:380:29: warning: slicing may panic
+crates\buzz-media\src\upload.rs:384:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\upload.rs:385:46: warning: slicing may panic
+crates\buzz-media\src\validation.rs:23:29: warning: slicing may panic
+crates\buzz-media\src\validation.rs:26:38: warning: slicing may panic
+crates\buzz-media\src\validation.rs:31:29: warning: slicing may panic
+crates\buzz-media\src\validation.rs:37:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:43:23: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:43:51: warning: slicing may panic
+crates\buzz-media\src\validation.rs:56:17: warning: slicing may panic
+crates\buzz-media\src\validation.rs:58:12: warning: slicing may panic
+crates\buzz-media\src\validation.rs:271:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:426:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:481:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:509:12: warning: indexing may panic
+crates\buzz-media\src\validation.rs:511:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:516:34: warning: indexing may panic
+crates\buzz-media\src\validation.rs:517:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:522:22: warning: indexing may panic
+crates\buzz-media\src\validation.rs:523:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:538:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:541:39: warning: indexing may panic
+crates\buzz-media\src\validation.rs:541:49: warning: indexing may panic
+crates\buzz-media\src\validation.rs:541:55: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:553:28: warning: slicing may panic
+crates\buzz-media\src\validation.rs:553:34: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:555:21: warning: slicing may panic
+crates\buzz-media\src\validation.rs:556:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:556:46: warning: indexing may panic
+crates\buzz-media\src\validation.rs:556:69: warning: indexing may panic
+crates\buzz-media\src\validation.rs:561:28: warning: slicing may panic
+crates\buzz-media\src\validation.rs:561:34: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:562:40: warning: slicing may panic
+crates\buzz-media\src\validation.rs:587:17: warning: slicing may panic
+crates\buzz-media\src\validation.rs:588:16: warning: indexing may panic
+crates\buzz-media\src\validation.rs:601:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:604:38: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:604:38: warning: slicing may panic
+crates\buzz-media\src\validation.rs:604:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:605:29: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:605:29: warning: slicing may panic
+crates\buzz-media\src\validation.rs:605:35: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:605:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:615:28: warning: slicing may panic
+crates\buzz-media\src\validation.rs:615:34: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:615:41: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:670:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:673:33: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:673:33: warning: slicing may panic
+crates\buzz-media\src\validation.rs:673:44: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:674:42: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:674:42: warning: slicing may panic
+crates\buzz-media\src\validation.rs:674:50: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:674:57: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:694:29: warning: slicing may panic
+crates\buzz-media\src\validation.rs:694:55: warning: slicing may panic
+crates\buzz-media\src\validation.rs:697:39: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:697:39: warning: slicing may panic
+crates\buzz-media\src\validation.rs:703:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:706:29: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:706:29: warning: slicing may panic
+crates\buzz-media\src\validation.rs:706:38: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:707:38: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:707:38: warning: slicing may panic
+crates\buzz-media\src\validation.rs:707:44: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:707:51: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:708:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:728:37: warning: slicing may panic
+crates\buzz-media\src\validation.rs:728:58: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:742:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:753:18: warning: indexing may panic
+crates\buzz-media\src\validation.rs:756:35: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:768:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:771:36: warning: indexing may panic
+crates\buzz-media\src\validation.rs:771:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:772:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:774:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:787:40: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:788:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:793:56: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:793:79: warning: indexing may panic
+crates\buzz-media\src\validation.rs:793:85: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:796:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:802:57: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:805:36: warning: slicing may panic
+crates\buzz-media\src\validation.rs:805:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:805:49: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:809:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:811:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:812:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:816:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:822:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:876:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:877:38: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:885:46: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:886:33: warning: used `unwrap()` on a `Result` value
+crates\buzz-media\src\validation.rs:893:18: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:904:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:914:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:914:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:914:61: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-media\src\validation.rs:916:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-media` (lib) generated 118 warnings
+crates\buzz-push-gateway\src\apns.rs:158:57: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-push-gateway\src\app_attest.rs:139:29: warning: slicing may panic
+crates\buzz-push-gateway\src\authority.rs:453:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-push-gateway\src\grant.rs:96:36: warning: slicing may panic
+crates\buzz-push-gateway\src\grant.rs:98:27: warning: slicing may panic
+crates\buzz-push-gateway\src\grant.rs:113:46: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-push-gateway\src\http.rs:305:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-push-gateway\src\http.rs:307:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-push-gateway\src\token.rs:114:36: warning: slicing may panic
+crates\buzz-push-gateway\src\token.rs:116:27: warning: slicing may panic
+warning: `buzz-push-gateway` (lib) generated 10 warnings
+crates\buzz-db\src\channel.rs:1056:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1187:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1191:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1195:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1200:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1204:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\channel.rs:1209:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\event.rs:176:36: warning: indexing may panic
+crates\buzz-db\src\event.rs:177:22: warning: indexing may panic
+crates\buzz-db\src\event.rs:198:32: warning: indexing may panic
+crates\buzz-db\src\event.rs:199:13: warning: indexing may panic
+crates\buzz-db\src\partition.rs:20:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\partition.rs:22:14: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\partition.rs:22:21: warning: integer division
+crates\buzz-db\src\partition.rs:22:39: warning: casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `((month - 1) % 12 + 1).cast_unsigned()`
+crates\buzz-db\src\partition.rs:22:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\partition.rs:24:20: warning: casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `month.cast_unsigned()`
+crates\buzz-db\src\partition.rs:28:14: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\partition.rs:30:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\partition.rs:67:12: warning: indexing may panic
+crates\buzz-db\src\partition.rs:68:12: warning: indexing may panic
+crates\buzz-db\src\partition.rs:69:12: warning: slicing may panic
+crates\buzz-db\src\partition.rs:70:12: warning: slicing may panic
+crates\buzz-db\src\partition.rs:71:12: warning: slicing may panic
+crates\buzz-db\src\push.rs:213:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\push.rs:224:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\push.rs:228:43: warning: used `unwrap()` on a `Result` value
+crates\buzz-db\src\push.rs:228:43: warning: slicing may panic
+crates\buzz-db\src\push.rs:229:46: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\push.rs:232:42: warning: used `unwrap()` on a `Result` value
+crates\buzz-db\src\push.rs:232:42: warning: slicing may panic
+crates\buzz-db\src\push.rs:580:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\push.rs:885:44: warning: indexing may panic
+crates\buzz-db\src\relay_invite.rs:112:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\relay_invite.rs:249:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\relay_invite.rs:346:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\relay_invite.rs:357:48: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\relay_members.rs:480:38: warning: indexing may panic
+crates\buzz-db\src\relay_members.rs:486:14: warning: indexing may panic
+crates\buzz-db\src\replica_fence.rs:115:28: warning: casting `u128` to `u64` may truncate the value
+crates\buzz-db\src\replica_fence.rs:115:64: warning: casting `u128` to `u64` may truncate the value
+crates\buzz-db\src\replica_fence.rs:196:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:206:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:236:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:255:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:266:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:298:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-db\src\replica_fence.rs:495:32: warning: slicing may panic
+crates\buzz-db\src\replica_fence.rs:634:5: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:382:43: warning: slicing may panic
+crates\buzz-db\src\thread.rs:385:26: warning: slicing may panic
+crates\buzz-db\src\thread.rs:429:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:436:26: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:440:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:445:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:658:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:662:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\thread.rs:687:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\user.rs:117:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\user.rs:121:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\user.rs:125:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\user.rs:129:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\user.rs:146:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\lib.rs:110:38: warning: indexing may panic
+crates\buzz-db\src\lib.rs:111:22: warning: indexing may panic
+crates\buzz-db\src\lib.rs:1029:19: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-db\src\lib.rs:1045:19: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-db\src\lib.rs:4606:31: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4606:62: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4664:53: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-db\src\lib.rs:4677:52: warning: casting `i32` to `u16` may truncate the value
+crates\buzz-db\src\lib.rs:4677:52: warning: casting `i32` to `u16` may lose the sign of the value
+crates\buzz-db\src\lib.rs:4802:33: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4802:52: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4809:37: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4809:56: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4826:37: warning: indexing may panic
+crates\buzz-db\src\lib.rs:4826:56: warning: indexing may panic
+warning: `buzz-db` (lib) generated 78 warnings
+crates\buzz-workflow\src\executor.rs:84:32: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-workflow\src\executor.rs:97:32: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-workflow\src\executor.rs:239:28: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:240:26: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:250:21: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:251:26: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:261:21: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:262:26: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:773:8: warning: indexing may panic
+crates\buzz-workflow\src\executor.rs:1053:13: warning: casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-workflow\src\lib.rs:227:34: warning: casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-workflow\src\lib.rs:286:25: warning: casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-workflow\src\lib.rs:768:32: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-workflow\src\lib.rs:798:26: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-workflow\src\lib.rs:834:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-workflow` (lib) generated 15 warnings
+crates\buzz-pubsub\src\cache_invalidation.rs:122:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-pubsub\src\conn_control.rs:110:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-pubsub\src\rate_limiter.rs:71:9: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `ttl.max(0).cast_unsigned()`
+crates\buzz-pubsub\src\subscriber.rs:67:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-pubsub\src\lib.rs:198:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-pubsub\src\lib.rs:224:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-pubsub` (lib) generated 6 warnings
+crates\buzz-acp\src\acp.rs:641:13: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:644:13: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:647:26: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:755:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:765:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:927:36: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:967:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1065:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1104:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1210:31: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1233:39: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1308:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1418:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1526:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1597:68: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1648:43: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1659:53: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\acp.rs:1677:47: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1708:23: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1716:37: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1747:37: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1778:28: warning: indexing may panic
+crates\buzz-acp\src\acp.rs:1877:23: warning: indexing may panic
+crates\buzz-acp\src\config.rs:615:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\config.rs:792:33: warning: indexing may panic
+crates\buzz-acp\src\engram_fetch.rs:74:35: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\engram_fetch.rs:122:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\filter.rs:276:32: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:277:30: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:288:25: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:289:30: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:300:25: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:301:30: warning: indexing may panic
+crates\buzz-acp\src\filter.rs:427:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:589:24: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:595:21: warning: used `unwrap()` on an `Option` value
+crates\buzz-acp\src\pool.rs:595:21: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:601:12: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:611:9: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:635:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:734:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:1473:42: warning: casting `u128` to `u64` may truncate the value
+crates\buzz-acp\src\pool.rs:2098:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:2102:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:2339:13: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2405:35: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2429:30: warning: casting `u128` to `u64` may truncate the value
+crates\buzz-acp\src\pool.rs:2493:42: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2508:25: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:2508:40: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:2685:62: warning: indexing may panic
+crates\buzz-acp\src\pool.rs:2841:33: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2842:33: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2949:10: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:2949:10: warning: casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers
+crates\buzz-acp\src\pool.rs:2964:33: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:2965:33: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool.rs:3153:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:3229:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\pool.rs:3717:22: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\pool_lifecycle.rs:115:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:199:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:212:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:299:34: warning: used `unwrap()` on an `Option` value
+crates\buzz-acp\src\queue.rs:321:41: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:359:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:433:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:454:70: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:496:45: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:858:27: warning: indexing may panic
+crates\buzz-acp\src\queue.rs:859:31: warning: indexing may panic
+crates\buzz-acp\src\queue.rs:867:31: warning: indexing may panic
+crates\buzz-acp\src\queue.rs:965:28: warning: indexing may panic
+crates\buzz-acp\src\queue.rs:1342:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:1510:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\queue.rs:1520:19: warning: indexing may panic
+crates\buzz-acp\src\queue.rs:1549:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:679:17: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\relay.rs:716:17: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\relay.rs:879:52: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\relay.rs:973:34: warning: integer division
+crates\buzz-acp\src\relay.rs:1172:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:1203:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:1221:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:1228:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:1786:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:1793:38: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2120:36: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2121:36: warning: integer division
+crates\buzz-acp\src\relay.rs:2121:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay-mesh\src\gossip.rs:224:5: warning: casting `u128` to `u64` may truncate the value
+crates\buzz-acp\src\relay.rs:2162:40: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2163:40: warning: integer division
+crates\buzz-acp\src\relay.rs:2163:41: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay-mesh\src\gossip.rs:232:5: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay-mesh\src\membership.rs:71:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\membership.rs:120:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\membership.rs:155:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\membership.rs:166:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\membership.rs:187:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\membership.rs:195:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\peer.rs:149:29: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-relay-mesh\src\registry.rs:155:28: warning: casting `u64` to `u32` may truncate the value
+crates\buzz-relay-mesh\src\runtime.rs:138:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay-mesh\src\runtime.rs:155:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-acp\src\relay.rs:2662:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2721:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2726:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2778:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2934:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2940:70: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2956:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2977:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2990:70: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2997:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:2998:46: warning: indexing may panic
+crates\buzz-acp\src\relay.rs:3005:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3020:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3140:13: warning: indexing may panic
+crates\buzz-acp\src\relay.rs:3146:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3160:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3387:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3414:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3434:34: warning: indexing may panic
+crates\buzz-acp\src\relay.rs:3435:13: warning: indexing may panic
+crates\buzz-acp\src\relay.rs:3893:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\relay.rs:3961:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-relay-mesh` (lib) generated 12 warnings
+crates\buzz-acp\src\usage.rs:280:31: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\usage.rs:285:34: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\usage.rs:286:36: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\usage.rs:313:58: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\usage.rs:327:58: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:85:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-acp\src\lib.rs:337:12: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:340:31: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:376:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:394:32: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:405:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:556:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:742:23: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:744:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:755:19: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:756:44: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:778:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:785:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:863:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1082:36: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1087:62: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1102:32: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1574:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1585:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1595:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:1785:13: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:1804:21: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3072:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-acp\src\lib.rs:3239:17: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3286:37: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3326:37: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3391:41: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3484:21: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3813:29: warning: casting `u64` to `u32` may truncate the value
+crates\buzz-acp\src\lib.rs:3813:29: warning: indexing may panic
+crates\buzz-acp\src\lib.rs:3902:36: warning: casting `u64` to `u32` may truncate the value
+crates\buzz-acp\src\lib.rs:3902:36: warning: indexing may panic
+warning: `buzz-acp` (lib) generated 152 warnings
+crates\buzz-relay\src\api\bridge.rs:457:18: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-relay\src\api\bridge.rs:528:54: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\api\bridge.rs:611:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1086:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1140:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1176:21: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-relay\src\api\bridge.rs:1292:23: warning: indexing may panic
+crates\buzz-relay\src\api\bridge.rs:1492:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1492:39: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.cast_unsigned()`
+crates\buzz-relay\src\api\bridge.rs:1525:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1563:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1563:39: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.cast_unsigned()`
+crates\buzz-relay\src\api\bridge.rs:1595:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\bridge.rs:1678:21: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-relay\src\api\bridge.rs:2031:58: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\api\git\cas_publish.rs:410:29: warning: used `unwrap()` on an `Option` value
+crates\buzz-relay\src\api\git\manifest.rs:45:46: warning: integer division
+crates\buzz-relay\src\api\git\manifest_event.rs:78:49: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:267:59: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\store.rs:299:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\api\git\store.rs:302:59: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\store.rs:486:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\api\git\store.rs:495:67: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\store.rs:576:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\api\git\store.rs:668:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:669:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:673:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:678:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:707:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:754:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:755:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:758:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:759:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:773:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:800:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:809:40: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:816:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\store.rs:897:59: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:93:17: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:104:13: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:171:17: warning: indexing may panic
+crates\buzz-relay\src\api\git\transport.rs:333:13: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:572:15: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:597:21: warning: indexing may panic
+crates\buzz-relay\src\api\git\transport.rs:663:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\api\git\transport.rs:700:27: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:845:47: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:846:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:852:8: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:1187:21: warning: used `unwrap()` on an `Option` value
+crates\buzz-relay\src\api\git\transport.rs:1336:38: warning: slicing may panic
+crates\buzz-relay\src\api\git\transport.rs:1376:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1379:48: warning: slicing may panic
+crates\buzz-relay\src\api\git\transport.rs:1379:65: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1383:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1386:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1389:28: warning: slicing may panic
+crates\buzz-relay\src\api\git\transport.rs:1389:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1389:49: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1390:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\git\transport.rs:1638:8: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:1652:5: warning: used `unwrap()` on a `Result` value
+crates\buzz-relay\src\api\git\transport.rs:1907:22: warning: casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers
+crates\buzz-relay\src\api\invites.rs:330:27: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `invite.expires_at.timestamp().cast_unsigned()`
+crates\buzz-relay\src\api\media.rs:82:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\media.rs:109:5: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\media.rs:129:5: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\media.rs:328:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\api\media.rs:329:42: warning: slicing may panic
+crates\buzz-relay\src\api\media.rs:365:81: warning: casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers
+crates\buzz-relay\src\api\media.rs:556:16: warning: indexing may panic
+crates\buzz-relay\src\api\media.rs:566:29: warning: indexing may panic
+crates\buzz-relay\src\api\media.rs:572:16: warning: indexing may panic
+crates\buzz-relay\src\api\media.rs:572:42: warning: indexing may panic
+crates\buzz-relay\src\api\media.rs:773:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\audio\handler.rs:1137:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\audio\join.rs:1797:42: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\audio\room.rs:151:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\audio\room.rs:400:59: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\audio\wire.rs:68:39: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:68:49: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:69:42: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:69:52: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:69:62: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:69:72: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:70:25: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:76:21: warning: indexing may panic
+crates\buzz-relay\src\audio\wire.rs:84:14: warning: slicing may panic
+crates\buzz-relay\src\config.rs:422:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\conformance\mod.rs:234:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\connection.rs:96:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\connection.rs:357:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\command_executor.rs:817:9: warning: indexing may panic
+crates\buzz-relay\src\handlers\command_executor.rs:1118:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\command_executor.rs:1118:24: warning: casting `i32` to `usize` may lose the sign of the value
+crates\buzz-relay\src\handlers\count.rs:177:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\count.rs:177:39: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.cast_unsigned()`
+crates\buzz-relay\src\handlers\count.rs:209:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\count.rs:251:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\count.rs:251:39: warning: casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.cast_unsigned()`
+crates\buzz-relay\src\handlers\count.rs:282:29: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\event.rs:93:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\event.rs:806:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\event.rs:933:9: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\event.rs:975:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\identity_archive.rs:147:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\identity_archive.rs:150:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\imeta.rs:366:14: warning: indexing may panic
+crates\buzz-relay\src\handlers\imeta.rs:402:24: warning: indexing may panic
+crates\buzz-relay\src\handlers\imeta.rs:403:23: warning: indexing may panic
+crates\buzz-relay\src\handlers\imeta.rs:409:24: warning: indexing may panic
+crates\buzz-relay\src\handlers\imeta.rs:412:20: warning: indexing may panic
+crates\buzz-relay\src\handlers\imeta.rs:413:20: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:597:32: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:598:28: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:599:27: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:668:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:681:44: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:681:63: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:682:38: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:690:48: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:690:67: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:691:42: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:721:29: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:721:56: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:935:15: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:937:28: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:944:28: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:951:28: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:956:45: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:956:68: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:959:21: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:995:15: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:996:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:997:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1013:13: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1021:13: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1058:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1059:36: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1065:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1109:13: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1138:9: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1138:43: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1143:9: warning: slicing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1278:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1278:21: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1305:8: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1356:21: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1481:24: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1484:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1492:23: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1492:23: warning: integer division
+crates\buzz-relay\src\handlers\ingest.rs:1498:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1499:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1500:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1507:17: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1509:17: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1541:15: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1542:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1543:41: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1561:13: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1576:17: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1642:15: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1649:56: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1651:48: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1654:20: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:1686:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:1862:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:2219:16: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:2222:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:2317:37: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:2317:63: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:2338:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\ingest.rs:2377:40: warning: indexing may panic
+crates\buzz-relay\src\handlers\ingest.rs:2378:26: warning: indexing may panic
+crates\buzz-relay\src\handlers\moderation_commands.rs:116:8: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\moderation_commands.rs:119:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\moderation_notices.rs:165:22: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\moderation_notices.rs:249:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\moderation_notices.rs:249:70: warning: indexing may panic
+crates\buzz-relay\src\handlers\push_lease.rs:109:22: warning: indexing may panic
+crates\buzz-relay\src\handlers\push_lease.rs:130:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\push_lease.rs:133:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\push_lease.rs:469:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\handlers\relay_admin.rs:211:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\relay_admin.rs:214:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\report.rs:130:46: warning: indexing may panic
+crates\buzz-relay\src\handlers\report.rs:166:17: warning: indexing may panic
+crates\buzz-relay\src\handlers\report.rs:188:37: warning: indexing may panic
+crates\buzz-relay\src\handlers\report.rs:190:28: warning: indexing may panic
+crates\buzz-relay\src\handlers\req.rs:321:23: warning: indexing may panic
+crates\buzz-relay\src\handlers\req.rs:401:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\req.rs:435:31: warning: casting `i64` to `u32` may truncate the value
+crates\buzz-relay\src\handlers\req.rs:553:22: warning: casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers
+crates\buzz-relay\src\handlers\req.rs:553:37: warning: casting `i64` to `u32` may truncate the value
+crates\buzz-relay\src\handlers\req.rs:554:24: warning: casting `i64` to `u32` may truncate the value
+crates\buzz-relay\src\handlers\req.rs:729:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\req.rs:773:23: warning: casting `i64` to `usize` may truncate the value on targets with 32-bit wide pointers
+crates\buzz-relay\src\handlers\req.rs:961:73: warning: casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `k.cast_unsigned()`
+crates\buzz-relay\src\handlers\side_effects.rs:246:25: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:332:33: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:332:59: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:859:26: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\side_effects.rs:934:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\side_effects.rs:1015:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:1020:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\side_effects.rs:2092:25: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:2095:22: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:2096:17: warning: indexing may panic
+crates\buzz-relay\src\handlers\side_effects.rs:2908:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:3099:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:3121:49: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:3131:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\side_effects.rs:3173:49: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:3213:22: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\handlers\side_effects.rs:3217:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\handlers\side_effects.rs:3285:48: warning: casting `u32` to `u16` may truncate the value
+crates\buzz-relay\src\invite_token.rs:156:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\invite_token.rs:344:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\invite_token.rs:348:12: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\invite_token.rs:359:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\metrics.rs:66:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\metrics.rs:161:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\metrics.rs:180:18: warning: used `unwrap()` on an `Option` value
+crates\buzz-relay\src\nip11.rs:111:25: warning: casting `i64` to `u32` may truncate the value
+crates\buzz-relay\src\protocol.rs:53:24: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:64:59: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:74:30: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:91:38: warning: slicing may panic
+crates\buzz-relay\src\protocol.rs:114:30: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:130:38: warning: slicing may panic
+crates\buzz-relay\src\protocol.rs:152:30: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:166:59: warning: indexing may panic
+crates\buzz-relay\src\protocol.rs:187:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\push_runtime.rs:69:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:81:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:145:21: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:210:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:272:30: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:312:1: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\push_runtime.rs:324:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:344:26: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:394:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:538:20: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\push_runtime.rs:545:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\router.rs:34:28: warning: casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers
+crates\buzz-relay\src\state.rs:104:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:173:26: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:330:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:362:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:397:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:444:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\state.rs:459:33: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\state.rs:637:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\state.rs:684:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\storage_sweep.rs:225:25: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\storage_sweep.rs:235:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\storage_sweep.rs:330:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\subscription.rs:428:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\telemetry.rs:113:37: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\tunnel\directory.rs:246:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\tunnel\directory.rs:277:5: warning: docs for function which may panic missing `# Panics` section
+crates\buzz-relay\src\tunnel\reliable.rs:440:54: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\tunnel\reliable.rs:465:12: warning: indexing may panic
+crates\buzz-relay\src\tunnel\reliable.rs:471:13: warning: slicing may panic
+crates\buzz-relay\src\tunnel\reliable.rs:473:15: warning: indexing may panic
+crates\buzz-relay\src\tunnel\reliable.rs:476:26: warning: slicing may panic
+crates\buzz-relay\src\tunnel\reliable.rs:484:86: warning: indexing may panic
+crates\buzz-relay\src\workflow_sink.rs:90:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:92:13: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:94:14: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:102:49: warning: indexing may panic
+crates\buzz-relay\src\workflow_sink.rs:102:55: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:102:81: warning: indexing may panic
+crates\buzz-relay\src\workflow_sink.rs:102:87: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:119:29: warning: indexing may panic
+crates\buzz-relay\src\workflow_sink.rs:119:74: warning: indexing may panic
+crates\buzz-relay\src\workflow_sink.rs:120:41: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:123:21: warning: slicing may panic
+crates\buzz-relay\src\workflow_sink.rs:123:27: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:128:28: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:135:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:137:17: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\workflow_sink.rs:301:35: warning: casting `u32` to `u16` may truncate the value
+warning: `buzz-relay` (lib) generated 284 warnings
+crates\buzz-relay\src\main.rs:87:7: warning: used `panic!()` or assertion in a function that returns `Result`
+crates\buzz-relay\src\main.rs:1000:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1048:31: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1326:17: warning: casting `i32` to `u16` may truncate the value
+crates\buzz-relay\src\main.rs:1326:17: warning: casting `i32` to `u16` may lose the sign of the value
+crates\buzz-relay\src\main.rs:1508:39: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1624:40: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1624:53: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1834:18: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1834:31: warning: arithmetic operation that can potentially result in unexpected side-effects
+crates\buzz-relay\src\main.rs:1834:44: warning: arithmetic operation that can potentially result in unexpected side-effects
+warning: `buzz-relay` (bin "buzz-relay") generated 11 warnings

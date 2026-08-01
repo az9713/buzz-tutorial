@@ -1,0 +1,225 @@
+[
+ {
+  "name": "relay",
+  "tier": "depth",
+  "files": 79,
+  "paths": [
+   "crates/buzz-relay"
+  ],
+  "why": "Ingest of untrusted Nostr events from any peer; the primary attack surface. Graphify: `crates/buzz-relay/src/handlers/ingest.rs` (degree 213) is THE untrusted-input entry point. Note that `ingest_event_inner()` there validates event kinds by calling `is_relay_admin_kind()` and `is_identity_archive_request_kind()`, which are defined in `crates/buzz-core/src/kind.rs` - a privilege-relevant check that lives outside the crate. Read both sides of that call."
+ },
+ {
+  "name": "core",
+  "tier": "depth",
+  "files": 24,
+  "paths": [
+   "crates/buzz-core"
+  ],
+  "why": "Keys, signatures, event validation primitives. Everything downstream trusts this."
+ },
+ {
+  "name": "auth",
+  "tier": "depth",
+  "files": 26,
+  "paths": [
+   "crates/buzz-auth",
+   "crates/buzz-acp"
+  ],
+  "why": "NIP-42/NIP-98 authentication, replay defence, scopes, rate limiting, and the ACP token path. NOTE: crates/buzz-auth was absent from the provisional plan entirely. Also compare crates/buzz-auth/src/nip98_replay.rs against crates/buzz-pubsub/src/nip98_replay.rs - duplicated replay-defence logic in two crates is a divergence risk. Graphify also found buzz-auth and buzz-pubsub in one tightly-coupled community (49 nodes): pub/sub is entangled with auth checks rather than merely consuming them. `crates/buzz-pubsub` is owned by the gateway-mesh slice, but read across the boundary where auth decisions are made or re-made there."
+ },
+ {
+  "name": "media",
+  "tier": "depth",
+  "files": 27,
+  "paths": [
+   "crates/buzz-media"
+  ],
+  "why": "Parsers over attacker-supplied binary input; memory-safety and resource-exhaustion surface."
+ },
+ {
+  "name": "tauri-commands",
+  "tier": "depth",
+  "files": 97,
+  "paths": [
+   "desktop/src-tauri/src/commands"
+  ],
+  "why": "The Rust<->JS trust boundary: graphify counted 205 `#[tauri::command]` handlers across 76 files, every one callable by a compromised or XSS'd renderer. The surface is NOT evenly spread - it concentrates in the command files that reach into buzz-core (`agents.rs`, `channels.rs`, `channel_window.rs`, `engrams.rs`, `identity.rs`, `messages.rs`, `pairing.rs`, `profile.rs`, `teams.rs`, `team_snapshot.rs`, `personas/*`) and especially the 8 that reach buzz-sdk and can therefore drive the `sign()` path (`agents.rs`, `engrams.rs`, `identity.rs`, `identity_archive.rs`, `messages.rs`, `personas/snapshot/import.rs`, `team_snapshot.rs`). Prioritise those. For each, ask: what can the renderer make this sign, read, or write?"
+ },
+ {
+  "name": "desktop-shared",
+  "tier": "depth",
+  "files": 328,
+  "paths": [
+   "desktop/src/shared"
+  ],
+  "why": "Shared API client, relay websocket handling, and lib code that every feature depends on - highest blast radius in the frontend."
+ },
+ {
+  "name": "desktop-messages",
+  "tier": "depth",
+  "files": 367,
+  "paths": [
+   "desktop/src/features/messages",
+   "desktop/src/features/channels",
+   "desktop/src/features/forum",
+   "desktop/src/features/custom-emoji"
+  ],
+  "why": "Rendering of attacker-authored content: XSS, content injection, markdown/emoji parsing."
+ },
+ {
+  "name": "mobile",
+  "tier": "depth",
+  "files": 330,
+  "paths": [
+   "mobile/lib",
+   "mobile/ios",
+   "mobile/android",
+   "mobile/scripts"
+  ],
+  "why": "Dart - the language with the weakest static-analysis coverage here, so it leans hardest on agent reading. Includes the iOS/Android native shells: entitlements, Info.plist, AndroidManifest permissions, exported components, and deep-link/intent filters are all attack surface a Dart-only read would miss."
+ },
+ {
+  "name": "db",
+  "tier": "depth",
+  "files": 56,
+  "paths": [
+   "crates/buzz-db",
+   "migrations",
+   "crates/buzz-sdk"
+  ],
+  "why": "Persistence plus the event-builder/signing SDK. Graphify's centrality analysis names `crates/buzz-db/src/lib.rs` (degree 243; defines Db, Result, CommunityId used across nearly every crate) and `crates/buzz-sdk/src/builders.rs` (degree 255, including `sign()`) as the two single files with the widest blast radius in the entire Rust scope - a defect in either reaches almost everything downstream. Audit injection, integrity, migration safety, and every path that reaches `sign()`."
+ },
+ {
+  "name": "gateway-mesh",
+  "tier": "breadth",
+  "files": 40,
+  "paths": [
+   "crates/buzz-push-gateway",
+   "crates/buzz-pubsub",
+   "crates/buzz-relay-mesh",
+   "crates/buzz-pair-relay"
+  ],
+  "why": "Outbound trust boundaries: third-party push services, pub/sub fan-out, and relay-to-relay gossip between mutually distrusting nodes."
+ },
+ {
+  "name": "agent-surface",
+  "tier": "breadth",
+  "files": 52,
+  "paths": [
+   "crates/buzz-agent",
+   "crates/buzz-dev-mcp",
+   "crates/buzz-persona",
+   "crates/buzz-workflow"
+  ],
+  "why": "Agent-facing surfaces: MCP tools, persona packs, and workflow execution - prompt/tool injection and untrusted-manifest handling. Graphify: buzz-dev-mcp clusters with buzz-relay and the Tauri egress guard - check whether an MCP tool can reach network egress or relay internals that a normal user path cannot."
+ },
+ {
+  "name": "tooling-identity",
+  "tier": "breadth",
+  "files": 106,
+  "paths": [
+   "crates/buzz-cli",
+   "crates/buzz-ws-client",
+   "crates/buzz-search",
+   "crates/buzz-voice",
+   "crates/buzz-audit",
+   "crates/buzz-admin",
+   "crates/git-credential-nostr",
+   "crates/git-sign-nostr",
+   "crates/buzz-pairing-cli",
+   "crates/sprig",
+   "crates/buzz-test-client",
+   "crates/buzz-conformance"
+  ],
+  "why": "Everything else in crates/. git-credential-nostr and git-sign-nostr touch real credentials and signing; buzz-audit is the tamper-evidence log. None of these appeared in the provisional slice table."
+ },
+ {
+  "name": "tauri-core",
+  "tier": "breadth",
+  "files": 183,
+  "paths": [
+   "desktop/src-tauri/src",
+   "desktop/src-tauri/capabilities",
+   "desktop/src-tauri/tauri.conf.json"
+  ],
+  "why": "The rest of the Tauri backend: secret_store, relay_admission, native_websocket, managed_agents, migrations, plus the capability/CSP configuration that decides what the webview may do. EXCLUDE desktop/src-tauri/src/commands (covered by the tauri-commands slice). Graphify flagged `desktop/src-tauri/src/egress_guard.rs` as sitting in one community with `crates/buzz-relay` and the `buzz-dev-mcp` tooling crate - a network-egress security control coupled to dev tooling. Check whether dev/MCP paths can weaken or bypass the egress guard in a shipped build. Also note `commands/` and `managed_agents/` are heavily co-mingled rather than cleanly separated."
+ },
+ {
+  "name": "desktop-agents",
+  "tier": "breadth",
+  "files": 322,
+  "paths": [
+   "desktop/src/features/agents",
+   "desktop/src/features/workflows",
+   "desktop/src/features/mesh-compute"
+  ],
+  "why": "Frontend agent orchestration: tool invocation, remote compute, and anything that turns model output into an action."
+ },
+ {
+  "name": "desktop-rest",
+  "tier": "breadth",
+  "files": 604,
+  "paths": [
+   "desktop/src/main.tsx",
+   "desktop/src/types",
+   "desktop/src/testing",
+   "desktop/public",
+   "desktop/src/features/onboarding",
+   "desktop/src/features/profile",
+   "desktop/src/features/settings",
+   "desktop/src/features/sidebar",
+   "desktop/src/features/home",
+   "desktop/src/features/communities",
+   "desktop/src/features/huddle",
+   "desktop/src/features/projects",
+   "desktop/src/features/moderation",
+   "desktop/src/features/notifications",
+   "desktop/src/features/reminders",
+   "desktop/src/features/pulse",
+   "desktop/src/features/search",
+   "desktop/src/features/local-archive",
+   "desktop/src/features/identity-archive",
+   "desktop/src/features/presence",
+   "desktop/src/features/community-members",
+   "desktop/src/features/agent-memory",
+   "desktop/src/features/user-status",
+   "desktop/src/features/channel-templates",
+   "desktop/src/features/chat",
+   "desktop/src/app"
+  ],
+  "why": "The remaining frontend features. Onboarding and identity-archive handle key material; moderation and settings hold privilege decisions."
+ },
+ {
+  "name": "web",
+  "tier": "breadth",
+  "files": 58,
+  "paths": [
+   "web/src",
+   "admin-web/src"
+  ],
+  "why": "Browser-facing surface, including the admin dashboard - admin UIs are a privilege-escalation target."
+ },
+ {
+  "name": "supply-chain",
+  "tier": "breadth",
+  "files": 205,
+  "paths": [
+   "deploy",
+   ".github",
+   "scripts",
+   "bin",
+   "desktop/scripts",
+   "web/scripts",
+   "Justfile",
+   "lefthook.yml",
+   "Dockerfile",
+   "Dockerfile.push-gateway",
+   "docker-compose.yml",
+   "pnpm-workspace.yaml",
+   "renovate.json",
+   "deny.toml",
+   ".env.example"
+  ],
+  "why": "CI/CD, container images, Helm charts, and release scripts: secrets exposure, workflow injection, and unpinned or unverified dependencies."
+ }
+]

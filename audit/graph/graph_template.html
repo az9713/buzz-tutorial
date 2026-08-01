@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>buzz_me knowledge graph</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1e1e1e; overflow: hidden;
+               font: 13px/1.4 system-ui, sans-serif; }
+  #graph { width: 100vw; height: 100vh; }
+  #ui { position: fixed; top: 10px; left: 10px; z-index: 10; color: #ddd;
+        background: rgba(30,30,30,.85); border: 1px solid #444; border-radius: 8px;
+        padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; width: 240px; }
+  #ui input[type=text] { background: #2a2a2a; border: 1px solid #555; color: #eee;
+        border-radius: 4px; padding: 5px 8px; width: 100%; box-sizing: border-box; }
+  #ui .row { display: flex; align-items: center; gap: 8px; }
+  #stats { color: #888; font-size: 11px; }
+  #center { background: #2a2a2a; border: 1px solid #555; color: #eee;
+            border-radius: 4px; padding: 4px 8px; cursor: pointer; }
+  #center:hover { background: #3a3a3a; }
+  #hits { max-height: 180px; overflow-y: auto; font-size: 12px; }
+  #hits div { padding: 2px 4px; cursor: pointer; border-radius: 3px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #hits div:hover { background: #3a3a3a; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <input id="search" type="text" placeholder="Search nodes… (Enter = jump)">
+  <div id="hits"></div>
+  <div class="row">
+    <span>degree ≥ <b id="thrval"></b></span>
+    <input id="thr" type="range" min="0" max="50" style="flex:1">
+  </div>
+  <div class="row"><button id="center" style="flex:1">Center</button><span id="stats" style="flex:3"></span></div>
+</div>
+<div id="graph"></div>
+<script>__LIB__</script>
+<script>
+const DATA = __DATA__;
+const DEFAULT_THR = __THR__;
+
+const color = c => `hsl(${(c * 137.508) % 360}, 62%, 62%)`;
+DATA.nodes.forEach(n => { n.col = color(n.c); n.r = 2 + Math.sqrt(n.d); });
+const masterLinks = DATA.links.map(l => ({ source: l.s, target: l.t, sid: l.s, tid: l.t }));
+
+let neighbors = new Map();          // id -> Set of neighbor ids (visible subgraph)
+let hoverNode = null;
+
+const graph = new ForceGraph(document.getElementById('graph'))
+  .backgroundColor('#1e1e1e')
+  .nodeId('id')
+  .nodeVal(n => n.r * n.r / 4)
+  .autoPauseRedraw(false)
+  .linkColor(l => hoverNode &&
+      (l.sid === hoverNode.id || l.tid === hoverNode.id) ? '#c9a26d' : 'rgba(255,255,255,0.08)')
+  .linkWidth(l => hoverNode && (l.sid === hoverNode.id || l.tid === hoverNode.id) ? 1.5 : 1)
+  .nodeCanvasObject((n, ctx, scale) => {
+    const dim = hoverNode && n !== hoverNode && !neighbors.get(hoverNode.id)?.has(n.id);
+    ctx.globalAlpha = dim ? 0.15 : 1;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, 2 * Math.PI);
+    ctx.fillStyle = n.col;
+    ctx.fill();
+    // labels fade in on zoom (Obsidian-style); always show for hovered + neighbors
+    const showLabel = !dim && (scale > 2.2 || hoverNode);
+    if (showLabel) {
+      ctx.globalAlpha = dim ? 0.15 : Math.min(1, scale > 2.2 ? (scale - 2.2) / 1.5 + 0.4 : 1);
+      ctx.font = `${Math.max(3, 11 / scale)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ddd';
+      ctx.fillText(n.label, n.x, n.y + n.r + Math.max(4, 12 / scale));
+    }
+    ctx.globalAlpha = 1;
+  })
+  .nodePointerAreaPaint((n, col, ctx) => {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r + 2, 0, 2 * Math.PI);
+    ctx.fillStyle = col;
+    ctx.fill();
+  })
+  .onNodeHover(n => { hoverNode = n || null; })
+  .onBackgroundClick(() => { hoverNode = null; });
+
+function applyFilter(thr) {
+  const vis = new Set(DATA.nodes.filter(n => n.d >= thr).map(n => n.id));
+  const fnodes = DATA.nodes.filter(n => vis.has(n.id));
+  const flinks = masterLinks.filter(l => vis.has(l.sid) && vis.has(l.tid));
+  neighbors = new Map();
+  flinks.forEach(l => {
+    (neighbors.get(l.sid) || neighbors.set(l.sid, new Set()).get(l.sid)).add(l.tid);
+    (neighbors.get(l.tid) || neighbors.set(l.tid, new Set()).get(l.tid)).add(l.sid);
+  });
+  graph.graphData({ nodes: fnodes, links: flinks });
+  document.getElementById('stats').textContent =
+    `${fnodes.length.toLocaleString()} nodes · ${flinks.length.toLocaleString()} links` +
+    ` (of ${DATA.nodes.length.toLocaleString()} / ${masterLinks.length.toLocaleString()})`;
+}
+
+const thrEl = document.getElementById('thr');
+thrEl.value = DEFAULT_THR;
+document.getElementById('thrval').textContent = DEFAULT_THR;
+thrEl.oninput = () => document.getElementById('thrval').textContent = thrEl.value;
+thrEl.onchange = () => applyFilter(+thrEl.value);   // apply on release, not every tick
+
+const searchEl = document.getElementById('search');
+const hitsEl = document.getElementById('hits');
+function jumpTo(n) {
+  if (n.x === undefined) return;
+  graph.centerAt(n.x, n.y, 800);
+  graph.zoom(5, 800);
+  hoverNode = n;
+}
+searchEl.oninput = () => {
+  const q = searchEl.value.trim().toLowerCase();
+  hitsEl.innerHTML = '';
+  if (q.length < 2) return;
+  const { nodes } = graph.graphData();
+  nodes.filter(n => n.label.toLowerCase().includes(q)).slice(0, 30).forEach(n => {
+    const d = document.createElement('div');
+    d.textContent = n.label;
+    d.onclick = () => jumpTo(n);
+    hitsEl.appendChild(d);
+  });
+};
+searchEl.onkeydown = e => { if (e.key === 'Enter' && hitsEl.firstChild) hitsEl.firstChild.click(); };
+
+document.getElementById('center').onclick = () => { hoverNode = null; graph.zoomToFit(600, 50); };
+
+applyFilter(DEFAULT_THR);
+graph.zoomToFit(0, 50);
+setTimeout(() => graph.zoomToFit(600, 50), 3000);
+</script>
+</body>
+</html>

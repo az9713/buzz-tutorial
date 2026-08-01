@@ -1,0 +1,103 @@
+{
+ "findings": [
+  {
+   "file": "web/src/features/repos/ui/RepoBlobViewer.tsx",
+   "line": 157,
+   "severity": "critical",
+   "category": "sandbox-escape",
+   "claim": "The 'Run' feature for repo-supplied HTML files renders untrusted content in an iframe whose sandbox attribute includes both allow-scripts AND allow-same-origin, which directly contradicts the code's own security-invariant comment above it (lines 145-156) claiming allow-same-origin is deliberately absent so the frame gets an opaque/null origin.",
+   "failure_scenario": "A malicious or compromised repo (any nostr-git repo a user browses/clones through this UI) contains an .html file. When the user clicks 'Run', resolveHtmlAssets() inlines same-repo assets and the result is loaded via srcDoc into an iframe sandboxed with 'allow-scripts allow-same-origin'. Per the HTML spec, combining these two tokens on a srcdoc iframe defeats the sandbox: the frame is treated as same-origin with the embedding page rather than opaque, so attacker-controlled JS in the repo's HTML can reach the parent document/window (DOM access, localStorage, IndexedDB \u2014 including the LightningFS git clone data and any cached NIP-98/session state) instead of being confined as the comment says it is. This is the classic 'sandbox=\"allow-scripts allow-same-origin\"' escape.",
+   "evidence": "const RUN_SANDBOX = \"allow-scripts allow-same-origin\";",
+   "confidence": "high",
+   "slice": "web"
+  },
+  {
+   "file": "crates/buzz-relay/src/admission.rs",
+   "line": 29,
+   "severity": "critical",
+   "category": "authorization",
+   "claim": "check_principal's match on the shared rate-limiter result has an unreachable second arm: the first arm `Ok(_) => Ok(())` catches every `Ok(RateLimitResult)` regardless of whether the limiter denied or allowed the request, so the `Ok(result) => Err(AdmissionError::Exceeded { .. })` arm beneath it can never run. Every principal-scoped admission check (WS event rate limiting in connection.rs, HTTP bridge admission in api/bridge.rs) therefore always succeeds as long as the limiter backend itself doesn't error, i.e. rate limiting on authenticated principals is effectively disabled.",
+   "failure_scenario": "An authenticated peer (or a token holder) sends events/requests far faster than the configured per-principal rate limit (e.g. WsEvents, ApiCalls). check_and_increment on the real limiter returns Ok(RateLimitResult::denied(...)) once the budget is exhausted, but check_principal's dead second match arm means that denial is discarded and Ok(()) is returned anyway, so the caller never sees AdmissionError::Exceeded and the flood is admitted without limit \u2014 a straightforward DoS/resource-exhaustion vector for any authenticated pubkey.",
+   "evidence": "Ok(_) => Ok(()),\n        Ok(result) => Err(AdmissionError::Exceeded {\n            reset_in_secs: result.reset_in_secs,\n        }),",
+   "confidence": "high",
+   "slice": "relay"
+  },
+  {
+   "file": "crates/buzz-core/src/event.rs",
+   "line": 33,
+   "severity": "high",
+   "category": "correctness",
+   "claim": "StoredEvent::is_verified() is hardcoded to always return true, ignoring the struct's own private `verified` field that with_received_at() explicitly sets (and which defaults to false in new()). Any caller that trusts is_verified() as a gate for signature/id verification status will treat unverified events as verified.",
+   "failure_scenario": "A relay or downstream consumer constructs a StoredEvent via StoredEvent::new(event, channel_id) (verified=false, e.g. before running verify_event()) or via with_received_at(.., verified=false) after a failed verification, then later calls stored_event.is_verified() to decide whether to trust/store/forward/fan-out the event. Because is_verified() unconditionally returns true, an event whose Schnorr signature or id hash never actually checked out (attacker-forged event, tampered id/sig) is reported as verified and can be accepted, persisted, or relayed as if it were cryptographically valid -- directly undermining the crate's stated purpose ('everything downstream trusts this').",
+   "evidence": "pub fn is_verified(&self) -> bool {\n        true\n    }",
+   "confidence": "high",
+   "slice": "core (crates/buzz-core)"
+  },
+  {
+   "file": "crates/buzz-media/src/upload.rs",
+   "line": 342,
+   "severity": "medium",
+   "category": "resource-exhaustion",
+   "claim": "process_video_upload streams the entire request body (up to config.max_video_bytes, 500MB by default) to a temp file and computes its SHA-256 across the whole stream before the Blossom kind:24242 auth event's Schnorr signature is checked at all \u2014 verify_blossom_upload_auth() is only called after the full streaming loop finishes.",
+   "failure_scenario": "An attacker with no valid Nostr keys (or an auth event that will fail verification for any reason) repeatedly POSTs up to ~500MB of random bytes to the video upload path. For every request the server must fully write the body to disk and hash it with SHA-256 before the cryptographic auth check ever runs, so the cheapest possible rejection point (signature verification) is deferred until after the most expensive work (disk I/O + full-body hashing) is done. This lets an unauthenticated caller cheaply drive disk and CPU cost on the relay in proportion to max_video_bytes per request.",
+   "evidence": "        let mut file = tokio::fs::File::create(&tmp_path)\n            .await\n            .map_err(|e| MediaError::Io(e.to_string()))?;\n        let mut hasher = Sha256::new();\n        let mut total: u64 = 0;",
+   "confidence": "medium",
+   "slice": "media (crates/buzz-media)"
+  },
+  {
+   "file": "crates/buzz-media/src/upload.rs",
+   "line": 410,
+   "severity": "low",
+   "category": "auth-ordering",
+   "claim": "The Blossom auth event's signature check (auth_event.verify() inside verify_blossom_upload_auth) is structurally the last gate in process_video_upload rather than the first \u2014 it runs only after the entire body has been streamed to disk and hashed (see the streaming loop starting around line 317), instead of failing fast on an invalid signature before consuming any body bytes.",
+   "failure_scenario": "Same root cause as the resource-exhaustion finding above: an attacker whose auth event has a garbage or missing signature still forces the server through the entire streaming-and-hashing pipeline for a large file before the request is rejected, because the code path never checks the signature until spawn_blocking is reached at the end.",
+   "evidence": "    tokio::task::spawn_blocking(move || {\n        // Videos: 1-hour window \u2014 large uploads on slow connections need headroom.\n        verify_blossom_upload_auth(&auth, &sha256_for_auth, Some(bound_host.as_str()), 3600)\n    })",
+   "confidence": "medium",
+   "slice": "media (crates/buzz-media)"
+  },
+  {
+   "file": "mobile/lib/shared/relay/relay_session.dart",
+   "line": 449,
+   "severity": "high",
+   "category": "missing-verification",
+   "claim": "Events received over the main relay WebSocket (EVENT frames for REQ subscriptions, history fetches, and the /query HTTP bridge) are deserialized with NostrEvent.fromJson and delivered straight to subscribers with no check that `id` is the correct SHA-256 of the canonical serialization and no check that `sig` verifies against `pubkey`. Contrast with features/pairing/pairing_provider.dart:334-341, which explicitly re-parses via `nostr.Event.fromJson` and compares `event.id` specifically because that path does NOT trust the relay to have validated events.",
+   "failure_scenario": "A malicious or compromised relay (or a relay reachable via a non-pinned TLS MITM) can inject EVENT frames with a forged pubkey/content/tags and any id/sig it likes; the mobile app will render it as an authentic message, profile update, reaction, or channel-metadata event from that pubkey because nothing in the EVENT ingestion path checks the signature before handing the event to feature code (channel messages, profiles, reactions, forum posts, etc. all flow through `_handleEvent`/`queryRelay`).",
+   "evidence": "final eventJson = data[2] as Map<String, dynamic>;\n    final event = NostrEvent.fromJson(eventJson);",
+   "confidence": "medium",
+   "slice": "mobile (Dart client: relay transport, media upload, event parsing) \u2014 mobile/lib"
+  },
+  {
+   "file": "mobile/lib/shared/relay/nostr_models.dart",
+   "line": 168,
+   "severity": "medium",
+   "category": "correctness",
+   "claim": "In `NostrEvent.threadReference`, the local variables are assigned backwards: the tag whose NIP-01 marker is `'root'` is stored into `replyTag`, and the tag marked `'reply'` is stored into `rootTag`. The function then returns `parentId: replyTag[1]` (i.e., the value of the tag marked `'root'`) and `rootId: rootTag?[1]` (i.e., the value of the tag marked `'reply'`), which is the reverse of the intended NIP-10/desktop convention described in the comment two lines above.",
+   "failure_scenario": "For any e-tagged event that includes both a `root` and a `reply` marker (the normal case for a reply inside a multi-message thread), the mobile client will compute the wrong `parentId`/`rootId`: it treats the thread root as the direct parent and the direct parent as the root. This can misplace replies in the wrong position in the thread view or attribute a reply's parent incorrectly, and is a parser differential vs. the desktop's `getThreadReference` that this code claims to mirror.",
+   "evidence": "if (tag[3] == 'root') replyTag = tag;\n        if (tag[3] == 'reply') rootTag = tag;",
+   "confidence": "high",
+   "slice": "mobile (Dart client: relay transport, media upload, event parsing) \u2014 mobile/lib"
+  },
+  {
+   "file": "mobile/lib/features/pairing/pairing_provider.dart",
+   "line": 680,
+   "severity": "medium",
+   "category": "input-validation",
+   "claim": "`_isPrivateHost` (used by `_validateRelayUrl`, which vets the `relayUrl` carried inside untrusted NIP-AB pairing payloads and legacy `buzz://` QR payloads before the app opens a NIP-42 WebSocket/HTTP connection to it) only parses strict 4-part dotted-decimal IPv4 and only blocks 10/8, 172.16/12, 192.168/16, 169.254/16. It has none of the protections `shared/relay/relay_validation.dart`'s `_isNonPublicIpv4`/`_isPublicAddress` apply for the same class of problem: no rejection of leading-zero/octal or hex octets, no handling of IPv6 literals (only the literal strings 'localhost'/'127.0.0.1'/'::1' are special-cased), no 0.0.0.0/8, 100.64.0.0/10 (CGNAT), or 224.0.0.0/4+ multicast/reserved ranges, and it trusts whatever hostname is given without any resolution/pinning.",
+   "failure_scenario": "An attacker who can get a victim to scan a crafted `nostrpair://` QR code or open a malicious `buzz://` pairing link can point `relayUrl` at an internal address the check misses (e.g. an IPv6 ULA/link-local literal, a decimal/hex-encoded loopback like `2130706433` or `0x7f000001`, or a DNS name that resolves to an internal address only at connect time) and cause the app to open an authenticated NIP-42 WebSocket connection \u2014 carrying the user's nsec \u2014 to that attacker-chosen internal endpoint.",
+   "evidence": "static bool _isPrivateHost(String host) {\n    final parts = host.split('.');\n    if (parts.length != 4) return false;\n    final octets = parts.map(int.tryParse).toList();",
+   "confidence": "medium",
+   "slice": "mobile (Dart client: relay transport, media upload, event parsing) \u2014 mobile/lib"
+  },
+  {
+   "file": "crates/buzz-acp/src/relay.rs",
+   "line": 3866,
+   "severity": "medium",
+   "category": "auth-verification-gap",
+   "claim": "The harness's NIP-42 client-side auth completion check accepts the first OK relay message received, without verifying it matches the event id of the AUTH event that was just sent \u2014 so an unrelated (or buffered/stale) OK with accepted:true from the relay can be mistaken for confirmation of the harness's own authentication.",
+   "failure_scenario": "If the relay (compromised, buggy, or racing with buffered messages from a prior session) sends any OK message with accepted:true before responding to the actual just-sent kind:22242 AUTH event \u2014 e.g. an OK for an unrelated stale event still in flight \u2014 do_connect() treats NIP-42 authentication as successful and proceeds to use the connection as authenticated, even though the relay may never have validated (or may have rejected) the real AUTH event. This is a self-deception of the client rather than a way for an external attacker to bypass the relay's own authorization, but it can cause the harness to silently operate on an unauthenticated/rejected session while believing its traffic is authorized.",
+   "evidence": "let ok = wait_for_any_ok(&mut ws, &mut buffer, AUTH_TIMEOUT).await?;\n        if !ok.accepted {\n            return Err(RelayError::AuthFailed(ok.message));\n        }\n        ok.event_id",
+   "confidence": "medium",
+   "slice": "auth (buzz-auth, buzz-acp)"
+  }
+ ]
+}

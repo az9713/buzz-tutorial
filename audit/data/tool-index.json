@@ -1,0 +1,5962 @@
+{
+ "TESTING.md": [
+  {
+   "tool": "semgrep",
+   "line": 209,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 210,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "benchmarks/harbor-buzz-orchestra/src/harbor_buzz_orchestra/container_runtime.py": [
+  {
+   "tool": "semgrep",
+   "line": 281,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 282,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 284,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 286,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 575,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 576,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 579,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "benchmarks/harbor-buzz-orchestra/testbed/src/harbor_buzz_testbed/provisioner.py": [
+  {
+   "tool": "semgrep",
+   "line": 118,
+   "rule": "dynamic-urllib-use-detected",
+   "severity": "WARNING"
+  }
+ ],
+ "crates/buzz-acp/src/config.rs": [
+  {
+   "tool": "semgrep",
+   "line": 740,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 615,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 792,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/relay.rs": [
+  {
+   "tool": "semgrep",
+   "line": 3480,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 3485,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 4364,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 679,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 716,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 879,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 973,
+   "rule": "integer division",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1172,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1203,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1221,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1228,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1786,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1793,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2120,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2121,
+   "rule": "integer division",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2121,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2162,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2163,
+   "rule": "integer division",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2163,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2662,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2721,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2726,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2778,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2934,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2940,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2956,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2977,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2990,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2997,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2998,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3005,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3020,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3140,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3146,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3160,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3387,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3414,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3434,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3435,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3893,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3961,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-cli/src/client.rs": [
+  {
+   "tool": "semgrep",
+   "line": 1289,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 1293,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 1302,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-core/src/pairing/NIP-AB.md": [
+  {
+   "tool": "semgrep",
+   "line": 108,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-core/src/pairing/qr.rs": [
+  {
+   "tool": "semgrep",
+   "line": 201,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 428,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 430,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-core/src/relay.rs": [
+  {
+   "tool": "semgrep",
+   "line": 101,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 102,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-core/src/tenant.rs": [
+  {
+   "tool": "semgrep",
+   "line": 256,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 266,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-dev-mcp/src/shim.rs": [
+  {
+   "tool": "semgrep",
+   "line": 163,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-relay/src/api/bridge.rs": [
+  {
+   "tool": "semgrep",
+   "line": 222,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 222,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 223,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2716,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2726,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2728,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2772,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2773,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2796,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2799,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2815,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2816,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2817,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2818,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2823,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2833,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2833,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2844,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2845,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2846,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 2846,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 457,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 528,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 611,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1086,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1140,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1176,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1292,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1492,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1492,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.c",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1525,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1563,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1563,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.c",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1595,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1678,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2031,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/media.rs": [
+  {
+   "tool": "semgrep",
+   "line": 1278,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 82,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 109,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 129,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 328,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 329,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 365,
+   "rule": "casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 556,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 566,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 572,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 572,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 773,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/nip05.rs": [
+  {
+   "tool": "semgrep",
+   "line": 118,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 150,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-relay/src/audio/handler.rs": [
+  {
+   "tool": "semgrep",
+   "line": 1400,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 1137,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/config.rs": [
+  {
+   "tool": "semgrep",
+   "line": 486,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 491,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 422,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/push_lease.rs": [
+  {
+   "tool": "semgrep",
+   "line": 588,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 756,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 757,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 109,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 130,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 133,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 469,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/nip11.rs": [
+  {
+   "tool": "semgrep",
+   "line": 350,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 352,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 353,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 355,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 111,
+   "rule": "casting `i64` to `u32` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/router.rs": [
+  {
+   "tool": "semgrep",
+   "line": 571,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 34,
+   "rule": "casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/tenant.rs": [
+  {
+   "tool": "semgrep",
+   "line": 228,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 239,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-sdk/src/builders.rs": [
+  {
+   "tool": "semgrep",
+   "line": 908,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 910,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "clippy",
+   "line": 271,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 513,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 525,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 944,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 961,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1068,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1110,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1164,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1166,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1190,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1191,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1192,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1193,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1390,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1455,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1473,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1491,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1507,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1513,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1538,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1555,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1562,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1580,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1596,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1626,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1633,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1652,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1659,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1701,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1814,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1835,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-test-client/src/bin/mention.rs": [
+  {
+   "tool": "semgrep",
+   "line": 9,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-test-client/src/main.rs": [
+  {
+   "tool": "semgrep",
+   "line": 233,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "deploy/charts/buzz/templates/_helpers.tpl": [
+  {
+   "tool": "semgrep",
+   "line": 83,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/archive/mod_tests.rs": [
+  {
+   "tool": "semgrep",
+   "line": 832,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/commands/agent_discovery/install_report_redaction_tests.rs": [
+  {
+   "tool": "semgrep",
+   "line": 306,
+   "rule": "detected-private-key",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/commands/join_policy.rs": [
+  {
+   "tool": "semgrep",
+   "line": 16,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 100,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/commands/pairing.rs": [
+  {
+   "tool": "semgrep",
+   "line": 485,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 601,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 606,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 616,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 661,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/managed_agents/env_vars/tests.rs": [
+  {
+   "tool": "semgrep",
+   "line": 179,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/managed_agents/nest/tests.rs": [
+  {
+   "tool": "semgrep",
+   "line": 512,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 520,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 528,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 764,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 793,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/managed_agents/spawn_hash/tests.rs": [
+  {
+   "tool": "semgrep",
+   "line": 672,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 682,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 715,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 725,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 759,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 761,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/native_websocket.rs": [
+  {
+   "tool": "semgrep",
+   "line": 389,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src-tauri/src/relay.rs": [
+  {
+   "tool": "semgrep",
+   "line": 80,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/agents/managedAgentRuntimeStatus.test.mjs": [
+  {
+   "tool": "semgrep",
+   "line": 89,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 90,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 96,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/channels/readState/readStateManager.ts": [
+  {
+   "tool": "semgrep",
+   "line": 780,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/channels/readState/readStateSnapshot.ts": [
+  {
+   "tool": "semgrep",
+   "line": 50,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/communities/communityStorage.test.mjs": [
+  {
+   "tool": "semgrep",
+   "line": 59,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 60,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/communities/communityStorage.ts": [
+  {
+   "tool": "semgrep",
+   "line": 108,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 133,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/communities/relayProbe.ts": [
+  {
+   "tool": "semgrep",
+   "line": 11,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 31,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/communities/ui/CommunityEditForm.tsx": [
+  {
+   "tool": "semgrep",
+   "line": 102,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/features/communities/useCommunityUnread.ts": [
+  {
+   "tool": "semgrep",
+   "line": 139,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/local-archive/archiveSyncManager.ts": [
+  {
+   "tool": "semgrep",
+   "line": 245,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/messages/lib/agentSnapshotClipboard.ts": [
+  {
+   "tool": "semgrep",
+   "line": 23,
+   "rule": "detect-replaceall-sanitization",
+   "severity": "INFO"
+  },
+  {
+   "tool": "semgrep",
+   "line": 23,
+   "rule": "detect-replaceall-sanitization",
+   "severity": "INFO"
+  },
+  {
+   "tool": "semgrep",
+   "line": 23,
+   "rule": "detect-replaceall-sanitization",
+   "severity": "INFO"
+  },
+  {
+   "tool": "semgrep",
+   "line": 23,
+   "rule": "detect-replaceall-sanitization",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/messages/lib/customEmojiNode.test.mjs": [
+  {
+   "tool": "semgrep",
+   "line": 14,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/features/messages/lib/customEmojiNode.ts": [
+  {
+   "tool": "semgrep",
+   "line": 101,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/features/messages/lib/hasMention.ts": [
+  {
+   "tool": "semgrep",
+   "line": 145,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/features/messages/lib/mentionHighlightExtension.ts": [
+  {
+   "tool": "semgrep",
+   "line": 109,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  },
+  {
+   "tool": "semgrep",
+   "line": 124,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/features/messages/useThreadReplies.ts": [
+  {
+   "tool": "semgrep",
+   "line": 35,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/onboarding/welcomeKickoff.ts": [
+  {
+   "tool": "semgrep",
+   "line": 627,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/features/profile/ui/ProfileAvatarEditor.utils.ts": [
+  {
+   "tool": "semgrep",
+   "line": 357,
+   "rule": "incomplete-sanitization",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/features/sidebar/ui/CommunityRail.tsx": [
+  {
+   "tool": "semgrep",
+   "line": 364,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/shared/api/inviteHelpers.ts": [
+  {
+   "tool": "semgrep",
+   "line": 20,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 41,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 64,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 82,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 83,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/shared/api/parseInviteInput.test.mjs": [
+  {
+   "tool": "semgrep",
+   "line": 26,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  },
+  {
+   "tool": "semgrep",
+   "line": 181,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/shared/api/relayWebSocketClose.ts": [
+  {
+   "tool": "semgrep",
+   "line": 16,
+   "rule": "unsafe-formatstring",
+   "severity": "INFO"
+  }
+ ],
+ "desktop/src/shared/lib/detectPrefixQuery.ts": [
+  {
+   "tool": "semgrep",
+   "line": 34,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/shared/lib/mentionPattern.ts": [
+  {
+   "tool": "semgrep",
+   "line": 36,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  },
+  {
+   "tool": "semgrep",
+   "line": 43,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  },
+  {
+   "tool": "semgrep",
+   "line": 43,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/shared/lib/remarkCustomEmoji.ts": [
+  {
+   "tool": "semgrep",
+   "line": 44,
+   "rule": "detect-non-literal-regexp",
+   "severity": "WARNING"
+  }
+ ],
+ "desktop/src/shared/ui/styled-qr-code.test.mjs": [
+  {
+   "tool": "semgrep",
+   "line": 9,
+   "rule": "detected-generic-secret",
+   "severity": "ERROR"
+  }
+ ],
+ "desktop/src/testing/e2eBridge.ts": [
+  {
+   "tool": "semgrep",
+   "line": 12011,
+   "rule": "detected-generic-secret",
+   "severity": "ERROR"
+  }
+ ],
+ "docs/nips/NIP-AE.md": [
+  {
+   "tool": "semgrep",
+   "line": 24,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "docs/nips/NIP-ER.md": [
+  {
+   "tool": "semgrep",
+   "line": 110,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "docs/nips/NIP-MP.fixtures.json": [
+  {
+   "tool": "semgrep",
+   "line": 1250,
+   "rule": "detected-telegram-bot-api-key",
+   "severity": "ERROR"
+  }
+ ],
+ "pnpm-workspace.yaml": [
+  {
+   "tool": "semgrep",
+   "line": 1,
+   "rule": "pnpm-block-exotic-sub-dependencies",
+   "severity": "MEDIUM"
+  },
+  {
+   "tool": "semgrep",
+   "line": 1,
+   "rule": "pnpm-minimum-release-age",
+   "severity": "MEDIUM"
+  },
+  {
+   "tool": "semgrep",
+   "line": 1,
+   "rule": "pnpm-trust-policy",
+   "severity": "MEDIUM"
+  }
+ ],
+ "renovate.json": [
+  {
+   "tool": "semgrep",
+   "line": 23,
+   "rule": "renovate-missing-minimum-release-age",
+   "severity": "MEDIUM"
+  },
+  {
+   "tool": "semgrep",
+   "line": 28,
+   "rule": "renovate-missing-minimum-release-age",
+   "severity": "MEDIUM"
+  },
+  {
+   "tool": "semgrep",
+   "line": 34,
+   "rule": "renovate-missing-minimum-release-age",
+   "severity": "MEDIUM"
+  }
+ ],
+ "scripts/build-sprig.sh": [
+  {
+   "tool": "semgrep",
+   "line": 122,
+   "rule": "ifs-tampering",
+   "severity": "WARNING"
+  }
+ ],
+ "scripts/e2e-git-perms.sh": [
+  {
+   "tool": "semgrep",
+   "line": 47,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "scripts/post-screenshots.sh": [
+  {
+   "tool": "semgrep",
+   "line": 83,
+   "rule": "ifs-tampering",
+   "severity": "WARNING"
+  }
+ ],
+ "web/src/shared/lib/relay-url.ts": [
+  {
+   "tool": "semgrep",
+   "line": 6,
+   "rule": "detect-insecure-websocket",
+   "severity": "ERROR"
+  }
+ ],
+ "crates/buzz-core/src/engram.rs": [
+  {
+   "tool": "clippy",
+   "line": 88,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 106,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 136,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 144,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 388,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 390,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 390,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 390,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 391,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 398,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 399,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 399,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 399,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 403,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 403,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 403,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 407,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 417,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 425,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 468,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-core/src/git_perms.rs": [
+  {
+   "tool": "clippy",
+   "line": 125,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 130,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 136,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 176,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 182,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 184,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 334,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 342,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 414,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-core/src/kind.rs": [
+  {
+   "tool": "clippy",
+   "line": 249,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 250,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 253,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 254,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-core/src/pairing/crypto.rs": [
+  {
+   "tool": "clippy",
+   "line": 41,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-core/src/pairing/session.rs": [
+  {
+   "tool": "clippy",
+   "line": 46,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-sdk/src/mentions.rs": [
+  {
+   "tool": "clippy",
+   "line": 74,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 75,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 75,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 76,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 77,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 80,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 82,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 88,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 96,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 123,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 123,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 127,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 217,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 264,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 268,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 277,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 279,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 279,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 287,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 290,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 293,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 313,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 317,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 361,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 362,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-sdk/src/nip_oa.rs": [
+  {
+   "tool": "clippy",
+   "line": 192,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 201,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 204,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 207,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 262,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 271,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 281,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 287,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-auth/src/scope.rs": [
+  {
+   "tool": "clippy",
+   "line": 170,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-conformance/src/checker.rs": [
+  {
+   "tool": "clippy",
+   "line": 83,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-persona/src/pack.rs": [
+  {
+   "tool": "clippy",
+   "line": 329,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-persona/src/persona.rs": [
+  {
+   "tool": "clippy",
+   "line": 265,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 293,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 295,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 310,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-search/src/query.rs": [
+  {
+   "tool": "clippy",
+   "line": 231,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-audit/src/service.rs": [
+  {
+   "tool": "clippy",
+   "line": 110,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-media/src/auth.rs": [
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 105,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-media/src/bucket_index.rs": [
+  {
+   "tool": "clippy",
+   "line": 251,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 252,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 270,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 271,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 291,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 292,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 295,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 296,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 315,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 316,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 392,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-media/src/storage.rs": [
+  {
+   "tool": "clippy",
+   "line": 173,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `res",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-media/src/upload.rs": [
+  {
+   "tool": "clippy",
+   "line": 372,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 379,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 380,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 384,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 385,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-media/src/validation.rs": [
+  {
+   "tool": "clippy",
+   "line": 23,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 26,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 31,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 37,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 43,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 43,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 56,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 58,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 271,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 426,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 481,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 509,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 511,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 516,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 517,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 522,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 523,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 538,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 541,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 541,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 541,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 553,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 553,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 555,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 556,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 556,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 556,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 561,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 561,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 562,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 587,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 588,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 601,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 604,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 604,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 604,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 605,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 605,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 605,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 605,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 615,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 615,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 615,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 670,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 673,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 673,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 673,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 674,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 674,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 674,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 674,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 694,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 694,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 697,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 697,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 703,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 706,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 706,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 706,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 707,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 707,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 707,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 707,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 708,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 728,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 728,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 742,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 753,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 756,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 768,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 771,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 771,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 772,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 774,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 787,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 788,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 793,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 793,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 793,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 796,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 802,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 805,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 805,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 805,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 809,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 811,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 812,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 816,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 822,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 876,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 877,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 885,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 886,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 893,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 904,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 914,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 914,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 914,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 916,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/apns.rs": [
+  {
+   "tool": "clippy",
+   "line": 158,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/app_attest.rs": [
+  {
+   "tool": "clippy",
+   "line": 139,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/authority.rs": [
+  {
+   "tool": "clippy",
+   "line": 453,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/grant.rs": [
+  {
+   "tool": "clippy",
+   "line": 96,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 98,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 113,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/http.rs": [
+  {
+   "tool": "clippy",
+   "line": 305,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 307,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-push-gateway/src/token.rs": [
+  {
+   "tool": "clippy",
+   "line": 114,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 116,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/channel.rs": [
+  {
+   "tool": "clippy",
+   "line": 1056,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1187,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1191,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1195,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1200,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1204,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1209,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/event.rs": [
+  {
+   "tool": "clippy",
+   "line": 176,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 177,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 198,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 199,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/partition.rs": [
+  {
+   "tool": "clippy",
+   "line": 20,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 22,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 22,
+   "rule": "integer division",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 22,
+   "rule": "casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `((m",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 22,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 24,
+   "rule": "casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `mon",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 28,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 30,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 67,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 68,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 70,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 71,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/push.rs": [
+  {
+   "tool": "clippy",
+   "line": 213,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 224,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 228,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 228,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 229,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 232,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 232,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 580,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 885,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/relay_invite.rs": [
+  {
+   "tool": "clippy",
+   "line": 112,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 249,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 346,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 357,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/relay_members.rs": [
+  {
+   "tool": "clippy",
+   "line": 480,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 486,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/replica_fence.rs": [
+  {
+   "tool": "clippy",
+   "line": 115,
+   "rule": "casting `u128` to `u64` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 115,
+   "rule": "casting `u128` to `u64` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 196,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 206,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 236,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 255,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 266,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 298,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 495,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 634,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/thread.rs": [
+  {
+   "tool": "clippy",
+   "line": 382,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 385,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 429,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 436,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 440,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 445,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 658,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 662,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 687,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/user.rs": [
+  {
+   "tool": "clippy",
+   "line": 117,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 121,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 125,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 129,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 146,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-db/src/lib.rs": [
+  {
+   "tool": "clippy",
+   "line": 110,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 111,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1029,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1045,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4606,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4606,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4664,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4677,
+   "rule": "casting `i32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4677,
+   "rule": "casting `i32` to `u16` may lose the sign of the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4802,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4802,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4809,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4809,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4826,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 4826,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-workflow/src/executor.rs": [
+  {
+   "tool": "clippy",
+   "line": 84,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 97,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 239,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 240,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 250,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 251,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 261,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 262,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 773,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1053,
+   "rule": "casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-workflow/src/lib.rs": [
+  {
+   "tool": "clippy",
+   "line": 227,
+   "rule": "casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 286,
+   "rule": "casting `usize` to `i32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 768,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 798,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 834,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-pubsub/src/cache_invalidation.rs": [
+  {
+   "tool": "clippy",
+   "line": 122,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-pubsub/src/conn_control.rs": [
+  {
+   "tool": "clippy",
+   "line": 110,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-pubsub/src/rate_limiter.rs": [
+  {
+   "tool": "clippy",
+   "line": 71,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `ttl",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-pubsub/src/subscriber.rs": [
+  {
+   "tool": "clippy",
+   "line": 67,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-pubsub/src/lib.rs": [
+  {
+   "tool": "clippy",
+   "line": 198,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 224,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/acp.rs": [
+  {
+   "tool": "clippy",
+   "line": 641,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 644,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 647,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 755,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 765,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 927,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 967,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1065,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1104,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1210,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1233,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1308,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1418,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1526,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1597,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1648,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1659,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1677,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1708,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1716,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1747,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1778,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1877,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/engram_fetch.rs": [
+  {
+   "tool": "clippy",
+   "line": 74,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 122,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/filter.rs": [
+  {
+   "tool": "clippy",
+   "line": 276,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 277,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 288,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 289,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 300,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 301,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 427,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/pool.rs": [
+  {
+   "tool": "clippy",
+   "line": 589,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 595,
+   "rule": "used `unwrap()` on an `Option` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 595,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 601,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 611,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 635,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 734,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1473,
+   "rule": "casting `u128` to `u64` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2098,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2102,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2339,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2405,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2429,
+   "rule": "casting `u128` to `u64` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2493,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2508,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2508,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2685,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2841,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2842,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2949,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2949,
+   "rule": "casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2964,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2965,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3153,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3229,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3717,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/pool_lifecycle.rs": [
+  {
+   "tool": "clippy",
+   "line": 115,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/queue.rs": [
+  {
+   "tool": "clippy",
+   "line": 199,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 212,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 299,
+   "rule": "used `unwrap()` on an `Option` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 321,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 359,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 433,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 454,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 496,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 858,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 859,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 867,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 965,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1342,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1510,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1520,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1549,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay-mesh/src/gossip.rs": [
+  {
+   "tool": "clippy",
+   "line": 224,
+   "rule": "casting `u128` to `u64` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 232,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay-mesh/src/membership.rs": [
+  {
+   "tool": "clippy",
+   "line": 71,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 120,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 155,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 166,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 187,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 195,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay-mesh/src/peer.rs": [
+  {
+   "tool": "clippy",
+   "line": 149,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay-mesh/src/registry.rs": [
+  {
+   "tool": "clippy",
+   "line": 155,
+   "rule": "casting `u64` to `u32` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay-mesh/src/runtime.rs": [
+  {
+   "tool": "clippy",
+   "line": 138,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 155,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/usage.rs": [
+  {
+   "tool": "clippy",
+   "line": 280,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 285,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 286,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 313,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 327,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-acp/src/lib.rs": [
+  {
+   "tool": "clippy",
+   "line": 85,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 337,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 340,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 376,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 394,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 405,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 556,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 742,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 744,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 755,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 756,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 778,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 785,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 863,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1082,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1087,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1102,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1574,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1585,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1595,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1785,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1804,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3072,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3239,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3286,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3326,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3391,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3484,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3813,
+   "rule": "casting `u64` to `u32` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3813,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3902,
+   "rule": "casting `u64` to `u32` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3902,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/git/cas_publish.rs": [
+  {
+   "tool": "clippy",
+   "line": 410,
+   "rule": "used `unwrap()` on an `Option` value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/git/manifest.rs": [
+  {
+   "tool": "clippy",
+   "line": 45,
+   "rule": "integer division",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/git/manifest_event.rs": [
+  {
+   "tool": "clippy",
+   "line": 78,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/git/store.rs": [
+  {
+   "tool": "clippy",
+   "line": 267,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 299,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 302,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 486,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 495,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 576,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 668,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 669,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 673,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 678,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 707,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 754,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 755,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 758,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 759,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 773,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 800,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 809,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 816,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 897,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/git/transport.rs": [
+  {
+   "tool": "clippy",
+   "line": 93,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 104,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 171,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 333,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 572,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 597,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 663,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 700,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 845,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 846,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 852,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1187,
+   "rule": "used `unwrap()` on an `Option` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1336,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1376,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1379,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1379,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1383,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1386,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1389,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1389,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1389,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1390,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1638,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1652,
+   "rule": "used `unwrap()` on a `Result` value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1907,
+   "rule": "casting `u64` to `usize` may truncate the value on targets with 32-bit wide pointers",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/api/invites.rs": [
+  {
+   "tool": "clippy",
+   "line": 330,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `inv",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/audio/join.rs": [
+  {
+   "tool": "clippy",
+   "line": 1797,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/audio/room.rs": [
+  {
+   "tool": "clippy",
+   "line": 151,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 400,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/audio/wire.rs": [
+  {
+   "tool": "clippy",
+   "line": 68,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 68,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 70,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 76,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 84,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/conformance/mod.rs": [
+  {
+   "tool": "clippy",
+   "line": 234,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/connection.rs": [
+  {
+   "tool": "clippy",
+   "line": 96,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 357,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/command_executor.rs": [
+  {
+   "tool": "clippy",
+   "line": 817,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1118,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1118,
+   "rule": "casting `i32` to `usize` may lose the sign of the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/count.rs": [
+  {
+   "tool": "clippy",
+   "line": 177,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 177,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.c",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 209,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 251,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 251,
+   "rule": "casting `i64` to `u64` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `n.c",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 282,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/event.rs": [
+  {
+   "tool": "clippy",
+   "line": 93,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 806,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 933,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 975,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/identity_archive.rs": [
+  {
+   "tool": "clippy",
+   "line": 147,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 150,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/imeta.rs": [
+  {
+   "tool": "clippy",
+   "line": 366,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 402,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 403,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 409,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 412,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 413,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/ingest.rs": [
+  {
+   "tool": "clippy",
+   "line": 597,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 598,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 599,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 668,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 681,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 681,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 682,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 690,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 690,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 691,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 721,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 721,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 935,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 937,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 944,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 951,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 956,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 956,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 959,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 995,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 996,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 997,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1013,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1021,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1058,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1059,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1065,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1109,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1138,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1138,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1143,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1278,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1278,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1305,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1356,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1481,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1484,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1492,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1492,
+   "rule": "integer division",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1498,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1499,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1500,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1507,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1509,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1541,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1542,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1543,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1561,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1576,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1642,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1649,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1651,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1654,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1686,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1862,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2219,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2222,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2317,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2317,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2338,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2377,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2378,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/moderation_commands.rs": [
+  {
+   "tool": "clippy",
+   "line": 116,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 119,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/moderation_notices.rs": [
+  {
+   "tool": "clippy",
+   "line": 165,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 249,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 249,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/relay_admin.rs": [
+  {
+   "tool": "clippy",
+   "line": 211,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 214,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/report.rs": [
+  {
+   "tool": "clippy",
+   "line": 130,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 166,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 188,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 190,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/req.rs": [
+  {
+   "tool": "clippy",
+   "line": 321,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 401,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 435,
+   "rule": "casting `i64` to `u32` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 553,
+   "rule": "casting `usize` to `u32` may truncate the value on targets with 64-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 553,
+   "rule": "casting `i64` to `u32` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 554,
+   "rule": "casting `i64` to `u32` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 729,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 773,
+   "rule": "casting `i64` to `usize` may truncate the value on targets with 32-bit wide pointers",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 961,
+   "rule": "casting `i32` to `u32` may lose the sign of the value: help: if this is intentional, use `cast_unsigned()` instead: `k.c",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/handlers/side_effects.rs": [
+  {
+   "tool": "clippy",
+   "line": 246,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 332,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 332,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 859,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 934,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1015,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1020,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2092,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2095,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2096,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 2908,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3099,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3121,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3131,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3173,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3213,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3217,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 3285,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/invite_token.rs": [
+  {
+   "tool": "clippy",
+   "line": 156,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 344,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 348,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 359,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/metrics.rs": [
+  {
+   "tool": "clippy",
+   "line": 66,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 161,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 180,
+   "rule": "used `unwrap()` on an `Option` value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/protocol.rs": [
+  {
+   "tool": "clippy",
+   "line": 53,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 64,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 74,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 91,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 114,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 130,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 152,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 166,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 187,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/push_runtime.rs": [
+  {
+   "tool": "clippy",
+   "line": 69,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 81,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 145,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 210,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 272,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 312,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 324,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 344,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 394,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 538,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 545,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/state.rs": [
+  {
+   "tool": "clippy",
+   "line": 104,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 173,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 330,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 362,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 397,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 444,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 459,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 637,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 684,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/storage_sweep.rs": [
+  {
+   "tool": "clippy",
+   "line": 225,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 235,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 330,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/subscription.rs": [
+  {
+   "tool": "clippy",
+   "line": 428,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/telemetry.rs": [
+  {
+   "tool": "clippy",
+   "line": 113,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/tunnel/directory.rs": [
+  {
+   "tool": "clippy",
+   "line": 246,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 277,
+   "rule": "docs for function which may panic missing `# Panics` section",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/tunnel/reliable.rs": [
+  {
+   "tool": "clippy",
+   "line": 440,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 465,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 471,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 473,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 476,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 484,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/workflow_sink.rs": [
+  {
+   "tool": "clippy",
+   "line": 90,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 92,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 94,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 102,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 119,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 119,
+   "rule": "indexing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 120,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 123,
+   "rule": "slicing may panic",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 123,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 128,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 135,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 137,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 301,
+   "rule": "casting `u32` to `u16` may truncate the value",
+   "severity": "warning"
+  }
+ ],
+ "crates/buzz-relay/src/main.rs": [
+  {
+   "tool": "clippy",
+   "line": 87,
+   "rule": "used `panic!()` or assertion in a function that returns `Result`",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1000,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1048,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1326,
+   "rule": "casting `i32` to `u16` may truncate the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1326,
+   "rule": "casting `i32` to `u16` may lose the sign of the value",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1508,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1624,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1624,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1834,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1834,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  },
+  {
+   "tool": "clippy",
+   "line": 1834,
+   "rule": "arithmetic operation that can potentially result in unexpected side-effects",
+   "severity": "warning"
+  }
+ ]
+}

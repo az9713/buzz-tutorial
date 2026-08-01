@@ -1,0 +1,166 @@
+{
+ "recall": "4/10",
+ "by_difficulty": {
+  "easy": [
+   2,
+   3
+  ],
+  "medium": [
+   0,
+   4
+  ],
+  "hard": [
+   2,
+   3
+  ]
+ },
+ "total_findings": 9,
+ "detail": [
+  {
+   "id": 1,
+   "file": "crates/buzz-relay/src/handlers/ingest.rs",
+   "line": 918,
+   "language": "rust",
+   "difficulty": "easy",
+   "type": "missing-bounds-check",
+   "planted_code": "fn validate_diff_event(event: &Event) -> Result<(), String> {\n    let mut has_repo = false;",
+   "why_its_a_bug": "Deletes the 60KB content-size cap on kind:40008 diff events, allowing unbounded-size payloads through ingest.",
+   "caught": false,
+   "matched_by": []
+  },
+  {
+   "id": 2,
+   "file": "crates/buzz-relay/src/admission.rs",
+   "line": 29,
+   "language": "rust",
+   "difficulty": "easy",
+   "type": "always-true-comparison",
+   "planted_code": "Ok(_) => Ok(()),",
+   "why_its_a_bug": "Admission check now succeeds on every Ok result regardless of result.allowed, so rate-limit denials never take effect.",
+   "caught": true,
+   "matched_by": [
+    {
+     "line": 29,
+     "severity": "critical",
+     "claim": "check_principal's match on the shared rate-limiter result has an unreachable second arm: the first arm `Ok(_) => Ok(())` catches every `Ok(RateLimitResult)` regardless of whether the limiter denied or allowed the request, so the `Ok(result) => Err(AdmissionError::Exceeded { .. })` arm beneath it can never run. Every principal-scoped admission check (WS event rate limiting in connection.rs, HTTP bridge admission in api/bridge.rs) therefore always succeeds as long as the limiter backend itself doesn't error, i.e. rate limiting on authenticated principals is effectively disabled."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "file": "crates/buzz-core/src/event.rs",
+   "line": 33,
+   "language": "rust",
+   "difficulty": "easy",
+   "type": "always-true-return",
+   "planted_code": "pub fn is_verified(&self) -> bool {\n        true\n    }",
+   "why_its_a_bug": "is_verified() always reports true, so unverified events are treated as signature-verified.",
+   "caught": true,
+   "matched_by": [
+    {
+     "line": 33,
+     "severity": "high",
+     "claim": "StoredEvent::is_verified() is hardcoded to always return true, ignoring the struct's own private `verified` field that with_received_at() explicitly sets (and which defaults to false in new()). Any caller that trusts is_verified() as a gate for signature/id verification status will treat unverified events as verified."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "file": "crates/buzz-auth/src/nip98_replay.rs",
+   "line": 120,
+   "language": "rust",
+   "difficulty": "medium",
+   "type": "case-normalization-bug",
+   "planted_code": "format!(\"buzz:{scope}:nip98:{}\", event_id.to_hex().to_uppercase())",
+   "why_its_a_bug": "Replay-guard keys become uppercase hex, breaking the lowercase key invariant and permitting replay.",
+   "caught": false,
+   "matched_by": []
+  },
+  {
+   "id": 5,
+   "file": "crates/buzz-auth/src/rate_limit.rs",
+   "line": 73,
+   "language": "rust",
+   "difficulty": "medium",
+   "type": "swapped-values",
+   "planted_code": "Self::Messages => \"ws\",\n            Self::ApiCalls => \"api\",\n            Self::WsEvents => \"msg\",",
+   "why_its_a_bug": "Swaps Redis key suffixes so message and websocket-event counters cross-apply the wrong limit.",
+   "caught": false,
+   "matched_by": []
+  },
+  {
+   "id": 6,
+   "file": "crates/buzz-media/src/validation.rs",
+   "line": 250,
+   "language": "rust",
+   "difficulty": "medium",
+   "type": "swapped-values",
+   "planted_code": "let max = if mime == \"image/gif\" {\n        config.max_image_bytes\n    } else {\n        config.max_gif_bytes\n    };",
+   "why_its_a_bug": "Swaps per-format size caps, defeating the size policy.",
+   "caught": false,
+   "matched_by": []
+  },
+  {
+   "id": 7,
+   "file": "crates/buzz-media/src/upload.rs",
+   "line": 98,
+   "language": "rust",
+   "difficulty": "medium",
+   "type": "boolean-operator-swap",
+   "planted_code": "if sidecar_exists || blob_exists {",
+   "why_its_a_bug": "Idempotency short-circuit fires when only one of sidecar/blob exists, recording a descriptor for a blob never stored.",
+   "caught": false,
+   "matched_by": []
+  },
+  {
+   "id": 8,
+   "file": "web/src/features/repos/ui/RepoBlobViewer.tsx",
+   "line": 157,
+   "language": "typescript",
+   "difficulty": "hard",
+   "type": "sandbox-escape",
+   "planted_code": "const RUN_SANDBOX = \"allow-scripts allow-same-origin\";",
+   "why_its_a_bug": "allow-same-origin plus allow-scripts lets pushed repo code run in the parent origin - cookie/localStorage/session theft.",
+   "caught": true,
+   "matched_by": [
+    {
+     "line": 157,
+     "severity": "critical",
+     "claim": "The 'Run' feature for repo-supplied HTML files renders untrusted content in an iframe whose sandbox attribute includes both allow-scripts AND allow-same-origin, which directly contradicts the code's own security-invariant comment above it (lines 145-156) claiming allow-same-origin is deliberately absent so the frame gets an opaque/null origin."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "file": "mobile/lib/shared/relay/nostr_models.dart",
+   "line": 169,
+   "language": "dart",
+   "difficulty": "hard",
+   "type": "swapped-assignment",
+   "planted_code": "if (tag[3] == 'root') replyTag = tag;\n        if (tag[3] == 'reply') rootTag = tag;",
+   "why_its_a_bug": "Swaps NIP-10 e-tag markers so threadReference resolves parentId/rootId backwards.",
+   "caught": true,
+   "matched_by": [
+    {
+     "line": 168,
+     "severity": "medium",
+     "claim": "In `NostrEvent.threadReference`, the local variables are assigned backwards: the tag whose NIP-01 marker is `'root'` is stored into `replyTag`, and the tag marked `'reply'` is stored into `rootTag`. The function then returns `parentId: replyTag[1]` (i.e., the value of the tag marked `'root'`) and `rootId: rootTag?[1]` (i.e., the value of the tag marked `'reply'`), which is the reverse of the intended NIP-10/desktop convention described in the comment two lines above."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "file": "mobile/lib/shared/relay/media_upload.dart",
+   "line": 359,
+   "language": "dart",
+   "difficulty": "hard",
+   "type": "inverted-condition",
+   "planted_code": "if (allowGenericFile &&\n        !_allowedImageMimeTypes.contains(mimeType) &&\n        !_allowedVideoMimeTypes.contains(mimeType)) {",
+   "why_its_a_bug": "Inverted guard: the unsupported-MIME check never runs for the image/video path.",
+   "caught": false,
+   "matched_by": []
+  }
+ ],
+ "note_read_but_missed": "The auth agent reported reading all 8 files of crates/buzz-auth in full and concluded 'this crate is small and well-tested; no findings there' - yet both planted defects in that crate (nip98_replay.rs:120, rate_limit.rs:73) were missed. The media agent likewise read validation.rs and upload.rs in full and missed both planted defects there, while reporting two different (unplanted) findings. Full reading did not imply detection.",
+ "findings_volume": "6 Sonnet breadth agents produced 9 findings total across 442 files."
+}

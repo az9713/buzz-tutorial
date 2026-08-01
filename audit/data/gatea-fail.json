@@ -1,0 +1,14 @@
+[
+ {
+  "file": "crates/buzz-relay/src/handlers/ingest.rs",
+  "line": 1226,
+  "severity": "medium",
+  "category": "data-integrity",
+  "claim": "When a reply's thread-root event cannot be loaded (e.g. purged by retention or not yet stored), ingest falls back to the parent's timestamp for root_created (ingest.rs:709-710), and insert_event_with_thread_metadata_tx then creates the root's thread_metadata stub keyed under that wrong event_created_at (event.rs:1225-1226 uses unwrap_or(meta.event_created_at) the same way); because thread_metadata's PK is (community_id, event_created_at, event_id) (migrations/0001:526), the mis-keyed stub never joins the real root event and can coexist with a correctly-keyed row for the same event_id.",
+  "failure_scenario": "Reply R2 to root X arrives while X's events row is absent (retention purge or out-of-order sync): the stub for X is inserted with parent/reply timestamp T' != X.created_at. get_channel_window's LEFT JOIN requires tm.event_created_at = e.created_at (thread.rs:640-641), so X shows no thread summary in the channel even though replies exist. If X (or a direct reply carrying X's true created_at) later produces a correctly-keyed row, two thread_metadata rows exist for X; every counter UPDATE matches on (community_id, event_id) only (event.rs:1249-1251) and increments BOTH rows, and get_thread_summary's unordered LIMIT 1 (thread.rs:522-523) returns whichever row Postgres picks \u2014 reply counts shown to users become wrong and nondeterministic. NOTE: the cited evidence line is in crates/buzz-db/src/event.rs at line 1226; the reachable trigger is ingest.rs:709-710.",
+  "evidence": "                                meta.root_event_created_at.unwrap_or(meta.event_created_at);",
+  "confidence": "medium",
+  "reported_slice": "db",
+  "gate_a": "evidence not present in file"
+ }
+]

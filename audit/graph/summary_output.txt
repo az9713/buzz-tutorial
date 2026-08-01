@@ -1,0 +1,96 @@
+﻿=== TOP 40 HIGH-CENTRALITY NODES (by raw degree) ===
+  255  src_builders  [code]  buzz/crates/buzz-sdk/src/builders.rs  mod=crates/buzz-sdk
+  243  src_lib_db  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+  234  src_llm  [code]  buzz/crates/buzz-agent/src/llm.rs  mod=crates/buzz-agent
+  225  buzz_crates_buzz_db_src_lib_rs_result  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+  213  handlers_ingest  [code]  buzz/crates/buzz-relay/src/handlers/ingest.rs  mod=crates/buzz-relay
+  199  src_pool  [code]  buzz/crates/buzz-acp/src/pool.rs  mod=crates/buzz-acp
+  186  buzz_crates_buzz_db_src_lib_rs_communityid  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+  158  buzz_crates_buzz_acp_src_lib_rs_src_lib  [code]  buzz/crates/buzz-acp/src/lib.rs  mod=crates/buzz-acp
+  156  src_queue  [code]  buzz/crates/buzz-acp/src/queue.rs  mod=crates/buzz-acp
+  155  buzz_crates_buzz_agent_src_config_rs_src_config  [code]  buzz/crates/buzz-agent/src/config.rs  mod=crates/buzz-agent
+  151  buzz_crates_buzz_acp_src_config_rs_src_config  [code]  buzz/crates/buzz-acp/src/config.rs  mod=crates/buzz-acp
+  150  buzz_crates_buzz_acp_src_relay_rs_src_relay  [code]  buzz/crates/buzz-acp/src/relay.rs  mod=crates/buzz-acp
+  128  api_bridge  [code]  buzz/crates/buzz-relay/src/api/bridge.rs  mod=crates/buzz-relay
+  126  src_acp  [code]  buzz/crates/buzz-acp/src/acp.rs  mod=crates/buzz-acp
+  103  buzz_crates_git_sign_nostr_src_lib_rs_src_lib  [code]  buzz/crates/git-sign-nostr/src/lib.rs  mod=crates/git-sign-nostr
+  103  discovery_tests  [code]  buzz/desktop/src-tauri/src/managed_agents/discovery/tests.rs  mod=desktop/src-tauri/src/managed_agents
+   97  buzz_crates_buzz_db_src_lib_rs_option  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+   92  audio_join  [code]  buzz/crates/buzz-relay/src/audio/join.rs  mod=crates/buzz-relay
+   91  buzz_crates_buzz_db_src_lib_rs_uuid  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+   91  src_validation  [code]  buzz/crates/buzz-media/src/validation.rs  mod=crates/buzz-media
+   91  src_executor  [code]  buzz/crates/buzz-workflow/src/executor.rs  mod=crates/buzz-workflow
+   90  src_builders_sign  [code]  buzz/crates/buzz-sdk/src/builders.rs  mod=crates/buzz-sdk
+   85  git_transport  [code]  buzz/crates/buzz-relay/src/api/git/transport.rs  mod=crates/buzz-relay
+   84  src_client  [code]  buzz/crates/buzz-cli/src/client.rs  mod=crates/buzz-cli
+   80  buzz_crates_buzz_db_src_lib_rs_src_lib  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+   79  src_workflow  [code]  buzz/crates/buzz-db/src/workflow.rs  mod=crates/buzz-db
+   79  handlers_req  [code]  buzz/crates/buzz-relay/src/handlers/req.rs  mod=crates/buzz-relay
+   76  buzz_crates_buzz_cli_src_commands_channels_rs_commands_channels  [code]  buzz/crates/buzz-cli/src/commands/channels.rs  mod=crates/buzz-cli
+   74  runtime_tests  [code]  buzz/desktop/src-tauri/src/managed_agents/runtime/tests.rs  mod=desktop/src-tauri/src/managed_agents
+   72  commands_agent_discovery  [code]  buzz/desktop/src-tauri/src/commands/agent_discovery.rs  mod=desktop/src-tauri/src/commands
+   69  handlers_side_effects  [code]  buzz/crates/buzz-relay/src/handlers/side_effects.rs  mod=crates/buzz-relay
+   69  buzz_crates_buzz_sdk_src_builders_rs_result  [code]  buzz/crates/buzz-sdk/src/builders.rs  mod=crates/buzz-sdk
+   69  buzz_crates_buzz_sdk_src_builders_rs_sdkerror  [code]  buzz/crates/buzz-sdk/src/builders.rs  mod=crates/buzz-sdk
+   68  buzz_crates_buzz_workflow_src_lib_rs_src_lib  [code]  buzz/crates/buzz-workflow/src/lib.rs  mod=crates/buzz-workflow
+   68  handlers_event  [code]  buzz/crates/buzz-relay/src/handlers/event.rs  mod=crates/buzz-relay
+   68  managed_agents_discovery  [code]  buzz/desktop/src-tauri/src/managed_agents/discovery.rs  mod=desktop/src-tauri/src/managed_agents
+   67  buzz_crates_buzz_db_src_lib_rs_vec  [code]  buzz/crates/buzz-db/src/lib.rs  mod=crates/buzz-db
+   66  src_relay_bgstate_new  [code]  buzz/crates/buzz-acp/src/relay.rs  mod=crates/buzz-acp
+   66  buzz_crates_buzz_db_src_event_rs_src_event  [code]  buzz/crates/buzz-db/src/event.rs  mod=crates/buzz-db
+   65  api_media  [code]  buzz/crates/buzz-relay/src/api/media.rs  mod=crates/buzz-relay
+
+=== GOD NODES (analyze.god_nodes) ===
+count=10
+{'id': 'src_lib_db', 'label': 'Db', 'degree': 243}
+{'id': 'buzz_crates_buzz_db_src_lib_rs_result', 'label': 'Result', 'degree': 225}
+{'id': 'buzz_crates_buzz_db_src_lib_rs_communityid', 'label': 'CommunityId', 'degree': 186}
+{'id': 'buzz_crates_buzz_db_src_lib_rs_option', 'label': 'Option', 'degree': 97}
+{'id': 'buzz_crates_buzz_db_src_lib_rs_uuid', 'label': 'Uuid', 'degree': 91}
+{'id': 'src_builders_sign', 'label': 'sign()', 'degree': 90}
+{'id': 'buzz_crates_buzz_sdk_src_builders_rs_result', 'label': 'Result', 'degree': 69}
+{'id': 'buzz_crates_buzz_sdk_src_builders_rs_sdkerror', 'label': 'SdkError', 'degree': 69}
+{'id': 'buzz_crates_buzz_db_src_lib_rs_vec', 'label': 'Vec', 'degree': 67}
+{'id': 'src_state_appstate', 'label': 'AppState', 'degree': 64}
+
+total communities: 695
+top 20 communities by size: [('0', 167), ('1', 135), ('2', 134), ('3', 122), ('4', 107), ('5', 107), ('6', 105), ('7', 99), ('8', 99), ('9', 95), ('10', 95), ('11', 94), ('12', 94), ('13', 93), ('14', 92), ('15', 91), ('16', 91), ('17', 91), ('18', 84), ('19', 84)]
+
+=== CROSS-MODULE COMMUNITIES (span >1 top-level module, size>=5) ===
+community 2 size=134 modules={'crates/buzz-core': 102, 'crates/buzz-pairing-cli': 32}
+community 7 size=99 modules={'crates/buzz-agent': 37, 'crates/buzz-pair-relay': 62}
+community 9 size=95 modules={'crates/buzz-core': 42, 'desktop/src-tauri/src/commands': 53}
+community 12 size=94 modules={'crates/buzz-dev-mcp': 35, 'crates/buzz-relay': 28, 'desktop/src-tauri/src/egress_guard.rs': 5, 'desktop/src-tauri/src/egress_guard_tests.rs': 26}
+community 13 size=93 modules={'desktop/src-tauri/src/nostr_convert.rs': 64, 'desktop/src-tauri/src/nostr_convert': 29}
+community 17 size=91 modules={'crates/buzz-test-client': 48, 'crates/buzz-voice': 43}
+community 18 size=84 modules={'crates/buzz-admin': 26, 'crates/buzz-core': 28, 'crates/buzz-relay': 30}
+community 23 size=82 modules={'crates/buzz-relay': 81, 'crates/buzz-db': 1}
+community 24 size=81 modules={'crates/buzz-relay': 46, 'crates/buzz-relay-mesh': 35}
+community 28 size=77 modules={'crates/buzz-dev-mcp': 76, 'desktop/src-tauri/src/tray_menu.rs': 1}
+community 31 size=75 modules={'desktop/src-tauri/src/commands': 48, 'desktop/src-tauri/src/managed_agents': 27}
+community 49 size=68 modules={'crates/buzz-sdk': 66, 'crates/buzz-cli': 2}
+community 50 size=68 modules={'desktop/src-tauri/src/commands': 67, 'desktop/src-tauri/src/relay.rs': 1}
+community 54 size=67 modules={'desktop/src-tauri/src/lib.rs': 8, 'desktop/src-tauri/src/shutdown.rs': 18, 'desktop/src-tauri/src/tray_menu.rs': 41}
+community 64 size=61 modules={'desktop/src-tauri/src/commands': 60, 'desktop/src-tauri/src/managed_agents': 1}
+community 68 size=60 modules={'desktop/src-tauri/src/commands': 58, 'desktop/src-tauri/src/managed_agents': 2}
+community 73 size=58 modules={'desktop/src-tauri/src/commands': 57, 'desktop/src-tauri/src/relay.rs': 1}
+community 85 size=56 modules={'desktop/src-tauri/src/app_state_tests.rs': 54, 'desktop/src-tauri/src/app_state.rs': 2}
+community 94 size=54 modules={'desktop/src-tauri/src/commands': 7, 'desktop/src-tauri/src/managed_agents': 47}
+community 100 size=53 modules={'crates/buzz-relay': 52, 'crates/buzz-core': 1}
+community 106 size=52 modules={'desktop/src-tauri/src/migration.rs': 46, 'desktop/src-tauri/src/migration_avatar_tests.rs': 5, 'desktop/src-tauri/src/migration_command_tests.rs': 1}
+community 112 size=50 modules={'desktop/src-tauri/src/event_sync_team_events_tests.rs': 10, 'desktop/src-tauri/src/event_sync_tests.rs': 14, 'desktop/src-tauri/src/managed_agents': 26}
+community 114 size=49 modules={'crates/buzz-auth': 26, 'crates/buzz-pubsub': 23}
+community 124 size=48 modules={'desktop/src-tauri/src/managed_agents': 47, 'desktop/src-tauri/src/commands': 1}
+community 126 size=47 modules={'desktop/src-tauri/src/commands': 8, 'desktop/src-tauri/src/managed_agents': 39}
+community 129 size=47 modules={'crates/buzz-cli': 46, 'crates/buzz-core': 1}
+community 174 size=41 modules={'desktop/src-tauri/src/commands': 18, 'desktop/src-tauri/src/templates': 23}
+community 186 size=39 modules={'desktop/src-tauri/src/archive': 38, 'desktop/src-tauri/src/relay.rs': 1}
+community 190 size=39 modules={'desktop/src-tauri/src/key_backup.rs': 19, 'desktop/src-tauri/src/key_backup_tests.rs': 20}
+community 193 size=38 modules={'crates/buzz-core': 10, 'crates/buzz-db': 28}
+
+=== SURPRISING CONNECTIONS (cross-community edges) ===
+{'source': 'cli_pipeline_resolves_multiword_display_names()', 'target': 'extract_at_mentions_with_known()', 'source_files': ['buzz/crates/buzz-cli/src/commands/messages.rs', 'buzz/crates/buzz-sdk/src/mentions.rs'], 'confidence': 'INFERRED', 'relation': 'calls', 'why': 'inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `cli_pipeline_resolves_multiword_display_names()` unexpectedly reaches hub `extract_at_mentions_with_known()`'}
+{'source': 'empty_trace_is_coverage_breach()', 'target': 'check_trace()', 'source_files': ['buzz/crates/buzz-conformance/tests/replay_fixtures.rs', 'buzz/crates/buzz-conformance/src/checker.rs'], 'confidence': 'INFERRED', 'relation': 'calls', 'why': 'inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `empty_trace_is_coverage_breach()` unexpectedly reaches hub `check_trace()`'}
+{'source': 'ingest_event_inner()', 'target': 'is_relay_admin_kind()', 'source_files': ['buzz/crates/buzz-relay/src/handlers/ingest.rs', 'buzz/crates/buzz-core/src/kind.rs'], 'confidence': 'INFERRED', 'relation': 'calls', 'why': 'inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `is_relay_admin_kind()` unexpectedly reaches hub `ingest_event_inner()`'}
+{'source': 'ingest_event_inner()', 'target': 'is_identity_archive_request_kind()', 'source_files': ['buzz/crates/buzz-relay/src/handlers/ingest.rs', 'buzz/crates/buzz-core/src/kind.rs'], 'confidence': 'INFERRED', 'relation': 'calls', 'why': 'inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `is_identity_archive_request_kind()` unexpectedly reaches hub `ingest_event_inner()`'}
+{'source': 'run_install_with_retry()', 'target': 'Sleep', 'source_files': ['buzz/desktop/src-tauri/src/commands/agent_discovery/install_exec.rs', 'buzz/crates/buzz-relay/src/api/git/transport.rs'], 'confidence': 'INFERRED', 'relation': 'calls', 'why': 'inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `Sleep` unexpectedly reaches hub `run_install_with_retry()`'}

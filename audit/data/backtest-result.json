@@ -1,0 +1,119 @@
+{
+ "coverage_note": "Read the full relay layer (relay_provider, relay_session, relay_socket, relay_client, relay_validation, media_upload, media_auth, media_image, nostr_models, signed_event_relay, app_lifecycle_provider, relay.dart barrel), both deeplink files, both invite files, and the pairing feature (pairing_provider, pairing_crypto, pairing_socket, pairing_page, pairing_qr_scanner + its part files). Traced the relay URL end to end: deep_link.parseInviteDeepLink -> InviteDeepLink.relayUrl (\"wss://host\") -> InviteJoinNotifier.confirmJoin -> Community.create(relayUrl:) -> RelayConfigNotifier.build -> RelayConfig.baseUrl -> {RelayConfig.wsUrl -> RelaySocket, RelaySessionNotifier.queryRelay, MediaUploadService._buildUploadRequest, MediaGetAuthService, RelayClient.mediaUploadUrl}; and the pairing path parseNostrpairUri/_parseLegacyInput -> _validateRelayUrl -> Community.create(relayUrl: \"https://host\"). Did NOT read (not present in this subset): shared/community/community_provider.dart (Community.create / nameFromUrl / communityListProvider), shared/auth/auth.dart, shared/crypto/{ecdh,nip44,hkdf}.dart, and the `nostr` package itself \u2014 so I could not confirm whether Community.create re-normalizes relayUrl (every helper in invite_join_provider switches on 'wss'/'ws', and pairing's validator only accepts http/https, which is strong evidence the two paths persist different schemes). Skimmed only: animated_image_sanitizer.dart, mp4_fast_start.dart, nostr_filters.dart, and the pure-UI part files (onboarding_background, pairing_welcome_view, dynamic_island_portal, scanner_camera).",
+ "files_read": [
+  "mobile/lib/shared/relay/relay_provider.dart",
+  "mobile/lib/shared/relay/relay_session.dart",
+  "mobile/lib/shared/relay/relay_socket.dart",
+  "mobile/lib/shared/relay/relay_client.dart",
+  "mobile/lib/shared/relay/relay_validation.dart",
+  "mobile/lib/shared/relay/media_upload.dart",
+  "mobile/lib/shared/relay/media_auth.dart",
+  "mobile/lib/shared/relay/media_image.dart",
+  "mobile/lib/shared/relay/nostr_models.dart",
+  "mobile/lib/shared/relay/signed_event_relay.dart",
+  "mobile/lib/shared/relay/app_lifecycle_provider.dart",
+  "mobile/lib/shared/relay/relay.dart",
+  "mobile/lib/shared/deeplink/deep_link.dart",
+  "mobile/lib/shared/deeplink/pending_deep_link_provider.dart",
+  "mobile/lib/features/invites/invite_join_provider.dart",
+  "mobile/lib/features/invites/invite_join_sheet.dart",
+  "mobile/lib/features/pairing/pairing_provider.dart",
+  "mobile/lib/features/pairing/pairing_crypto.dart",
+  "mobile/lib/features/pairing/pairing_socket.dart",
+  "mobile/lib/features/pairing/pairing_page.dart",
+  "mobile/lib/features/pairing/pairing_qr_scanner.dart",
+  "mobile/lib/features/pairing/pairing_qr_scanner/fallback_scanner.dart"
+ ],
+ "findings": [
+  {
+   "file": "mobile/lib/shared/relay/relay_provider.dart",
+   "line": 21,
+   "severity": "critical",
+   "claim": "RelayConfig.wsUrl silently downgrades TLS for every community joined by invite link. The scheme test only recognises 'https', but the invite path persists the relay URL with the websocket scheme ('wss://host'), so 'wss' falls into the else branch and the socket is opened as plaintext 'ws://'. The wss-only validation performed at parse time (relay_validation.validateInviteRelayUri throws 'Relay URL must use WSS') therefore does not survive to the connection actually made.",
+   "failure_scenario": "User opens https://relay.example/invite/abc123. parseInviteDeepLink builds relayUrl = 'wss://relay.example' (deep_link.dart:197-213) and validateInviteRelayUri accepts it because the scheme is wss. confirmJoin stores that exact string as Community.relayUrl (invite_join_provider.dart:157-162), and RelayConfigNotifier.build sets baseUrl = 'wss://relay.example'. On connect, wsUrl computes uri.scheme=='wss' != 'https' -> scheme='ws' -> 'ws://relay.example'. RelaySocket.connect opens an unencrypted WebSocket on port 80 and immediately sends the NIP-42 kind:22242 AUTH event signed with the member's nsec (relay_socket.dart:203-217), plus every subsequent message and subscription, in cleartext. Any on-path attacker (caf\u00e9 Wi-Fi, ISP, hostile CGNAT) reads the whole community feed, replays the AUTH event, and \u2014 because inbound events are never signature-checked (see relay_session.dart:449) \u2014 injects arbitrary forged messages. The invite claim itself went over HTTPS (_claimUrlFromRelay maps wss->https), so nothing warns the user.",
+   "evidence": "  /// Derive the websocket URL from the HTTP base URL.\n  String get wsUrl {\n    final uri = Uri.parse(baseUrl);\n    final scheme = uri.scheme == 'https' ? 'wss' : 'ws';\n    return uri.replace(scheme: scheme).toString();\n  }",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/features/pairing/pairing_provider.dart",
+   "line": 654,
+   "severity": "high",
+   "claim": "The pairing path validates the relay URL with a hand-rolled private-address check that is far weaker than the hardened shared validator (relay_validation.dart) used by the invite path \u2014 the same stored field, two different validators. _isPrivateHost only understands 4-part dotted-decimal and only blocks 10/8, 172.16/12, 192.168/16 and 169.254/16, and the localhost check is three exact strings.",
+   "failure_scenario": "A user scans a hostile QR (or a compromised/malicious 'source' device sends a pairing payload) whose relayUrl is 'https://127.0.0.2/', 'https://127.1/', 'https://2130706433/', 'https://[0:0:0:0:0:0:0:1]/', 'https://0.0.0.0/', 'https://100.64.3.9/' (CGNAT) or 'https://foo.localhost/'. None of these match host=='localhost'|'127.0.0.1'|'::1', and _isPrivateHost returns false for all of them ('127.1' and '2130706433' are not 4 parts; '127.0.0.2' has a=127 which is not in the list; the IPv6 form splits on '.' into 1 part; 100.64/10 is absent). The app then opens a WebSocket to that address with the supplied nsec and, on success, stores it as the active community, so the device is pointed at loopback/link-local/CGNAT services the user cannot see. The invite path routed through validateInviteRelayUri would have rejected every one of these (relay_validation.dart:38-62 rejects non-canonical IPv4 literals, all of 127/8, 100.64/10, 0/8, and non-global IPv6).",
+   "evidence": "  static bool _isPrivateHost(String host) {\n    final parts = host.split('.');\n    if (parts.length != 4) return false;\n    final octets = parts.map(int.tryParse).toList();\n    if (octets.any((o) => o == null)) return false;\n\n    final a = octets[0]!;\n    final b = octets[1]!;\n\n    if (a == 10) return true;\n    if (a == 172 && b >= 16 && b <= 31) return true;\n    if (a == 192 && b == 168) return true;\n    if (a == 169 && b == 254) return true;\n    return false;\n  }",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/features/pairing/pairing_provider.dart",
+   "line": 98,
+   "severity": "high",
+   "claim": "The SAS-verified NIP-AB pairing protocol can be skipped entirely by prefix choice: any scanned string that does not start with 'nostrpair://' is routed to the legacy base64 path, which imports a relay URL AND an nsec from the QR with no ECDH, no SAS code, no transcript hash, and no user confirmation screen.",
+   "failure_scenario": "An attacker prints/AirDrops/embeds a QR containing 'buzz://<base64 of {\"relayUrl\":\"https://evil.example\",\"pubkey\":\"...\",\"nsec\":\"<attacker-known key>\"}>'. pair() sees no 'nostrpair://' prefix and calls _pairLegacy, which decodes the payload, connects once to validate, and calls authenticateWithCommunity \u2014 the SAS screen (_SasVerificationView, the only thing that asks 'Does your desktop app show this code?') never appears. The victim is now signed in to an attacker-controlled relay under an identity whose private key the attacker holds: the attacker can read everything the victim posts, sign messages as the victim, and \u2014 because the same QR scanner is offered from the invite success sheet's 'Back it up now' button (invite_join_sheet.dart:171-182) \u2014 the victim believes they are backing up their real identity.",
+   "evidence": "    final trimmed = rawInput.trim();\n    if (trimmed.startsWith('nostrpair://')) {\n      return _pairNipAb(trimmed);\n    }\n    // Legacy buzz:// flow.\n    return _pairLegacy(trimmed);",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/shared/relay/media_auth.dart",
+   "line": 87,
+   "severity": "high",
+   "claim": "MediaGetAuthService._isRelayMediaUrl matches on authority only and explicitly accepts 'http' as well as 'https', so a signed Blossom kind:24242 't=get' credential is attached to plaintext HTTP media fetches. extractServerAuthority also strips ':80'/':443' regardless of scheme, so 'http://relay.example:80/media/x' and 'wss://relay.example' normalise to the identical authority.",
+   "failure_scenario": "Any relay event (message imeta tag, profile picture, custom emoji) that contains 'http://relay.example/media/evil.jpg' passes isRelayMediaUrl, so MediaImageProvider._loadAsync sends the memoized 'Authorization: Nostr <base64 kind:24242 event>' header over unencrypted HTTP (media_image.dart:95). That auth event carries only ['t','get'], ['expiration'] and ['server'] tags \u2014 it is not bound to a URL or body hash (media_auth.dart:109-114) \u2014 so a passive network observer captures a bearer token valid for the full 600-second lifetime and can read any media blob on the relay as that user. On an invite-joined community the relay base URL is already 'wss://\u2026' (finding 1), so the authority comparison succeeds while nothing in this class ever checks that the fetch is encrypted.",
+   "evidence": "  bool _isRelayMediaUrl(Uri uri, Uri relayUri) {\n    if (uri.scheme != 'http' && uri.scheme != 'https') return false;\n    if (uri.host.isEmpty || relayUri.host.isEmpty) return false;",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/shared/relay/media_upload.dart",
+   "line": 408,
+   "severity": "medium",
+   "claim": "MediaUploadService rebuilds the upload URL by resolving a path against the stored baseUrl, assuming baseUrl is HTTP-schemed. For invite-joined communities baseUrl is 'wss://host', so the request target becomes 'wss://host/upload', which package:http/dart:io cannot issue \u2014 a consumer that disagrees with RelayConfig.wsUrl about what the same stored string means.",
+   "failure_scenario": "A member who joined via an invite link picks a photo; _buildUploadRequest produces Uri 'wss://relay.example/upload' and _http.send throws ArgumentError('Unsupported scheme wss in \u2026') before any network I/O. Both the primary and the /media/upload legacy retry fail the same way, so media upload is permanently broken for every invite-joined community while working for pairing-joined ones (which store 'https://\u2026'). RelayClient.mediaUploadUrl (relay_client.dart:21-24) has the identical defect.",
+   "evidence": "    final request = http.Request('PUT', Uri.parse(_baseUrl).resolve(path));",
+   "confidence": "medium"
+  },
+  {
+   "file": "mobile/lib/shared/relay/relay_session.dart",
+   "line": 136,
+   "severity": "medium",
+   "claim": "queryRelay resolves the relay's HTTP bridge endpoint against config.baseUrl with no scheme mapping, so it inherits whatever scheme the onboarding path persisted \u2014 'https://host/query' for pairing, but 'wss://host/query' for invites. The NIP-98 header is also signed over that malformed URL.",
+   "failure_scenario": "On an invite-joined community every one-shot query throws at client.post(Uri.parse('wss://relay.example/query')) \u2014 the http client rejects the wss scheme \u2014 so all HTTP-bridge queries fail for exactly the users onboarded by invite link. Note the invite provider itself knows the mapping is required and does it locally (_claimUrlFromRelay switches wss->https, invite_join_provider.dart:242-255); relay_session does not, which is the concrete divergence between two consumers of the same stored value.",
+   "evidence": "    final config = ref.read(relayConfigProvider);\n    final url = Uri.parse(config.baseUrl).resolve('/query').toString();",
+   "confidence": "medium"
+  },
+  {
+   "file": "mobile/lib/shared/relay/relay_session.dart",
+   "line": 449,
+   "severity": "medium",
+   "claim": "Inbound relay events are deserialized with NostrEvent.fromJson, which copies id/pubkey/sig verbatim and performs no id recomputation and no Schnorr signature check (nostr_models.dart:113-125). Nothing else in the session layer verifies them, so authorship of every displayed message rests entirely on the transport.",
+   "failure_scenario": "Anyone who can write frames on the socket \u2014 a malicious or compromised relay, or an on-path attacker on the plaintext ws:// connection created by finding 1 \u2014 sends ['EVENT','l-1',{'id':'\u2026','pubkey':'<admin pubkey>','kind':9,'content':'send me your seed','sig':'00\u2026'}]. _handleEvent constructs the NostrEvent and delivers it to the live subscription callback; the UI renders it as an authentic message from the admin. The pairing code path shows the intended contrast \u2014 it explicitly verifies signatures before acting (pairing_provider.dart:334-341) \u2014 while the main event path does not.",
+   "evidence": "    final subId = data[1] as String;\n    final eventJson = data[2] as Map<String, dynamic>;\n    final event = NostrEvent.fromJson(eventJson);",
+   "confidence": "medium"
+  },
+  {
+   "file": "mobile/lib/features/pairing/pairing_provider.dart",
+   "line": 607,
+   "severity": "medium",
+   "claim": "_validateCredentials duplicates the same defective scheme mapping as RelayConfig.wsUrl ('https' -> wss, everything else -> ws), so the credential-validation handshake silently drops to plaintext for any relayUrl that is not literally https-schemed.",
+   "failure_scenario": "In a debug build (or if _validateRelayUrl is ever relaxed, or if this helper is reused for an invite-shaped 'wss://' URL as _processPayload's sibling paths already are), uri.scheme is 'http' or 'wss' and the else branch yields 'ws://\u2026'. The user's real nsec is then used to sign a NIP-42 AUTH event and sent over an unencrypted socket during what the code calls 'validation'. Two copies of the same wrong mapping mean fixing relay_provider.dart alone does not fix the app.",
+   "evidence": "    final uri = Uri.parse(relayUrl);\n    final scheme = uri.scheme == 'https' ? 'wss' : 'ws';\n    final wsUrl = uri.replace(scheme: scheme).toString();",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/features/pairing/pairing_crypto.dart",
+   "line": 144,
+   "severity": "low",
+   "claim": "parseNostrpairUri accepts plaintext 'ws://' relays and applies no host validation at all \u2014 no TLS requirement, no private/loopback address filtering \u2014 unlike validateInviteRelayUri which is applied to every invite relay.",
+   "failure_scenario": "A hostile QR code carries 'nostrpair://<64 hex>?secret=<64 hex>&relay=ws://192.168.0.5:7777'. _pairNipAb passes qr.relays.first straight to PairingSocket with no further checks (pairing_provider.dart:178, 198-205), so the device opens an unencrypted WebSocket to an arbitrary attacker-chosen host on the local network. The pairing payload itself is NIP-44 encrypted and SAS-bound, so key material is not directly exposed, but the ephemeral pubkey, the source pubkey p-tag, timing metadata, and the NIP-42 AUTH event are sent in the clear, and the scanner becomes a probe for internal hosts.",
+   "evidence": "  for (final relay in relays) {\n    final parsed = Uri.tryParse(relay);\n    if (parsed == null || (parsed.scheme != 'wss' && parsed.scheme != 'ws')) {\n      throw FormatException('Invalid relay URL: $relay');\n    }\n  }",
+   "confidence": "high"
+  },
+  {
+   "file": "mobile/lib/shared/relay/relay_socket.dart",
+   "line": 171,
+   "severity": "low",
+   "claim": "Relay frames are type-cast without checking: data[0] is cast to String in both socket layers, and relay_session casts data[1]/data[2]/data[3] to String/Map/bool inside stream callbacks that have no try-catch around the dispatch.",
+   "failure_scenario": "A malicious relay (or on-path attacker on the downgraded ws:// link) sends '[1]' or '[\"EVENT\",\"l-1\",\"not-an-object\"]' or '[\"OK\",\"id\",\"yes\"]'. The cast raises a TypeError inside the WebSocket stream listener rather than being swallowed like malformed JSON is on the line above, producing an uncaught async error; _handleOk's 'data[2] as bool' and _handleEvent's 'data[2] as Map<String, dynamic>' (relay_session.dart:447) fail the same way. A single crafted frame is enough to disrupt the session, and the surrounding code's own comments assume malformed input is merely ignored.",
+   "evidence": "    if (data.isEmpty) return;\n    final type = data[0] as String;",
+   "confidence": "medium"
+  }
+ ]
+}

