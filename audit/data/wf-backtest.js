@@ -1,11 +1,11 @@
-export const meta = {
+﻿export const meta = {
   name: 'buzz-audit-backtest',
   description: 'Blind depth audit of pre-fix code, to test whether the audit rediscovers a known real vulnerability',
   phases: [{ title: 'Backtest', detail: '1 depth agent, Fable 5, blind to the answer' }],
 }
 
 const ROOT =
-  'C:/Users/simon/AppData/Local/Temp/claude/C--Users-simon-Downloads-buzz-me/246c14bd-8634-4529-b69c-47258b3a4d50/scratchpad/backtest'
+  '<scratchpad>/backtest'
 
 const SCHEMA = {
   type: 'object',
@@ -34,9 +34,9 @@ const SCHEMA = {
   },
 }
 
-const PROMPT = `You are performing a DEEP security audit of the Dart code under \`${ROOT}\` (29 files under \`mobile/lib/\`). Read only — do not edit anything. Give \`file\` paths relative to that root, e.g. \`mobile/lib/shared/relay/relay_provider.dart\`.
+const PROMPT = `You are performing a DEEP security audit of the Dart code under \`${ROOT}\` (29 files under \`mobile/lib/\`). Read only â€” do not edit anything. Give \`file\` paths relative to that root, e.g. \`mobile/lib/shared/relay/relay_provider.dart\`.
 
-This is the mobile client of \`buzz\`, a Nostr social app. The files cover two onboarding paths into a community — joining by **invite link** (\`features/invites/\`, \`shared/deeplink/\`) and **device pairing** (\`features/pairing/\`) — plus the relay connection layer that both feed (\`shared/relay/\`).
+This is the mobile client of \`buzz\`, a Nostr social app. The files cover two onboarding paths into a community â€” joining by **invite link** (\`features/invites/\`, \`shared/deeplink/\`) and **device pairing** (\`features/pairing/\`) â€” plus the relay connection layer that both feed (\`shared/relay/\`).
 
 Concentrate on:
 

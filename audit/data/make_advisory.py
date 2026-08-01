@@ -10,7 +10,7 @@ from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).parent
-OUT = Path(r"C:/Users/simon/Downloads/buzz_me/buzz-audit-advisory.md")
+OUT = HERE.parent / "buzz-audit-advisory.md"
 
 confirmed = json.loads((HERE / "confirmed.json").read_text(encoding="utf-8"))
 refuted = json.loads((HERE / "refuted.json").read_text(encoding="utf-8"))

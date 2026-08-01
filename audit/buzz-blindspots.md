@@ -1,6 +1,6 @@
 # Blindspot pass: the technical creation of Buzz
 
-Generated 31 July 2026. Grounded in the clone at `C:\Users\simon\Downloads\buzz_me\buzz`
+Generated 31 July 2026. Grounded in a local clone of `block/buzz`
 (main @ `10d5a2641`, 30 Jul 2026, 2,022 commits, 538 remote branches).
 
 Written as a follow-on to two explainers (`how-buzz-works.html`, `what-is-nostr.html`)

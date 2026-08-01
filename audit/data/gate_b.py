@@ -11,6 +11,7 @@ Writes gate-b.json.
 """
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -18,7 +19,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
-REPO = Path(r"C:/Users/simon/Downloads/buzz_me/buzz")
+# Path to the buzz clone being audited. Override with BUZZ_CLONE.
+REPO = Path(os.environ.get("BUZZ_CLONE", HERE.parents[2] / "buzz"))
 BATCH = 3
 TIMEOUT = 900
 
@@ -49,7 +51,9 @@ def fmt(f):
 
 # On Windows the npm shim is codex.cmd, which CreateProcess will not resolve from
 # the bare name "codex".
-CODEX = shutil.which("codex") or r"C:/Users/simon/AppData/Roaming/npm/codex.cmd"
+# npm's Windows shim is codex.CMD, which `which` finds; fall back to the npm prefix.
+CODEX = shutil.which("codex") or str(
+    Path(os.environ.get("APPDATA", "")) / "npm" / "codex.cmd")
 
 
 def run_codex(prompt):

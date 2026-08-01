@@ -4,10 +4,11 @@
 There is no `CLAUDE.md` in this repo; the standing conventions live in
 `README.md` and in "How to work" at the bottom of this file.
 
-Work spans two locations:
-- **This repo** — `C:\Users\simon\Downloads\buzz_me\buzz-tutorial` → published at
+Work spans two locations (paths are relative to the local working folder, which
+this file deliberately does not name — it is a public repo):
+- **This repo** — `<working folder>/buzz-tutorial` → published at
   https://github.com/az9713/buzz-tutorial (public) and served via GitHub Pages
-- **Working folder** — `C:\Users\simon\Downloads\buzz_me` holds an upstream clone
+- **Working folder** — `<working folder>` holds an upstream clone
   of `block/buzz` plus local-only research notes
 
 Last session: 31 July 2026.
@@ -27,7 +28,7 @@ Commit `e14b5f0` on `main`; local and remote hashes match; working tree clean.
 | `hardening.html` (~25 KB) | https://az9713.github.io/buzz-tutorial/hardening.html | `e14b5f0` |
 
 All are single pages with CSS/JS/SVG inlined, no CDN, theme-aware. Identical
-copies also sit in `C:\Users\simon\Downloads\buzz_me\`. `README.md` frames all
+copies also sit in the working folder. `README.md` frames all
 four, states they are unofficial, CC BY 4.0.
 
 **Also tracked:** `buzz-docs/` — four docs proposed for upstream (`index.md`,
@@ -46,12 +47,13 @@ never on `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` (`discovery.rs:140`,
 (`SetupStep.tsx:397-442`). The built-in **Buzz Agent** runtime calls LLM APIs
 directly and accepts only metered credentials (`buzz-agent/src/config.rs:763-813`).
 
-**Local only, NOT in any git repo** — `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md`
-(30 KB): blindspot pass on Buzz's technical creation — false framings, stack map,
-12 blindspots each with a research prompt, rat-hole warning, master prompt.
-Deliberately unpublished — it reads as a critique of someone else's shipped
-codebase. Backed up byte-identical to `C:\Users\simon\mms\buzz-blindspots.md`.
-Two copies, both outside git; if you edit one, re-copy.
+**Now published** — `audit/buzz-blindspots.md` (30 KB): blindspot pass on Buzz's
+technical creation — false framings, stack map, 12 blindspots each with a research
+prompt, rat-hole warning, master prompt. **This reversed an earlier decision.**
+Through 31 Jul 2026 it was deliberately kept out of git because it reads as a
+critique of someone else's shipped codebase; on 1 Aug 2026 it was committed here
+with the rest of the audit artifacts and rendered to
+`audit/blindspots.html`. A local backup remains in the MMS store outside git.
 
 ## Trust map findings — verified 31 Jul 2026 against `main` @ `b1b283cd4`
 
@@ -146,9 +148,9 @@ If the user asks for something else, that takes precedence.
 
 - `README.md` (this repo) — what each document is and the provenance rules
 - `trust-map.html` / `hardening.html` — the security findings and their remedies
-- `C:\Users\simon\Downloads\buzz_me\buzz-blindspots.md` — research findings plus a
+- `audit/buzz-blindspots.md` — research findings plus a
   master prompt for going deeper on any subsystem
-- `C:\Users\simon\Downloads\buzz_me\buzz\` — full upstream clone of `block/buzz`,
+- `<working folder>/buzz/` — full upstream clone of `block/buzz`,
   521 MB, git `main` @ `b1b283cd4`, tree clean, 0 commits ahead.
   **Do not commit into it** — it's upstream, not ours.
 

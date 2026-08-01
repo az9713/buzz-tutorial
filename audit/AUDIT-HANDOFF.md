@@ -12,13 +12,13 @@ Last updated: 2026-08-01. **The audit is finished. The deliverable is
 | `AUDIT-PLAN.md` | The original spec (historical — the run deviated from it where Phase 0 said to) |
 | `graphify-out/` | Knowledge graph: `graph.json`, `graph.html`, `GRAPH_REPORT.md` |
 
-Scratchpad (session-scoped path, but the files are still there):
-`C:/Users/simon/AppData/Local/Temp/claude/C--Users-simon-Downloads-buzz-me/246c14bd-8634-4529-b69c-47258b3a4d50/scratchpad/`
-— `confirmed.json`, `refuted.json`, `triage-dropped.json`, `gaps.json`,
+These all began life in a session-scoped scratchpad and were copied into
+`audit/data/` on 1 Aug 2026 so they would survive the session:
+`confirmed.json`, `refuted.json`, `triage-dropped.json`, `gaps.json`,
 `coverage.json`, `canary-score.json`, `backtest-result.json`, `raw-findings.json`,
 plus `gate_a.py`, `gate_b.py`, `tool_index.py`, `score_canary.py`,
 `make_advisory.py` and the four `wf-*.js` workflows. Regenerate the advisory with
-`python make_advisory.py`.
+`python data/make_advisory.py`.
 
 ## Headline results
 
