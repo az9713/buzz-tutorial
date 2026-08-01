@@ -30,6 +30,7 @@ Commit `e892b76` on `main`; local and remote hashes match; working tree clean.
 | `audit/advisory.html` (~190 KB) | https://az9713.github.io/buzz-tutorial/audit/advisory.html | `a16a705` |
 | `audit/blindspots.html` (~45 KB) | https://az9713.github.io/buzz-tutorial/audit/blindspots.html | `3ee8ec8` |
 | `audit/phase0-log.html` (~29 KB) | https://az9713.github.io/buzz-tutorial/audit/phase0-log.html | `3ee8ec8` |
+| `audit/managed-agents.html` (~28 KB) | https://az9713.github.io/buzz-tutorial/audit/managed-agents.html | `bc8952d` + this |
 
 **`buzz-onboarding.html` is new (1 Aug 2026)** and is the first *user-facing*
 document here — the other four explain how Buzz works; this one explains how to
@@ -256,8 +257,8 @@ Then, unblocked work in rough priority:
   (`team_snapshot.rs:593-613`, which carries `definition_respond_to`) has an
   untrusted-network source — if it does, the persona finding loses its user-click
   bound. Plus ~20 unread `unsafe` blocks in `runtime/instance_reaper.rs` and
-  `runtime/sweep.rs`. **Not yet rendered to HTML** — needs a `DOCS` row in
-  `audit/data/md2html.py`.
+  `runtime/sweep.rs`. Live at
+  https://az9713.github.io/buzz-tutorial/audit/managed-agents.html
 - **Fold the two headline findings back into the older docs.** Neither
   `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download
   default or the absent RLS backstop, and both discuss the areas concerned.

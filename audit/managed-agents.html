@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>managed_agents — the directory the audit never read</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.ok{border-left-color:var(--ok)}
+.ok .lab{color:var(--ok)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.gap{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:2px 20px 14px;margin:1.8rem 0}
+.gap h3{margin-top:1.2rem}
+.rowhead{font-weight:650}
+
+/* audit-doc additions */
+.sevtag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:.28em .5em;border-radius:3px;
+  vertical-align:.12em;margin-left:.5em}
+.sev-high{background:rgba(138,61,18,.13);color:var(--warn)}
+.sev-medium{background:rgba(168,98,13,.13);color:var(--accent)}
+.sev-low{background:rgba(45,106,62,.13);color:var(--ok)}
+blockquote{margin:1.1rem 0;padding:.1rem 0 .1rem 16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-size:.95rem}
+h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
+.backlink{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>managed_agents — the directory the audit never read</h1>
+<p class="sub">11 findings over 77 Rust files with no lint coverage: prompt injection and confused deputy, plus unsafe and process control. Claude-verified only.</p>
+</header>
+<nav class="toc">
+<strong>Contents</strong>
+<div class="toc">
+<ul>
+<li><a href="#a-indirect-prompt-injection-confused-deputy">A. Indirect prompt injection / confused deputy</a><ul>
+<li><a href="#a1-high-a-strangers-persona-supplies-both-the-system-prompt-and-an-open-anyone-may-command-this-gate">A1 — HIGH — a stranger's persona supplies both the system prompt and an open "anyone may command this" gate</a></li>
+<li><a href="#a2-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A2 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</a></li>
+<li><a href="#a3-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A3 — MEDIUM — attacker-controlled display_name lands in the AGENTS.md every agent reads</a></li>
+<li><a href="#a4-low-unverified-name_pool-passthrough">A4 — LOW (UNVERIFIED) — name_pool passthrough</a></li>
+<li><a href="#a5-low-agent-name-unvalidated">A5 — LOW — agent name unvalidated</a></li>
+<li><a href="#checked-and-sound">Checked and sound</a></li>
+</ul>
+</li>
+<li><a href="#b-memory-safety-process-control-windows-paths">B. Memory safety, process control, Windows paths</a><ul>
+<li><a href="#b1-high-on-windows-the-whole-orphanreap-subsystem-is-no-ops-and-the-windows-teardown-helper-written-for-it-is-unreachable">B1 — HIGH — on Windows the whole orphan/reap subsystem is no-ops, and the Windows teardown helper written for it is unreachable</a></li>
+<li><a href="#b2-medium-job-assignment-is-a-timing-argument-with-no-windows-fallback">B2 — MEDIUM — job assignment is a timing argument with no Windows fallback</a></li>
+<li><a href="#b3-medium-probe_auth_statuss-10-second-timeout-hangs-forever-on-windows">B3 — MEDIUM — probe_auth_status's "10-second timeout" hangs forever on Windows</a></li>
+<li><a href="#b4-low-argument-injection-via-the-comma-delimited-buzz_acp_agent_args">B4 — LOW — argument injection via the comma-delimited BUZZ_ACP_AGENT_ARGS</a></li>
+<li><a href="#b5-low-is_under_dir-system32-exclusion-fails-open-on-a-verbatimunc-prefix">B5 — LOW — is_under_dir System32 exclusion fails open on a verbatim/UNC prefix</a></li>
+<li><a href="#b6-low-unverified-sigterm-to-a-possibly-recycled-pid">B6 — LOW / UNVERIFIED — SIGTERM to a possibly-recycled PID</a></li>
+<li><a href="#checked-and-sound_1">Checked and sound</a></li>
+</ul>
+</li>
+<li><a href="#coverage-read-vs-skipped">Coverage — read vs skipped</a></li>
+<li><a href="#method-notes">Method notes</a></li>
+</ul>
+</div>
+
+</nav>
+
+<p>Date: 2026-08-01. Read-only. Companion to <code>buzz-audit-advisory.md</code>; nothing here
+overlaps its 27 findings, because no agent in that run read this directory.</p>
+<p>Target: <code>buzz/desktop/src-tauri/src/managed_agents/</code> — 77 Rust files, excluded
+from the root cargo workspace (<code>Cargo.toml:32</code>), never analysed by clippy, no
+applicable semgrep rules.</p>
+<p>Two lenses, one agent each. Every finding below carries <code>file:line</code> the agent
+read. The load-bearing lines of findings A1, B1 and B3 were re-read
+independently before publishing — the prior run's calibration showed reporters
+inflate, so claims that carry the verdict get checked by hand.</p>
+<h2 id="a-indirect-prompt-injection-confused-deputy">A. Indirect prompt injection / confused deputy</h2>
+<h3 id="a1-high-a-strangers-persona-supplies-both-the-system-prompt-and-an-open-anyone-may-command-this-gate">A1 — HIGH — a stranger's persona supplies both the system prompt and an open "anyone may command this" gate</h3>
+<p>Buzz has a persona catalog: shareable agent configs published as kind:30175
+events. Three facts compose into the finding.</p>
+<ol>
+<li><code>personaCatalogRelay.ts:261-265</code> queries <code>kinds:[KIND_PERSONA]</code> with <strong>no
+   <code>authors</code> filter</strong>. Every user's shared persona is fetched. (Verified.)</li>
+<li><code>personaCatalogRelay.ts:155-160</code> downgrades <code>respond_to: "allowlist"</code> to
+   owner-only but passes <code>"anyone"</code> through verbatim; <code>:172-173</code> takes
+   <code>system_prompt</code> as-is. (Verified.)</li>
+<li><code>types.rs:940-945</code> (<code>resolve_mint_behavioral_defaults</code>): with no explicit
+   instance-level choice, <strong>the definition's <code>respond_to</code> wins</strong>. (Verified.)</li>
+</ol>
+<p>Path to the sink: <code>usePersonaActions.ts:321-333</code> → <code>commands/personas/create.rs:28,54-76</code>
+(trim only) → <code>commands/agents.rs:825-830</code> → <code>types.rs:941-956</code> →
+<code>agents.rs:892</code> → <code>runtime.rs:380-400</code> (<code>build_respond_to_env</code>) emits
+<code>BUZZ_ACP_RESPOND_TO</code> onto the harness process; <code>agents.rs:860</code> supplies the
+prompt.</p>
+<p>Impact: after one click the user runs an agent whose standing instructions the
+attacker wrote and whose message gate accepts any npub on the relay — the
+attacker can then converse with it directly, at the user's privilege. Note that
+<code>BUZZ_ACP_RESPOND_TO</code> is in <code>RESERVED_ENV_KEYS</code> (<code>env_vars.rs:77</code>) <em>precisely
+because it is a security gate</em>; the definition-default route walks around that
+reasoning.</p>
+<p>Bounded by: catalog entries carry no <code>envVars</code> (<code>personaCatalogRelay.ts:292-311</code>
+sets <code>{}</code>), and <code>runtime</code> resolves through an id table falling back to the
+bundled default (<code>discovery.rs:303-330</code>) — no arbitrary binary, no credential
+injection. Needs one user click, but the UI frames it as "add an agent," not
+"let strangers command it."</p>
+<h3 id="a2-medium-unverified-reachability-inbound-persona-reconcile-has-no-authorship-check">A2 — MEDIUM (UNVERIFIED reachability) — inbound persona reconcile has no authorship check</h3>
+<p><code>commands/personas/inbound.rs:54-183</code> verifies the event signature
+(<code>parse_verified_inbound_event</code>, <code>:190-198</code>) but never compares <code>event.pubkey</code>
+to the workspace owner. <code>apply_inbound_persona</code> (<code>:342-363</code>) matches <strong>by d-tag
+alone</strong> and overwrites <code>system_prompt</code>, <code>runtime</code>, <code>model</code>, <code>provider</code>,
+<code>respond_to</code>, <code>respond_to_allowlist</code>.</p>
+<p>Its own comment (<code>:185-189</code>) says the TS-side owner filter "reads the same
+attacker-controlled field and is no defense" — yet <code>usePersonaSync.ts:39</code> plus
+the <code>authors:[pubkey]</code> filters (<code>:50,62</code>) are the only owner check in the chain.
+<code>tauriPersonas.ts:318</code> is the sole wrapper and <code>usePersonaSync</code> its sole caller,
+so no live bypass was demonstrated: hardening, not a proven exploit. The sibling
+tombstone path <em>does</em> enforce owner scoping (<code>inbound.rs:219</code>), which makes the
+omission look accidental. If reached: silent rewrite of a running agent's system
+prompt at next spawn, no UI signal.</p>
+<h3 id="a3-medium-attacker-controlled-display_name-lands-in-the-agentsmd-every-agent-reads">A3 — MEDIUM — attacker-controlled <code>display_name</code> lands in the AGENTS.md every agent reads</h3>
+<p><code>nest.rs:551-579</code> writes each agent's name and its persona's <code>display_name</code> into
+the managed table in <code>~/.buzz/AGENTS.md</code>. Sanitization is <code>escape_md_cell</code>
+(<code>nest.rs:547-549</code>): replaces <code>|</code> and <code>\n</code> only — <strong>not <code>\r</code></strong> — with no length
+cap. <code>display_name</code> is attacker-authored (<code>personaCatalogRelay.ts:138-141,170</code>)
+and reaches the store with only <code>trim_required</code> (<code>create.rs:26</code>,
+<code>personas/mod.rs:14-20</code>), bounded only by the relay's content ceiling.</p>
+<p>AGENTS.md is the shared orientation file loaded by <em>every</em> Buzz-spawned agent
+(<code>nest.rs:40</code>, <code>nest_agents.md:1-3</code>), regenerated on every persona/agent change
+(<code>nest.rs:673-700</code>). Multi-kilobyte injected prose from one added persona
+therefore reaches agents unrelated to it — wider blast radius than A1, lower
+ceiling on what it achieves.</p>
+<h3 id="a4-low-unverified-name_pool-passthrough">A4 — LOW (UNVERIFIED) — <code>name_pool</code> passthrough</h3>
+<p>Arbitrary strings survive <code>personaCatalogRelay.ts:150-154</code> →
+<code>usePersonaActions.ts:328</code> → <code>create.rs:47-52</code> (trim + drop-empty).
+<code>pickBotName.ts:45-59</code> would pick one as an agent name, and names reach AGENTS.md
+with A3's weak escaping. <strong>No production caller of <code>pickBotName</code> was found</strong> —
+not demonstrated today, a loaded gun if wired up.</p>
+<h3 id="a5-low-agent-name-unvalidated">A5 — LOW — agent <code>name</code> unvalidated</h3>
+<p><code>commands/agents.rs:570-573</code> trims and rejects empty, no charset or length bound;
+the name is an AGENTS.md sink. Locally typed today; matters as A4's landing site.</p>
+<h3 id="checked-and-sound">Checked and sound</h3>
+<p>Env boundary is genuinely hardened (<code>env_vars.rs:108-115</code> rejects non-POSIX keys,
+closing the <code>BUZZ_AUTH_TAG=x</code>→<code>getenv</code> bypass; <code>:58-90</code> reserves identity, relay
+URL, command/args, gate; <code>:245-290</code> re-filters at spawn with NUL/size caps;
+<code>custom_harnesses.rs:192</code> routes hand-authored files through the same validator).
+No arbitrary command from relay data (<code>discovery.rs:303-330</code>). Inbound managed-agent
+projection cannot reach secrets or harness pins (<code>inbound.rs:381-405</code>).
+<code>agent_env.rs</code> and <code>relay_mesh.rs</code> take no Nostr input. The three <code>.md</code> skill files
+are <code>include_str!</code> statics with zero interpolation (<code>nest.rs:40,44</code>).</p>
+<h2 id="b-memory-safety-process-control-windows-paths">B. Memory safety, process control, Windows paths</h2>
+<h3 id="b1-high-on-windows-the-whole-orphanreap-subsystem-is-no-ops-and-the-windows-teardown-helper-written-for-it-is-unreachable">B1 — HIGH — on Windows the whole orphan/reap subsystem is no-ops, and the Windows teardown helper written for it is unreachable</h3>
+<p><code>runtime/process.rs:63-66</code> hardcodes <code>process_is_running(_pid) -&gt; false</code> on
+non-unix; <code>:202-205</code> hardcodes <code>process_has_buzz_marker -&gt; false</code>. (Both
+verified.) Every reap entry point is likewise stubbed: <code>orphan_sweep.rs:68-71</code>,
+<code>:237-238</code>, <code>:381-387</code>, <code>instance_reaper.rs:358-359</code>, <code>sweep.rs:522-523</code>.</p>
+<p>Consequence: <code>taskkill_tree</code> (<code>process_lifecycle.rs:112</code>), documented at
+<code>process_lifecycle.rs:9-10</code> as "the after-restart path, where only the PID
+survives in the record," can never be reached on that path. Both routes gate on
+the always-false predicate:</p>
+<ul>
+<li><code>runtime/stop.rs:99-104</code> requires <code>is_running &amp;&amp; belongs_to_us &amp;&amp; has_marker</code>.
+  All false on Windows — the child is never killed, yet <code>:98</code> takes
+  <code>record.runtime_pid</code> and <code>:107</code> removes the pid file, discarding the only
+  record of it.</li>
+<li><code>terminate_untracked_pair_runtime</code> (<code>runtime/process.rs:448-469</code>) fires only
+  for receipts passing <code>valid_agent_runtime_receipt</code>, which ANDs <code>is_running</code>
+  (<code>:419</code>) and <code>has_marker</code> (<code>:420</code>). Prior-session receipts are never acted on
+  and never cleaned up.</li>
+</ul>
+<p>Also <code>restore.rs:184-188</code>: <code>if process_is_running(pid) { continue; }</code> is dead on
+Windows (verified), so a live prior-session agent goes undetected and a <strong>second</strong>
+harness spawns for the same pubkey/relay pair.</p>
+<p>Not Critical because the normal path is covered by the Job Object —
+<code>JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</code> (<code>process_lifecycle.rs:80</code>) kills the tree
+when the desktop dies, including on crash, because the OS closes the handle.
+Exposure is the failure modes: <code>finish_spawn</code> continues with <code>job: None</code> when
+assignment fails (<code>:142-148</code>), plus agents from older builds or foreign
+instances. Those orphans hold <code>BUZZ_PRIVATE_KEY</code> — the agent nsec (<code>runtime.rs:580</code>)
+— and a live relay connection, with no cleanup path anywhere in the product.</p>
+<h3 id="b2-medium-job-assignment-is-a-timing-argument-with-no-windows-fallback">B2 — MEDIUM — job assignment is a timing argument with no Windows fallback</h3>
+<p><code>process_lifecycle.rs:142</code> calls <code>create_job_for_child(child.id())</code> <em>after</em>
+<code>spawn()</code>. The doc at <code>:48-55</code> concedes the window "is NOT structurally empty"
+and argues assign-latency beats buzz-acp's tens-to-hundreds of ms to spawn 24
+workers. Windows auto-enrolls only descendants created <em>after</em>
+<code>AssignProcessToJobObject</code> (<code>:97</code>). Preconditions: parent thread descheduled
+between <code>spawn()</code> and <code>OpenProcess</code> (paging, AV filter driver, loaded box) long
+enough for buzz-acp to fork. Trigger: normal stop — <code>runtime/stop.rs:53-54</code>
+drops the job, killing only the enrolled set. Pre-assignment workers survive, and
+per B1 nothing on Windows collects them. <code>CREATE_SUSPENDED</code> is declined at
+<code>:57-60</code> as "materially more unsafe Win32"; the real trade is a probabilistic
+invariant on the platform with no recovery path.</p>
+<h3 id="b3-medium-probe_auth_statuss-10-second-timeout-hangs-forever-on-windows">B3 — MEDIUM — <code>probe_auth_status</code>'s "10-second timeout" hangs forever on Windows</h3>
+<p><code>discovery.rs:1031</code> documents "On timeout the child is killed and <code>Unknown</code> is
+returned; no orphaned threads or processes are left behind." The kill is
+<code>#[cfg(unix)]</code> only (<code>:1082-1085</code>); the Windows arm is <code>let _ = child_pid;</code>
+(<code>:1086-1087</code>). Control reaches <code>wait_thread.join()</code> (<code>:1089</code>), parked in
+<code>child.wait()</code> (<code>:1074</code>) on a child nobody killed. (Verified.) Preconditions: a
+probe CLI blocking past 10s — stdin is <code>Stdio::null()</code> (<code>:1042</code>), so a CLI
+waiting on a TTY blocks indefinitely, as does a hung network call. Consequence:
+permanent deadlock of the discovery thread plus a leaked child, on the primary
+platform.</p>
+<h3 id="b4-low-argument-injection-via-the-comma-delimited-buzz_acp_agent_args">B4 — LOW — argument injection via the comma-delimited <code>BUZZ_ACP_AGENT_ARGS</code></h3>
+<p><code>runtime.rs:584</code> does <code>agent_args.join(",")</code>; buzz-acp re-splits on <code>,</code> (clap
+<code>value_delimiter</code>, per <code>custom_harnesses.rs:176-178</code>). A comma inside one
+argument becomes two arguments downstream — argument injection, <strong>not</strong> command
+injection: no shell, <code>Command::new</code> throughout. The invariant is enforced for
+custom-harness definitions (<code>custom_harnesses.rs:182-188</code>) but not for
+<code>ManagedAgentRecord.agent_args</code> (<code>types.rs:257</code>), which flows unvalidated through
+<code>runtime.rs:288</code> → <code>:584</code> and <code>commands/agent_model_process.rs:42</code>. Local-config
+only — <code>agent_snapshot.rs:26,497</code> deliberately exclude <code>agent_args</code> from the
+published snapshot and no remote write path was found. User-config-to-agent-flag
+escalation (e.g. smuggling a sandbox-bypass flag), not remote.</p>
+<h3 id="b5-low-is_under_dir-system32-exclusion-fails-open-on-a-verbatimunc-prefix">B5 — LOW — <code>is_under_dir</code> System32 exclusion fails open on a verbatim/UNC prefix</h3>
+<p><code>git_bash.rs:324-333</code> compares path components against <code>SystemRoot</code> to skip
+System32 when scanning PATH for <code>bash.exe</code> (<code>:305</code>), guarding the WSL stub
+(issue #2328, <code>:270-273</code>). <code>Path::components</code> yields <code>Prefix(Disk("C:"))</code> for
+<code>C:\Windows</code> but <code>Prefix(VerbatimDisk("\\?\C:"))</code> for <code>\\?\C:\Windows\System32</code>;
+the <code>eq_ignore_ascii_case</code> at <code>:328-330</code> compares <code>"C:"</code> vs <code>"\\?\C:"</code>, returns
+false, exclusion fails open. <code>is_windows_apps_alias</code> (<code>:277</code>) does not catch it.
+Same class: <code>resolve_shell_override</code> passes <code>None</code> for <code>system_root</code> (<code>:254</code>), so
+a bare-name <code>BUZZ_SHELL</code> skips the exclusion entirely. Impact: a broken shell
+(wsl.exe trees), not privilege gain.</p>
+<h3 id="b6-low-unverified-sigterm-to-a-possibly-recycled-pid">B6 — LOW / UNVERIFIED — SIGTERM to a possibly-recycled PID</h3>
+<p><code>discovery.rs:1084</code> signals <code>child_pid</code>, a <code>u32</code> saved at <code>:1071</code> before <code>child</code>
+moved into the wait thread (<code>:1073</code>). If <code>child.wait()</code> reaps in the instant
+before the <code>remaining.is_zero()</code> check (<code>:1081</code>), the PID is released and could
+be reused before the kill. Unix-only, sub-millisecond, same-user signal. Not
+demonstrated.</p>
+<h3 id="checked-and-sound_1">Checked and sound</h3>
+<p><code>unsafe impl Send for JobHandle</code> (<code>process_lifecycle.rs:27</code>) — exclusively owned
+<code>HANDLE</code>, <code>CloseHandle</code> is thread-safe. <code>OpenProcess(pid)</code> at <code>:92</code> is <strong>not</strong> a
+PID-reuse race: <code>std::process::Child</code> holds the process handle, reserving the
+PID. Registry block (<code>git_bash.rs:354-399</code>) correct — <code>div_ceil(2)</code> never
+under-allocates, <code>RegCloseKey</code> covers every exit including <code>ERROR_MORE_DATA</code>,
+two-call TOCTOU cannot overflow. <code>install_log_filename</code> (<code>storage.rs:68-81</code>)
+rejects rather than sanitizes traversal. Install commands (<code>discovery.rs:88/120/152</code>)
+are curl-pipe-to-shell but from a hardcoded preset table, no interpolation.
+<code>find_via_login_shell</code> (<code>discovery.rs:821</code>) passes the command as <code>$1</code>.</p>
+<h2 id="coverage-read-vs-skipped">Coverage — read vs skipped</h2>
+<p><strong>Lens A.</strong> Full: <code>agent_env.rs</code>, <code>env_vars.rs</code>, <code>nest.rs</code>, <code>nest_agents.md</code>,
+<code>custom_harnesses.rs</code>, <code>repos.rs</code>, <code>relay_mesh.rs</code>, <code>persona_events.rs</code>,
+<code>commands/personas/inbound.rs</code>, <code>commands/personas/create.rs</code>,
+<code>personaCatalogRelay.ts</code>, <code>usePersonaSync.ts</code>, <code>pickBotName.ts</code>. Targeted:
+<code>discovery.rs:240-360</code>, <code>types.rs:931-991</code>, <code>agents.rs:560-620,800-920</code>,
+<code>usePersonaActions.ts:290-360</code>, <code>event_sync.rs:1-260</code>, <code>runtime_commands.rs:1-150</code>.
+Skipped: tests, <code>config_bridge/</code>, <code>readiness/</code>, <code>retention/</code>, <code>runtime/</code>
+internals, <code>teams.rs</code>/<code>team_events.rs</code>/<code>team_snapshot.rs</code>, and the <em>content</em> of
+<code>screenshot_skill.md</code>/<code>nest_skill.md</code> (verified as non-interpolated statics, not
+audited as text). <strong>Open question:</strong> whether team-pack import
+(<code>team_snapshot.rs:593-613</code>, which does carry <code>definition_respond_to</code>) has an
+untrusted-network source. Looked local-directory-driven; not chased far enough to
+claim either way. That is the obvious next thread.</p>
+<p><strong>Lens B.</strong> Full: <code>process_lifecycle.rs</code>, <code>git_bash.rs</code>, <code>managed_node_paths.rs</code>,
+<code>runtime/process.rs</code>, <code>runtime/orphan_sweep.rs</code>, <code>runtime/stop.rs</code>, plus
+<code>runtime.rs:540-1024</code>, <code>discovery.rs:640-760/770-825/1020-1109</code>,
+<code>restore.rs:120-260/370-405</code>, <code>shutdown.rs:160-230</code>, <code>types.rs:460-492</code>,
+<code>install_exec.rs:360-436</code>. Skipped beyond grep context:
+<code>runtime/instance_reaper.rs</code>, <code>runtime/sweep.rs</code> (macOS/Linux-only, and B1 makes
+them inert on the target platform); <code>config_bridge/</code>, personas, teams, nest,
+retention, all tests.</p>
+<p><strong><code>unsafe</code> accounting:</strong> 56 grep occurrences across 9 <code>.rs</code> files; excluding
+comments/doc text and the 8 in <code>runtime/tests.rs</code>, ~45 are real blocks. <strong>25 read
+in full source context</strong> (3 <code>process_lifecycle.rs</code>, 1 <code>git_bash.rs</code>, 1
+<code>discovery.rs</code>, 11 <code>runtime/process.rs</code>, 8 <code>runtime/orphan_sweep.rs</code>, 1
+<code>shutdown.rs</code>). The remaining ~20 in <code>instance_reaper.rs</code>/<code>sweep.rs</code> were seen
+only as grep context. <strong>So roughly 45% of the repo's <code>unsafe</code> is now read and 55%
+is still unread</strong> — better than the advisory's zero, still not coverage.</p>
+<h2 id="method-notes">Method notes</h2>
+<p>Two agents, one lens each, run in parallel. A first single-agent attempt covering
+both lenses stalled mid-stream; splitting it fixed that. All three subagent runs
+went idle without returning results and had to be prodded — the same harness
+behaviour recorded in the audit handoff notes.</p>
+<p>This is Claude-only verification. Gate B (cross-model check) is still quota-blocked
+until Aug 7, so the correlated-error caveat from the main advisory applies here in
+full — with the partial exception of A1, B1 and B3, whose decisive lines were
+re-read directly against the source rather than taken on the reporter's word.</p>
+<p>Nothing in <code>buzz/</code> was modified.</p>
+<hr>
+<p class="backlink"><a href="../">← buzz-tutorial</a> ·
+<a href="advisory.html">advisory</a> ·
+<a href="blindspots.html">blindspots</a> ·
+<a href="managed-agents.html">managed_agents</a> ·
+<a href="phase0-log.html">phase 0 log</a> ·
+<a href="graph/graph.html">knowledge graph</a></p>
+</div>
+</body>
+</html>

@@ -27,6 +27,12 @@ DOCS = [
      "What the architecture explainers leave out. Claims marked [verified] were "
      "re-checked directly against the clone at main @ 10d5a2641.",
      ["[verified]", "Buzz"]),
+    ("managed-agents-deep-dive.md", "managed-agents.html",
+     "managed_agents — the directory the audit never read",
+     "11 findings over 77 Rust files with no lint coverage: prompt injection and "
+     "confused deputy, plus unsafe and process control. Claude-verified only.",
+     ["runtime/process.rs:63-66", "BUZZ_PRIVATE_KEY", "personaCatalogRelay.ts",
+      "Coverage — read vs skipped"]),
     ("audit-phase0-log.md", "phase0-log.html",
      "Phase 0 log — cartography, tooling, and calibration setup",
      "The raw record behind the advisory: tooling, the knowledge graph, the slice "
@@ -52,6 +58,7 @@ NAV = """<hr>
 <p class="backlink"><a href="../">← buzz-tutorial</a> ·
 <a href="advisory.html">advisory</a> ·
 <a href="blindspots.html">blindspots</a> ·
+<a href="managed-agents.html">managed_agents</a> ·
 <a href="phase0-log.html">phase 0 log</a> ·
 <a href="graph/graph.html">knowledge graph</a></p>"""
 
