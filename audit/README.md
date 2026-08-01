@@ -10,7 +10,7 @@ full. Details in the advisory.
 
 | File | What |
 |---|---|
-| [`buzz-audit-advisory.md`](buzz-audit-advisory.md) | **The deliverable.** Confirmed findings ranked by value per unit of remediation risk, plus refuted/triaged lists, coverage gaps, and calibration numbers |
+| [`buzz-audit-advisory.md`](buzz-audit-advisory.md) | **The deliverable.** Confirmed findings ranked by value per unit of remediation risk, plus refuted/triaged lists, coverage gaps, and calibration numbers. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/advisory.html) |
 | [`AUDIT-PLAN.md`](AUDIT-PLAN.md) | Original spec (historical — the run deviated where Phase 0 said to) |
 | [`audit-phase0-log.md`](audit-phase0-log.md) | Phase 0 record: tooling, graph build, slice list, two mid-run corrections |
 | [`AUDIT-HANDOFF.md`](AUDIT-HANDOFF.md) | Session handoff: headline results, what failed, harness notes |
@@ -21,7 +21,8 @@ full. Details in the advisory.
 ## Regenerating the advisory
 
 `python data/make_advisory.py` rebuilds `buzz-audit-advisory.md` from the JSON in
-`data/`.
+`data/`, and `python data/md2html.py` re-renders `advisory.html` from that
+markdown (it borrows the site's stylesheet from `hardening.html`).
 
 ## Not included
 

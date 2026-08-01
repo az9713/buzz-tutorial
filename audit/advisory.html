@@ -1,0 +1,2152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>buzz — security and quality audit advisory</title>
+<style>
+:root{
+  --bg:#fbfaf8; --fg:#1d1c1a; --muted:#5d5a54; --rule:#dcd8d0;
+  --card:#fffefc; --accent:#a8620d; --accent2:#2a6f6a; --code:#f2efe9;
+  --warn:#8a3d12; --ok:#2d6a3e; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141414; --fg:#e9e6e0; --muted:#a09b93; --rule:#33312e;
+    --card:#1c1b19; --accent:#e0a259; --accent2:#6fc4bb; --code:#201f1d;
+    --warn:#e08a5a; --ok:#7ec48f; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.65 Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 120px}
+header.hero{padding:64px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+h1{font-size:2.15rem;line-height:1.16;margin:0 0 12px;letter-spacing:-.015em}
+.sub{color:var(--muted);font-size:1.06rem;margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .9rem;line-height:1.25;letter-spacing:-.01em;
+  padding-top:.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.13rem;margin:2.1rem 0 .6rem;color:var(--fg)}
+h4{margin:1.5rem 0 .4rem;color:var(--muted);
+  font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;font-size:.78rem}
+p{margin:.85rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(168,98,13,.35)}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code);padding:.1em .34em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.5;margin:1.1rem 0}
+pre code{background:none;padding:0;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:650;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted)}
+tbody tr:hover{background:var(--card)}
+.callout{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent2);
+  border-radius:0 6px 6px 0;padding:12px 16px;margin:1.3rem 0;font-size:.94rem}
+.callout .lab{display:block;font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:6px}
+.myread{border-left-color:var(--accent)}
+.myread .lab{color:var(--accent)}
+.warn{border-left-color:var(--warn)}
+.warn .lab{color:var(--warn)}
+.ok{border-left-color:var(--ok)}
+.ok .lab{color:var(--ok)}
+.toc{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:16px 20px;margin:1.6rem 0;font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:.9rem}
+.toc ol{margin:.4rem 0 0;padding-left:1.3rem}
+.toc li{margin:.28rem 0}
+.toc a{border:none}
+blockquote{margin:1.3rem 0;padding-left:16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-style:italic}
+.small{font-size:.87rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0}
+.tag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:3px;
+  background:var(--code);color:var(--muted);border:1px solid var(--rule);
+  white-space:nowrap}
+.tag.g{color:var(--ok);border-color:var(--ok)}
+.tag.a{color:var(--accent);border-color:var(--accent)}
+.tag.r{color:var(--warn);border-color:var(--warn)}
+ul,ol{margin:.85rem 0;padding-left:1.4rem}
+li{margin:.35rem 0}
+.gap{background:var(--card);border:1px solid var(--rule);border-radius:8px;
+  padding:2px 20px 14px;margin:1.8rem 0}
+.gap h3{margin-top:1.2rem}
+.rowhead{font-weight:650}
+
+/* advisory-specific */
+.sevtag{display:inline-block;font:600 .68rem/1 ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.06em;padding:.28em .5em;border-radius:3px;
+  vertical-align:.12em;margin-left:.5em}
+.sev-high{background:rgba(138,61,18,.13);color:var(--warn)}
+.sev-medium{background:rgba(168,98,13,.13);color:var(--accent)}
+.sev-low{background:rgba(45,106,62,.13);color:var(--ok)}
+blockquote{margin:1.1rem 0;padding:.1rem 0 .1rem 16px;border-left:3px solid var(--rule);
+  color:var(--muted);font-size:.95rem}
+h3 code{font-size:.82em;background:none;padding:0;color:var(--muted)}
+.backlink{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>buzz — security and quality audit advisory</h1>
+<p class="sub">27 confirmed findings: 4 high, 12 medium, 11 low. No critical survived verification. Claude-verified only — the independent second-model gate never ran.</p>
+</header>
+<nav class="toc">
+<strong>Contents</strong>
+<div class="toc">
+<ul>
+<li><a href="#read-this-part-first">Read this part first</a></li>
+<li><a href="#what-actually-ran">What actually ran</a><ul>
+<li><a href="#phase-0-changed-the-plan-in-ways-worth-knowing">Phase 0 changed the plan in ways worth knowing</a></li>
+</ul>
+</li>
+<li><a href="#calibration-how-well-does-this-method-actually-work">Calibration — how well does this method actually work?</a><ul>
+<li><a href="#recall-4-of-10-planted-defects-410">Recall: 4 of 10 planted defects (4/10)</a></li>
+<li><a href="#backtest-the-depth-tier-rediscovered-a-real-vulnerability">Backtest: the depth tier rediscovered a real vulnerability</a></li>
+</ul>
+</li>
+<li><a href="#confirmed-findings">Confirmed findings</a><ul>
+<li><a href="#the-two-findings-we-would-fix-first">The two findings we would fix first</a></li>
+<li><a href="#f009-high-cratesbuzz-relaysrcaudiohandlerrs244">F009 — HIGH — crates/buzz-relay/src/audio/handler.rs:244</a></li>
+<li><a href="#f014-high-desktopsrcfeaturesmessageslibformattimelinemessagests239">F014 — HIGH — desktop/src/features/messages/lib/formatTimelineMessages.ts:239</a></li>
+<li><a href="#f015-high-mobilelibfeatureschannelstimeline_messagedart356">F015 — HIGH — mobile/lib/features/channels/timeline_message.dart:356</a></li>
+<li><a href="#f023-high-cratesbuzz-mediasrcvalidationrs270">F023 — HIGH — crates/buzz-media/src/validation.rs:270</a></li>
+<li><a href="#f002-medium-cratesbuzz-relaysrcapibridgers118">F002 — MEDIUM — crates/buzz-relay/src/api/bridge.rs:118</a></li>
+<li><a href="#f008-medium-cratesbuzz-relaysrcapimediars96">F008 — MEDIUM — crates/buzz-relay/src/api/media.rs:96</a></li>
+<li><a href="#f010-medium-cratesbuzz-relaysrchandlersingestrs2733">F010 — MEDIUM — crates/buzz-relay/src/handlers/ingest.rs:2733</a></li>
+<li><a href="#f022-medium-cratesbuzz-relaysrchandlersreqrs239">F022 — MEDIUM — crates/buzz-relay/src/handlers/req.rs:239</a></li>
+<li><a href="#f030-medium-mobilelibsharedrelaynostr_modelsdart113">F030 — MEDIUM — mobile/lib/shared/relay/nostr_models.dart:113</a></li>
+<li><a href="#f032-medium-cratesbuzz-relaysrcapiadminauthrs6">F032 — MEDIUM — crates/buzz-relay/src/api/admin/auth.rs:6</a></li>
+<li><a href="#f035-medium-desktopsrcsharedliblinkpreviewts168">F035 — MEDIUM — desktop/src/shared/lib/linkPreview.ts:168</a></li>
+<li><a href="#f018-medium-mobilelibfeaturespairingpairing_providerdart103">F018 — MEDIUM — mobile/lib/features/pairing/pairing_provider.dart:103</a></li>
+<li><a href="#f019-medium-cratesbuzz-sdksrcnip_oars231">F019 — MEDIUM — crates/buzz-sdk/src/nip_oa.rs:231</a></li>
+<li><a href="#f021-medium-cratesbuzz-sdksrcnip_oars214">F021 — MEDIUM — crates/buzz-sdk/src/nip_oa.rs:214</a></li>
+<li><a href="#f026-medium-cratesbuzz-relaysrcapimodrs86">F026 — MEDIUM — crates/buzz-relay/src/api/mod.rs:86</a></li>
+<li><a href="#f027-medium-cratesbuzz-relaysrchandlersauthrs231">F027 — MEDIUM — crates/buzz-relay/src/handlers/auth.rs:231</a></li>
+<li><a href="#f038-low-mobilelibfeaturespairingpairing_providerdart680">F038 — LOW — mobile/lib/features/pairing/pairing_provider.dart:680</a></li>
+<li><a href="#f040-low-cratesbuzz-authsrcrate_limitrs188">F040 — LOW — crates/buzz-auth/src/rate_limit.rs:188</a></li>
+<li><a href="#f041-low-websrcfeaturesreposuse-repo-refsts51">F041 — LOW — web/src/features/repos/use-repo-refs.ts:51</a></li>
+<li><a href="#f046-low-desktopsrc-taurisrccommandsmessagesrs246">F046 — LOW — desktop/src-tauri/src/commands/messages.rs:246</a></li>
+<li><a href="#f047-low-desktopsrc-taurisrccommandsmessagesrs659">F047 — LOW — desktop/src-tauri/src/commands/messages.rs:659</a></li>
+<li><a href="#f004-low-desktopsrc-taurisrccommandsidentityrs618">F004 — LOW — desktop/src-tauri/src/commands/identity.rs:618</a></li>
+<li><a href="#f006-low-desktopsrc-taurisrccommandsprofilers80">F006 — LOW — desktop/src-tauri/src/commands/profile.rs:80</a></li>
+<li><a href="#f017-low-mobilelibsharedrelayrelay_sessiondart462">F017 — LOW — mobile/lib/shared/relay/relay_session.dart:462</a></li>
+<li><a href="#f028-low-cratesbuzz-relaysrchandlersauthrs196">F028 — LOW — crates/buzz-relay/src/handlers/auth.rs:196</a></li>
+<li><a href="#f033-low-desktopsrc-tauritauriconfjson37">F033 — LOW — desktop/src-tauri/tauri.conf.json:37</a></li>
+<li><a href="#f048-low-desktopsrc-taurisrccommandschannelsrs221">F048 — LOW — desktop/src-tauri/src/commands/channels.rs:221</a></li>
+</ul>
+</li>
+<li><a href="#flagged-but-not-confirmed">Flagged but not confirmed</a><ul>
+<li><a href="#refuted-during-verification-21">Refuted during verification (21)</a></li>
+<li><a href="#triaged-out-before-verification-137">Triaged out before verification (137)</a></li>
+<li><a href="#flagged-by-tooling-exploitability-unconfirmed">Flagged by tooling, exploitability unconfirmed</a></li>
+</ul>
+</li>
+<li><a href="#coverage-gaps-what-this-audit-did-not-examine">Coverage gaps — what this audit did not examine</a><ul>
+<li><a href="#the-gap-we-consider-most-serious">The gap we consider most serious</a></li>
+<li><a href="#an-error-in-our-own-static-analysis-coverage-found-by-the-critics">An error in our own static-analysis coverage, found by the critics</a></li>
+<li><a href="#large-subsystems-that-were-barely-read">Large subsystems that were barely read</a></li>
+<li><a href="#slices-that-returned-suspiciously-little-for-their-size">Slices that returned suspiciously little for their size</a></li>
+<li><a href="#full-gap-list">Full gap list</a></li>
+</ul>
+</li>
+<li><a href="#what-was-never-in-scope">What was never in scope</a></li>
+<li><a href="#cost-caps-and-what-they-cut">Cost, caps, and what they cut</a></li>
+<li><a href="#if-you-act-on-one-thing">If you act on one thing</a></li>
+</ul>
+</div>
+
+</nav>
+
+<p><strong>Target:</strong> <code>buzz</code> @ commit <code>b1b283cd4</code>, clean working tree. 3,435 tracked files;
+Rust, TypeScript, Dart, plus shell and YAML.
+<strong>Date:</strong> 2026-07-31 / 2026-08-01.
+<strong>Nature:</strong> advisory only. We do not own this repository, nothing in it was
+modified, and no patches are proposed as diffs.</p>
+<hr />
+<h2 id="read-this-part-first">Read this part first</h2>
+<p>This audit was performed by language models reading code. That method has a
+specific, measurable failure profile, and this section states it before any
+finding, because the findings should be read through it.</p>
+<p><strong>What we measured about ourselves:</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+<th>How we know</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do the findings cite code that actually exists?</td>
+<td><strong>Yes — 198/199 (99.5%)</strong></td>
+<td>Gate A: a script checked every quoted <code>evidence</code> string against the file. 1 finding invented code and was deleted.</td>
+</tr>
+<tr>
+<td>Are the reporters' severity labels trustworthy?</td>
+<td><strong>No.</strong></td>
+<td>Of the 27 findings that survived verification, reporters claimed 1 critical and 20 high. Verifiers rescored the same findings to <strong>0 critical and 4 high</strong>.</td>
+</tr>
+<tr>
+<td>How many findings survive an adversarial re-read?</td>
+<td><strong>27 of 48 (56%)</strong></td>
+<td>3 independent verifiers per finding, instructed to refute by default; 2-of-3 needed to survive.</td>
+</tr>
+<tr>
+<td>Would this method find a bug it wasn't told about?</td>
+<td><strong>Sometimes. 4 of 10.</strong></td>
+<td>Planted-defect canary — see Calibration.</td>
+</tr>
+<tr>
+<td>Did static analysis independently corroborate the findings?</td>
+<td><strong>Almost never — 11 of 198.</strong></td>
+<td>~94% of what reached verification rests on model reading alone.</td>
+</tr>
+<tr>
+<td>Was cross-model verification obtained?</td>
+<td><strong>No.</strong></td>
+<td>Gate B failed. See below.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The single most important caveat.</strong> Findings and verifiers were all Claude
+models. Their errors are <em>correlated</em>: a misreading that feels natural to one is
+likely to feel natural to the next, so three verifiers can agree on a wrong answer
+with high confidence. The plan's defence against this was Gate B — independent
+re-verification by a different model family (GPT-5 via the Codex CLI). <strong>Gate B
+did not run.</strong> The CLI authenticated and answered two smoke tests, then the
+account hit its usage limit ("try again at Aug 7th") and every one of the 9
+verification batches returned empty output. All 27 findings below are
+<strong>Claude-verified only</strong>, and the correlated-error caveat applies to them in full.</p>
+<p><strong>"No findings" never means "no bugs."</strong> See Calibration and Coverage gaps. Several
+slices returned little because they were barely read, not because they were clean.</p>
+<hr />
+<h2 id="what-actually-ran">What actually ran</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Work</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Cartography: skill search, static analysis, graphify knowledge graph</td>
+<td>Reshaped the slice list — see below</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Breadth sweep, 17 slices, 1 Sonnet 5 agent each</td>
+<td>Every slice covered</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Depth dives, 9 risk slices × 3 lenses, Fable 5 at high effort</td>
+<td>27 agents</td>
+</tr>
+<tr>
+<td>Gate A</td>
+<td>Mechanical evidence check, zero tokens</td>
+<td>198/199 passed</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Adversarial verification, 12 batches × 3 refute-by-default lenses</td>
+<td>27 survived, 21 refuted</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Completeness critics × 3</td>
+<td>50 coverage gaps</td>
+</tr>
+<tr>
+<td>Gate B</td>
+<td>Cross-model verification</td>
+<td><strong>Failed — quota exhausted</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>44 agents in the sweep, 39 in verification, 0 errors.</strong> 2,904 of 3,435 tracked
+files (84.5%) were assigned to a slice. The 531 unassigned are listed in
+"What was never in scope".</p>
+<h3 id="phase-0-changed-the-plan-in-ways-worth-knowing">Phase 0 changed the plan in ways worth knowing</h3>
+<p>Cartography ran <em>before</em> any auditor, specifically so that slices would follow
+real coupling rather than directory names. It caught three things the provisional
+plan had wrong:</p>
+<ol>
+<li><strong><code>crates/buzz-auth</code> was missing from the audit scope entirely</strong> — nine files
+   containing NIP-42 relay auth, NIP-98 HTTP auth, replay defence, scopes, and
+   rate limiting. It was promoted to a depth slice.</li>
+<li><strong>About 100 further crate files had no owner</strong>, including
+   <code>git-credential-nostr</code> and <code>git-sign-nostr</code> (which touch real credentials and
+   signing) and <code>buzz-audit</code> (the tamper-evidence log).</li>
+<li><strong>Centrality analysis</strong> (20,140 nodes, 53,273 edges over 597 Rust files) named
+   <code>crates/buzz-sdk/src/builders.rs</code> (containing <code>sign()</code>) and
+   <code>crates/buzz-db/src/lib.rs</code> as the two widest-blast-radius files in the Rust
+   scope. Both were in breadth-only slices; both were promoted to depth.</li>
+</ol>
+<p>It also found that <code>ingest_event_inner()</code> in the relay makes its privilege
+decisions by calling <code>is_relay_admin_kind()</code> in <strong><code>buzz-core</code></strong> — so a
+crate-scoped review of the relay would read only half of its own admission logic.</p>
+<hr />
+<h2 id="calibration-how-well-does-this-method-actually-work">Calibration — how well does this method actually work?</h2>
+<h3 id="recall-4-of-10-planted-defects-410">Recall: 4 of 10 planted defects (4/10)</h3>
+<p>Ten synthetic defects of known type and location were planted in a scratch copy
+of 442 files (never in the real repository), and the breadth pass swept it blind.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Difficulty</th>
+<th>Found</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Easy (visible when skimming)</td>
+<td>2/3</td>
+</tr>
+<tr>
+<td>Medium (needs the enclosing function)</td>
+<td><strong>0/4</strong></td>
+</tr>
+<tr>
+<td>Hard (one-token change / absent check)</td>
+<td>2/3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The 0/4 on medium is the result that matters.</strong> The agent auditing
+<code>crates/buzz-auth</code> reported reading all eight of its files <em>in full</em> and concluded
+"this crate is small and well-tested; no findings there" — while two planted
+defects sat in the files it had just read. The media agent did the same: read
+<code>validation.rs</code> and <code>upload.rs</code> completely, missed both planted defects, and
+reported two different issues instead.</p>
+<p><strong>"The agent read the file" and "the agent would have caught a bug in the file"
+are separate claims, and only the first is supported by this evidence.</strong></p>
+<p>The defects it did catch were ones that look wrong in isolation — a match arm
+swallowing a rate-limit denial, <code>is_verified()</code> hardcoded to <code>true</code>,
+<code>allow-same-origin</code> added to an iframe sandbox. The ones it missed were all of the
+form <em>"this value is plausible but it is the wrong value"</em> — a swapped size cap, a
+swapped Redis key suffix, an inverted boolean. Those require holding the intended
+semantics in mind, not just reading the line.</p>
+<p>Two caveats make 40% an <strong>upper bound</strong>: a defect counts as found if any finding
+lands within 15 lines of it, which is generous; and synthetic defects are easier
+than real ones.</p>
+<h3 id="backtest-the-depth-tier-rediscovered-a-real-vulnerability">Backtest: the depth tier rediscovered a real vulnerability</h3>
+<p>Commit <code>047533c56</code> fixed a genuine silent TLS downgrade. 29 Dart files from its
+<strong>parent</strong> commit were extracted and one depth agent was pointed at them blind,
+told only to look at transport security and onboarding input.</p>
+<p>Its first finding, ranked critical, was the real bug:</p>
+<blockquote>
+<p><code>RelayConfig.wsUrl</code> silently downgrades TLS for every community joined by
+invite link. The scheme test only recognises <code>'https'</code>, but the invite path
+persists <code>'wss://host'</code>, so <code>'wss'</code> falls into the else branch and the socket is
+opened as plaintext <code>'ws://'</code>.</p>
+</blockquote>
+<p>Exact file, exact line (<code>relay_provider.dart:21</code>), correct mechanism. It traced
+the full path and independently noted the detail that makes the bug dangerous in
+practice: the invite claim itself succeeds over HTTPS, so nothing warns the user,
+and the plaintext socket then carries the NIP-42 AUTH event signed with the
+member's private key.</p>
+<p><strong>Breadth and depth are not equally powerful, and this audit should not be
+summarised with one recall number.</strong> Breadth (Sonnet, one pass, read-broadly
+instructions) got 40% on synthetic defects. Depth (Fable at high effort, instructed
+to trace data flow <em>across</em> files) found a real one. An empty breadth slice is weak
+evidence; an empty depth slice is somewhat stronger; neither is an all-clear.</p>
+<hr />
+<h2 id="confirmed-findings">Confirmed findings</h2>
+<p>27 findings survived: <strong>4 high, 12 medium, 11 low. No critical finding survived verification.</strong></p>
+<p>Ranked below by value per unit of remediation risk — that is, how much security is
+gained per unit of change required. A one-line gate added next to an existing
+gate ranks above a finding of similar severity that needs a protocol change.</p>
+<p>11 of the 27 survived on a <strong>split 2-of-3 vote</strong> (F018, F019, F021, F026, F027, F004, F006, F017, F028, F033, F048) —
+one verifier actively believed each of these was wrong. They are weaker evidence
+than the unanimous ones and are marked as such in the table.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Severity</th>
+<th>Vote</th>
+<th>Location</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F009</td>
+<td>high</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/audio/handler.rs:244</code></td>
+<td>authz-bypass</td>
+</tr>
+<tr>
+<td>F014</td>
+<td>high</td>
+<td>3/3</td>
+<td><code>desktop/src/features/messages/lib/formatTimelineMessages.ts:239</code></td>
+<td>parser-differential-authorship-spoofing</td>
+</tr>
+<tr>
+<td>F015</td>
+<td>high</td>
+<td>3/3</td>
+<td><code>mobile/lib/features/channels/timeline_message.dart:356</code></td>
+<td>parser-differential</td>
+</tr>
+<tr>
+<td>F023</td>
+<td>high</td>
+<td>3/3</td>
+<td><code>crates/buzz-media/src/validation.rs:270</code></td>
+<td>resource-exhaustion</td>
+</tr>
+<tr>
+<td>F002</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/api/bridge.rs:118</code></td>
+<td>authentication-bypass</td>
+</tr>
+<tr>
+<td>F008</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/api/media.rs:96</code></td>
+<td>resource-exhaustion</td>
+</tr>
+<tr>
+<td>F010</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/handlers/ingest.rs:2733</code></td>
+<td>correctness</td>
+</tr>
+<tr>
+<td>F022</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/handlers/req.rs:239</code></td>
+<td>resource-leak</td>
+</tr>
+<tr>
+<td>F030</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>mobile/lib/shared/relay/nostr_models.dart:113</code></td>
+<td>auth-verification-gap</td>
+</tr>
+<tr>
+<td>F032</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>crates/buzz-relay/src/api/admin/auth.rs:6</code></td>
+<td>authz</td>
+</tr>
+<tr>
+<td>F035</td>
+<td>medium</td>
+<td>3/3</td>
+<td><code>desktop/src/shared/lib/linkPreview.ts:168</code></td>
+<td>algorithmic-complexity</td>
+</tr>
+<tr>
+<td>F018</td>
+<td>medium</td>
+<td>2/3</td>
+<td><code>mobile/lib/features/pairing/pairing_provider.dart:103</code></td>
+<td>authentication-bypass</td>
+</tr>
+<tr>
+<td>F019</td>
+<td>medium</td>
+<td>2/3</td>
+<td><code>crates/buzz-sdk/src/nip_oa.rs:231</code></td>
+<td>authz-bypass</td>
+</tr>
+<tr>
+<td>F021</td>
+<td>medium</td>
+<td>2/3</td>
+<td><code>crates/buzz-sdk/src/nip_oa.rs:214</code></td>
+<td>crypto-verification-incomplete</td>
+</tr>
+<tr>
+<td>F026</td>
+<td>medium</td>
+<td>2/3</td>
+<td><code>crates/buzz-relay/src/api/mod.rs:86</code></td>
+<td>auth-delegation-expiry-not-enforced</td>
+</tr>
+<tr>
+<td>F027</td>
+<td>medium</td>
+<td>2/3</td>
+<td><code>crates/buzz-relay/src/handlers/auth.rs:231</code></td>
+<td>error-classification</td>
+</tr>
+<tr>
+<td>F038</td>
+<td>low</td>
+<td>3/3</td>
+<td><code>mobile/lib/features/pairing/pairing_provider.dart:680</code></td>
+<td>ssrf</td>
+</tr>
+<tr>
+<td>F040</td>
+<td>low</td>
+<td>3/3</td>
+<td><code>crates/buzz-auth/src/rate_limit.rs:188</code></td>
+<td>dead-security-control</td>
+</tr>
+<tr>
+<td>F041</td>
+<td>low</td>
+<td>3/3</td>
+<td><code>web/src/features/repos/use-repo-refs.ts:51</code></td>
+<td>authorization-gap</td>
+</tr>
+<tr>
+<td>F046</td>
+<td>low</td>
+<td>3/3</td>
+<td><code>desktop/src-tauri/src/commands/messages.rs:246</code></td>
+<td>silent-truncation</td>
+</tr>
+<tr>
+<td>F047</td>
+<td>low</td>
+<td>3/3</td>
+<td><code>desktop/src-tauri/src/commands/messages.rs:659</code></td>
+<td>idempotency</td>
+</tr>
+<tr>
+<td>F004</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>desktop/src-tauri/src/commands/identity.rs:618</code></td>
+<td>recovery-mode-signing-gate-bypass</td>
+</tr>
+<tr>
+<td>F006</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>desktop/src-tauri/src/commands/profile.rs:80</code></td>
+<td>data-loss</td>
+</tr>
+<tr>
+<td>F017</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>mobile/lib/shared/relay/relay_session.dart:462</code></td>
+<td>data-loss</td>
+</tr>
+<tr>
+<td>F028</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>crates/buzz-relay/src/handlers/auth.rs:196</code></td>
+<td>error-classification</td>
+</tr>
+<tr>
+<td>F033</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>desktop/src-tauri/tauri.conf.json:37</code></td>
+<td>missing-hardening</td>
+</tr>
+<tr>
+<td>F048</td>
+<td>low</td>
+<td>2/3</td>
+<td><code>desktop/src-tauri/src/commands/channels.rs:221</code></td>
+<td>silent-failure</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="the-two-findings-we-would-fix-first">The two findings we would fix first</h3>
+<p><strong>F009 and the F014/F015 pair</strong> are the highest value per unit of risk.</p>
+<p><strong>F009</strong> — the huddle-audio WebSocket re-implements NIP-42 admission but omits the
+community-ban gate the main WebSocket path enforces. The fix is to call the
+existing <code>moderation_restriction_state</code> check on the audio path, next to the auth
+it already does. Low remediation risk, closes a ban bypass. Note the caveat in
+Coverage gaps: this finding comes out of a 5,836-line subsystem of which roughly
+one file was read.</p>
+<p><strong>F014 + F015</strong> are the <em>same defect implemented twice</em>: both the desktop and the
+mobile client resolve a kind:40003 edit's target using the <strong>last</strong> <code>e</code> tag, while
+the relay uses a different rule. That is a parser differential across a trust
+boundary, and it is worth more attention than either finding alone, because it
+means the two clients and the server disagree about which event an edit applies
+to. Fixing one platform and not the other leaves the differential in place.</p>
+<h3 id="f009-high-cratesbuzz-relaysrcaudiohandlerrs244">F009<span class="sevtag sev-high">high</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/audio/handler.rs:244</code></h3>
+<p><strong>Category:</strong> authz-bypass  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> high, high, high  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The huddle-audio WebSocket auth path re-implements NIP-42 admission but omits the community ban gate (and the pubkey allowlist gate) that the main WebSocket auth path enforces. <code>moderation_restriction_state</code> is called in exactly four places in buzz-relay — handlers/auth.rs:121, handlers/auth.rs:143, handlers/ingest.rs:1998, handlers/moderation_commands.rs:105, handlers/relay_admin.rs:168 — and none of them is on the  …</p>
+<p><strong>How it fails.</strong> A pubkey is banned in community C. Its main relay WebSocket is refused at handlers/auth.rs:159-182 and its event writes are refused at handlers/ingest.rs:1998. The same actor then opens <code>GET /huddle/{channel_id}/audio</code> (registered at router.rs:125-128), receives the challenge generated at audio/handler.rs:175, signs a kind:22242 AUTH event, and passes <code>verify_auth_event</code> at audio/handler.rs:222. <code>enforce_relay_membership</code> at line 244 succeeds (the actor is still a relay member — a ban is not a membership removal),  …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if crate::api::relay_members::enforce_relay_membership(
+        &amp;state,
+        tenant.community(),
+        pubkey.as_bytes(),
+        auth_tag_json.as_deref(),
+    )
+</code></pre>
+<p><strong>Reachable path.</strong> Remote attacker (banned pubkey, still a relay member) -&gt; GET /huddle/{channel_id}/audio (crates/buzz-relay/src/router.rs:125-128) -&gt; ws_audio_handler (audio/handler.rs:64; only Host-&gt;community binding + connection permit before upgrade) -&gt; handle_audio_connection (audio/handler.rs:137) -&gt; handle_active_audio_connection (audio/handler.rs:166) -&gt; challenge sent (audio/handler.rs:175) -&gt; attacker signs kind:22242, verif …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Verified by reading the whole audio admission path and every ban call site. The route <code>/huddle/{channel_id}/audio</code> is registered unconditionally (crates/buzz-relay/src/router.rs:125-128) with no cargo feature or debug gate (<code>pub mod audio</code> in crates/buzz-relay/src/lib.rs:10). Pre-upgrade the handler only binds the community from the Host header and takes a connection permit (audio/handler.rs:64-107) — no auth. After the challe …</p>
+</blockquote>
+<h3 id="f014-high-desktopsrcfeaturesmessageslibformattimelinemessagests239">F014<span class="sevtag sev-high">high</span> <span style="color:var(--muted)">—</span> <code>desktop/src/features/messages/lib/formatTimelineMessages.ts:239</code></h3>
+<p><strong>Category:</strong> parser-differential-authorship-spoofing  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> high, high, high  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The desktop resolves a kind:40003 edit's target using the LAST valid <code>e</code> tag (getReactionTargetId at formatTimelineMessages.ts:118-131 iterates <code>for (let index = tags.length - 1; index &gt;= 0; index -= 1)</code>), while the relay authorises the same event against the FIRST valid <code>e</code> tag (crates/buzz-relay/src/handlers/ingest.rs:790-806, <code>event.tags.iter().find_map(...)</code> inside validate_edit_ownership). Nothing constrains the …</p>
+<p><strong>How it fails.</strong> Mallory is an ordinary member of #general. (1) She posts her own message M_m and notes its id. (2) She publishes kind:40003 with tags <code>[["h", channelId], ["e", M_m_id], ["e", M_victim_id]]</code> and content "I've transferred the keys to mallory@evil.example — use that from now on". (3) Relay ingest: validate_edit_ownership (ingest.rs:790) takes the FIRST <code>e</code> tag = M_m_id, looks up M_m, finds effective author == Mallory (ingest.rs:829-831), re-checks her channel membership, and accepts; the generic membership gate is ski …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>const targetId = getReactionTargetId(event.tags);
+    if (!targetId || deletedEventIds.has(targetId)) {
+</code></pre>
+<p><strong>Reachable path.</strong> Attacker = ordinary member of channel #general (holds MessagesWrite, ingest.rs:250). 1) Publishes kind:40003 with tags [["h",chan],["e",own_msg_id],["e",victim_msg_id]] over the normal EVENT ingest path. 2) crates/buzz-relay/src/handlers/ingest.rs:2152-2158 — generic membership gate skipped for KIND_STREAM_MESSAGE_EDIT. 3) ingest.rs:2330-2343 — e-tag cardinality check does not apply (kind != 5/9005), so two <code>e</code> tags  …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The parser differential is real and every hop is live production code. Relay: <code>validate_edit_ownership</code> selects the target with a forward <code>find_map</code> over <code>e</code> tags (crates/buzz-relay/src/handlers/ingest.rs:788-806) — first valid 64-hex <code>e</code> tag wins. Desktop: <code>getReactionTargetId</code> scans tags in reverse (desktop/src/features/messages/lib/formatTimelineMessages.ts:117-131) — last valid <code>e</code> tag wins. Nothing reconciles them: the e/ …</p>
+</blockquote>
+<h3 id="f015-high-mobilelibfeatureschannelstimeline_messagedart356">F015<span class="sevtag sev-high">high</span> <span style="color:var(--muted)">—</span> <code>mobile/lib/features/channels/timeline_message.dart:356</code></h3>
+<p><strong>Category:</strong> parser-differential  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> high, high, high  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The mobile timeline resolves a kind:40003 edit event's target using the LAST <code>e</code> tag (<code>_lastETag</code>, line 586: it scans <code>for (var i = tags.length - 1; i &gt;= 0; i--)</code>), while the relay authorizes the same event against the FIRST 64-hex <code>e</code> tag (crates/buzz-relay/src/handlers/ingest.rs <code>validate_edit_ownership</code>, which does <code>event.tags.iter().find_map(...)</code>). Unlike kind:5/9005 deletions — which the relay explicitly caps a …</p>
+<p><strong>How it fails.</strong> Mallory is a member of channel #eng. She posts an ordinary message M_a. She then publishes a kind:40003 event with tags [["h", "<eng-channel-id>"], ["e", "<M_a id>"], ["e", "<Alice's message id>"]] and content "approved, wire the funds to acct 12345". The relay's validate_edit_ownership reads the first e tag (M_a), sees author == actor, and accepts and fans out the event. Every mobile client that renders #eng runs formatTimeline over the channel window; <code>_lastETag</code> returns Alice's message id, so `edits[&lt;Alice's mes …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if (event.kind != EventKind.streamMessageEdit) continue;
+    if (deletedIds.contains(event.id)) continue;
+
+    final targetId = _lastETag(event.tags);
+</code></pre>
+<p><strong>Reachable path.</strong> Attacker = member of #eng with MessagesWrite (crates/buzz-relay/src/handlers/ingest.rs:250). 1) Publish kind:40003, tags [["h",eng],["e",own_msg_id],["e",alice_msg_id]]. 2) ingest.rs:2152-2158 skip_membership for KIND_STREAM_MESSAGE_EDIT. 3) ingest.rs:2330-2343 cardinality rule not applied to 40003. 4) ingest.rs:2345 -&gt; validate_edit_ownership; ingest.rs:788-806 forward find_map selects own_msg_id; ingest.rs:829-851  …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Same differential, independently verified on the mobile client, all shipped code. <code>_lastETag</code> (mobile/lib/features/channels/timeline_message.dart:586-592) walks tags backwards and — unlike the desktop helper — does not even require 64-hex, so the last <code>e</code> tag always wins, while the relay authorizes on the first valid <code>e</code> tag (crates/buzz-relay/src/handlers/ingest.rs:788-806). No e-tag cardinality limit exists for kind:40003 (t …</p>
+</blockquote>
+<h3 id="f023-high-cratesbuzz-mediasrcvalidationrs270">F023<span class="sevtag sev-high">high</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-media/src/validation.rs:270</code></h3>
+<p><strong>Category:</strong> resource-exhaustion  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> high, medium, high  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The image-bomb guard measures dimensions with <code>imagesize</code>, which for GIF reads ONLY the logical screen descriptor (file offset 6-9), while the decoder that actually allocates (<code>image::load_from_memory</code> in thumbnail.rs:26) sizes its buffer from the per-frame image-descriptor width/height. <code>validate_gif_metadata_free</code> walks the image descriptor but only reads the packed byte at <code>bytes[i + 9]</code> (line 771) and then does ` …</p>
+<p><strong>How it fails.</strong> Attacker with any accepted Blossom signer key (on an open relay, membership is not enforced) sends <code>PUT /upload</code> with a ~1 KiB GIF: header <code>GIF89a</code>, logical screen width=1 height=1, packed=0x00, then one image descriptor with left=0, top=0, width=65535, height=2048, a 6-byte local colour table, and an LZW stream of a solid colour, then the 0x3B trailer. crates/buzz-relay/src/api/media.rs:369 sniffs image/gif and routes to buzz_media::process_upload (upload.rs:207). validation.rs:734 <code>validate_gif_metadata_free</code> acc …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let size = imagesize::blob_size(bytes).map_err(|_| MediaError::InvalidImage)?;
+    if (size.width as u64) * (size.height as u64) &gt; MAX_PIXELS {
+        return Err(MediaError::ImageTooLarge);
+</code></pre>
+<p><strong>Reachable path.</strong> Remote PUT /upload with a self-signed Blossom auth event -&gt; crates/buzz-relay/src/api/media.rs:139 AuthenticatedUpload::from_request_parts -&gt; media.rs:211 enforce_relay_membership returns OpenRelay (crates/buzz-relay/src/config.rs:534 default false) -&gt; media.rs:369-375 sniffs image/gif -&gt; buzz_media::process_upload (crates/buzz-media/src/upload.rs:207) -&gt; validate_content (crates/buzz-media/src/validation.rs:238) -&gt;  …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>I verified every hop against the vendored crate sources and it holds. (a) crates/buzz-media/src/validation.rs:734 <code>validate_gif_metadata_free</code> reads the image descriptor's packed byte at bytes[i+9] then does <code>i += 10</code> (lines 771-772) — the frame width/height at bytes[i+5..i+9] are never read or bounded, confirmed by reading lines 763-828. (b) imagesize 0.14.0 (Cargo.lock:3922) src/formats/gif.rs seeks to offset 6 and returns O …</p>
+</blockquote>
+<h3 id="f002-medium-cratesbuzz-relaysrcapibridgers118">F002<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/api/bridge.rs:118</code></h3>
+<p><strong>Category:</strong> authentication-bypass  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, high, medium  ·  <strong>Reporter originally claimed:</strong> critical</p>
+<p><strong>Claim.</strong> The HTTP bridge accepts an unauthenticated, unsigned <code>X-Pubkey</code> header as proof of identity whenever <code>require_auth_token</code> is false — and <code>require_auth_token</code> defaults to false (crates/buzz-relay/src/config.rs:524-526, <code>std::env::var("BUZZ_REQUIRE_AUTH_TOKEN")...unwrap_or(false)</code>). Every bridge read route passes that config flag straight through: <code>/query</code> (bridge.rs:908-914), <code>/count</code> (bridge.rs:1350-1356), and the mo …</p>
+<p><strong>How it fails.</strong> Attacker knows any victim's Nostr public key (public by construction — it appears in every event the victim signs). Against a relay deployed without <code>BUZZ_REQUIRE_AUTH_TOKEN=true</code>, they send <code>POST /query</code> with <code>Host: &lt;tenant host&gt;</code>, no <code>Authorization</code> header, header <code>X-Pubkey: &lt;victim 64-hex pubkey&gt;</code>, body <code>[{}]</code>. <code>query_events</code> (bridge.rs:884) binds the tenant from Host, calls <code>verify_bridge_auth</code> (bridge.rs:908) which falls into the branch at line 118, returns <code>(victim_pubkey, [0u8;32])</code>. <code>query_events_authed</code> th …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if !require_auth_token {
+        if let Some(hex_val) = headers.get(&quot;x-pubkey&quot;).and_then(|v| v.to_str().ok()) {
+</code></pre>
+<p><strong>Reachable path.</strong> attacker HTTP POST /query with Host: <tenant host>, no Authorization, X-Pubkey: <victim hex pubkey>, body [{}] -&gt; crates/buzz-relay/src/api/bridge.rs:884 query_events -&gt; :908 verify_bridge_auth(..., state.config.require_auth_token=false) -&gt; :117-125 X-Pubkey branch returns (victim_pubkey, [0u8;32]) -&gt; :922 query_events_authed -&gt; :957 check_nip98_replay -&gt; :150-153 zero id short-circuits Ok -&gt; :983-1005 p-gated/author …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code behaviour is described accurately and the impact under the stated precondition is real, but the precondition is operator misconfiguration that every shipped deployment artifact already prevents, so critical is far too high. Confirmed at low. Accurate parts: verify_bridge_auth_with_options falls back to an unsigned X-Pubkey header when require_auth_token is false (bridge.rs:117-125), returns a zero event id which check …</p>
+</blockquote>
+<h3 id="f008-medium-cratesbuzz-relaysrcapimediars96">F008<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/api/media.rs:96</code></h3>
+<p><strong>Category:</strong> resource-exhaustion  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The media upload rate limiter is a plain DashMap keyed by (community_id, uploader pubkey) that is inserted into on every upload attempt and never evicted, swept, or capped, so an attacker who mints fresh Nostr keypairs grows relay heap without bound. The per-pubkey rate limit cannot slow this: each fresh key is a brand-new window, and the rate limiter is the very thing being grown. This is the exact threat the same f …</p>
+<p><strong>How it fails.</strong> On a default deployment (require_relay_membership defaults to false — crates/buzz-relay/src/config.rs:1018-1019 asserts this), an attacker loops: generate a secp256k1 keypair (~50us, free), sign a kind:24242 Blossom auth event with a valid t/x/expiration tag set, and PUT /upload with a small body and a matching X-SHA-256. Each request passes bind_community (media.rs:165), verify_blossom_auth_event (media.rs:177), the x-tag check (media.rs:195-201) and the open-relay membership short-circuit (api/mod.rs:67-69), then …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let mut entry = state
+        .media_upload_rate_limiter
+        .entry(key)
+        .or_insert((0, now));
+</code></pre>
+<p><strong>Reachable path.</strong> Attacker (no account, no membership) -&gt; PUT /upload on the public relay host (crates/buzz-relay/src/router.rs:40) -&gt; AuthenticatedUpload::from_request_parts -&gt; crate::tenant::bind_community (media.rs:165) -&gt; extract_blossom_auth + verify_blossom_auth_event with a freshly generated keypair (media.rs:176-177) -&gt; X-SHA-256 format + x-tag match, both attacker-chosen (media.rs:181-201) -&gt; api/mod.rs:124-131 enforce_relay_ …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Verified end to end. <code>media_upload_rate_limiter</code> is declared as <code>Arc&lt;ScopedRateLimiter&gt;</code> = <code>Arc&lt;DashMap&lt;ScopedPubkeyKey, SlidingWindowCounter&gt;&gt;</code> (state.rs:39, state.rs:592) and constructed as a bare <code>DashMap::new()</code> (state.rs:775). <code>upload_rate_limited</code> (media.rs:86-108) does <code>.entry(key).or_insert((0, now))</code> and only ever resets the counter in place -- it never removes. Grep for <code>media_upload_rate_limiter</code> across the whole cr …</p>
+</blockquote>
+<h3 id="f010-medium-cratesbuzz-relaysrchandlersingestrs2733">F010<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/handlers/ingest.rs:2733</code></h3>
+<p><strong>Category:</strong> correctness  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, low, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> Ingesting a kind:7 (NIP-25 reaction) that targets a channel-less/global event (e.g. a kind:1 text note, which is always global per is_global_only_kind) leaves channel_id as None, and the tracing code on this line unconditionally does channel_id.expect("reaction path has channel"), which panics.</p>
+<p><strong>How it fails.</strong> An authenticated user with ordinary MessagesWrite scope submits EVENT kind:7 with an <code>e</code> tag pointing at any previously-stored global event (e.g. a kind:1 text note authored by anyone). derive_reaction_channel looks up the target, finds target.channel_id == None (global events have no channel), and returns ReactionChannelResult::NoChannel, so <code>channel_id</code> stays None all the way through ingest_event_inner (KIND_REACTION is not in is_global_only_kind or requires_h_channel_scope, so nothing forces channel_id back to S …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>channel: channel_label(channel_id.expect(&quot;reaction path has channel&quot;)),
+</code></pre>
+<p><strong>Reachable path.</strong> Authenticated NIP-42 peer sends EVENT kind:7 with an e-tag on any stored kind:1 -&gt; handlers/event.rs:728 (or HTTP publish api/bridge.rs:837) -&gt; handlers/ingest.rs:1767 ingest_event -&gt; ingest_event_inner (ingest.rs:1806) -&gt; ingest.rs:2026-2029 derive_reaction_channel -&gt; NoChannel -&gt; channel_id = None (target kind:1 stored with NULL channel per is_global_only_kind, ingest.rs:395-399) -&gt; no gate rejects (requires_h_chan …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The unwrap is genuinely reachable from an authenticated remote peer, but the reporter's DoS characterization is overstated. Reachability: kind:1 is in is_global_only_kind (ingest.rs:395-399), so stored text notes have channel_id NULL; derive_reaction_channel (ingest.rs:374-378) returns NoChannel for such a target and ingest_event_inner maps that to <code>None</code> (ingest.rs:2026-2029). Nothing forces it back: is_global_only_kind does  …</p>
+</blockquote>
+<h3 id="f022-medium-cratesbuzz-relaysrchandlersreqrs239">F022<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/handlers/req.rs:239</code></h3>
+<p><strong>Category:</strong> resource-leak  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> A REQ whose handler task is still running when its WebSocket closes registers a subscription into <code>sub_registry</code> and retains a Redis topic that nothing will ever remove, because <code>remove_connection</code> (the only reclaim path) already ran. Each such REQ permanently leaks a subscription entry, its fan-out index entries, and one Redis topic refcount.</p>
+<p><strong>How it fails.</strong> Client opens a WS, completes NIP-42 AUTH, sends <code>["REQ","s",{"kinds":[1]}]</code>, and immediately closes the socket. <code>handle_req</code> was spawned detached at connection.rs:552 and is awaiting <code>get_accessible_channel_ids_cached</code> (req.rs:93) — a DB round-trip. Meanwhile <code>recv_loop</code> returns, and <code>handle_active_connection</code> runs <code>cancel.cancel()</code> and awaits only send/heartbeat/auth tasks (connection.rs:260-263), then calls <code>state.sub_registry.remove_connection(conn.conn_id)</code> at connection.rs:265 — which finds nothing. The DB cal …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let replaced = state.sub_registry.register_scoped(
+        conn.tenant.community(),
+        conn_id,
+        sub_id.clone(),
+        filters.clone(),
+        channel_id,
+    );
+</code></pre>
+<p><strong>Reachable path.</strong> Remote WS client -&gt; NIP-42 AUTH (crates/buzz-relay/src/connection.rs:506) -&gt; sends ["REQ",...] -&gt; crates/buzz-relay/src/connection.rs:552 tokio::spawn(handle_req) detached -&gt; crates/buzz-relay/src/handlers/req.rs:93 awaits get_accessible_channel_ids_cached (DB). Client closes socket -&gt; recv_loop returns (connection.rs:258) -&gt; cancel.cancel() (260) -&gt; awaits only send/heartbeat/auth tasks (261-263) -&gt; crates/buzz-rela …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The ordering hazard is real and I could not find a defense. <code>handle_req</code> is spawned fully detached at crates/buzz-relay/src/connection.rs:552-558 (<code>tokio::spawn</code>, handle dropped, only a semaphore permit held). The connection teardown at connection.rs:258-271 awaits ONLY send_task, heartbeat_task and auth_timeout_task (lines 261-263) — the spawned REQ/EVENT/COUNT tasks are never joined and there is no JoinSet. `remove_connectio …</p>
+</blockquote>
+<h3 id="f030-medium-mobilelibsharedrelaynostr_modelsdart113">F030<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>mobile/lib/shared/relay/nostr_models.dart:113</code></h3>
+<p><strong>Category:</strong> auth-verification-gap  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The mobile app's primary NostrEvent model, used to parse every EVENT frame received from a relay over the main channel/message/timeline subscription pipeline (relay_session.dart), never verifies the event's id (SHA-256 of canonical serialization) or its Schnorr signature. NostrEvent.fromJson simply copies the id/pubkey/sig fields out of untrusted JSON with no cryptographic check. This is inconsistent with the app's o …</p>
+<p><strong>How it fails.</strong> A malicious or compromised relay (or a MITM if the operator's deployment terminates TLS elsewhere, per SECURITY.md's statement that 'the relay itself does not enforce TLS'), or any relay the user connects to via an invite/pairing deep link, can send an EVENT frame with an arbitrary pubkey, content, kind, and tags with a bogus or unchecked id/sig. relay_session.dart's <code>_handleEvent</code> (around line 449) calls <code>NostrEvent.fromJson(eventJson)</code> directly and hands the resulting event to channel timelines, DMs, profile meta …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>factory NostrEvent.fromJson(Map&lt;String, dynamic&gt; json) {
+    return NostrEvent(
+      id: json['id'] as String,
+      pubkey: json['pubkey'] as String,
+</code></pre>
+<p><strong>Reachable path.</strong> relay WebSocket frame -&gt; mobile/lib/shared/relay/relay_session.dart:151-162 (<code>_onMessage</code> switch, case 'EVENT') -&gt; relay_session.dart:449 <code>_handleEvent</code> calls <code>NostrEvent.fromJson(eventJson)</code> -&gt; mobile/lib/shared/relay/nostr_models.dart:113-126 (fields copied verbatim, no id/sig check) -&gt; relay_session.dart:456-467 event appended to <code>_historySubscriptions</code> / <code>_eventBuffer</code> and flushed to live subscribers; same unveri …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The claim holds on inspection. <code>NostrEvent.fromJson</code> (mobile/lib/shared/relay/nostr_models.dart:113) copies id/pubkey/sig straight out of JSON with no id recomputation and no Schnorr check, and nothing downstream compensates: a repo-wide search of mobile/lib for verification primitives returns only two hits, <code>nostr.Event.fromJson</code> in the pairing path (mobile/lib/features/pairing/pairing_provider.dart:337) and `nostr.Schnorr.ve …</p>
+</blockquote>
+<h3 id="f032-medium-cratesbuzz-relaysrcapiadminauthrs6">F032<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/api/admin/auth.rs:6</code></h3>
+<p><strong>Category:</strong> authz  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The entire read-only deployment-admin API (moderation reports, product feedback, and feedback attachments) is gated solely by comparing the client-supplied HTTP <code>Host</code> header (and <code>Origin</code> header) against a configured admin hostname string — there is no bearer token, session, or Nostr-signature check on these routes.</p>
+<p><strong>How it fails.</strong> router.rs merges the admin router (<code>/api/admin/v1/*</code>, see api/admin/mod.rs router()) into the same Axum Router that serves all other relay traffic on the same listener/port. <code>authorize()</code> in this file calls <code>is_admin_host</code>, which only checks <code>headers.get(header::HOST) == config.host</code>. Any client that can reach the relay's port — which is guaranteed since it's the same socket as public API/WS traffic — can set an arbitrary <code>Host: &lt;admin-host-value&gt;</code> header on a raw HTTP request (curl, not a browser, so the Origin ch …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>headers
+        .get(header::HOST)
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|host| host == config.host)
+</code></pre>
+<p><strong>Reachable path.</strong> Operator sets BUZZ_ADMIN_HOST (crates/buzz-relay/src/config.rs:874) -&gt; admin router mounted on the public listener at crates/buzz-relay/src/router.rs:60 and merged at router.rs:140-141 -&gt; unauthenticated attacker who can open a TCP connection to the relay's bind addr sends <code>GET /api/admin/v1/reports</code> with <code>Host: &lt;BUZZ_ADMIN_HOST&gt;</code> and no Origin header -&gt; crates/buzz-relay/src/api/admin/mod.rs:98 `authorize(&amp;state, &amp;h …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code reads as described. <code>authorize</code> (crates/buzz-relay/src/api/admin/auth.rs:16-32) applies only two checks: exact <code>Host</code> equality via <code>is_admin_host</code> (auth.rs:6-14) and an Origin check written as <code>headers.get(ORIGIN).is_some_and(...)</code>, which is skipped entirely when no Origin header is sent — so curl bypasses it. There is no bearer token, session, or NIP-98/Nostr-signature check on these routes, and every handler gates o …</p>
+</blockquote>
+<h3 id="f035-medium-desktopsrcsharedliblinkpreviewts168">F035<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>desktop/src/shared/lib/linkPreview.ts:168</code></h3>
+<p><strong>Category:</strong> algorithmic-complexity  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium, high  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> <code>stripHiddenLinkPreviewContent</code> runs on every rendered message body and is quadratic in body length: <code>collectInlineSpoilerRanges</code> calls <code>isIndexInRanges</code> (an O(R) <code>Array.some</code>) at every <code>||</code> occurrence, and <code>collectBlockSpoilerRanges</code> calls <code>overlapsRange</code> (also O(R)) for every line equal to <code>||</code>, where R is the number of code/image ranges the attacker can also inflate from the same body. Unlike the parsed markdown t …</p>
+<p><strong>How it fails.</strong> Mallory posts one message whose content alternates lines of <code>`a`</code> (an inline code span, producing one entry in <code>codeRanges</code>) and lines of <code>||</code> (a block-spoiler delimiter line), up to the relay's 256 KB content limit (<code>MAX_EVENT_CONTENT_BYTES</code> in crates/buzz-relay/src/handlers/ingest.rs). That yields on the order of 3x10^4 code ranges and 4x10^4 <code>||</code> lines. <code>MarkdownInner</code> (desktop/src/shared/ui/markdown.tsx:1871-1874) calls <code>extractSupportedLinkPreviews(content)</code> synchronously inside the render-path <code>useMemo</code>,  …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if (
+      content[index] === &quot;|&quot; &amp;&amp;
+      content[index + 1] === &quot;|&quot; &amp;&amp;
+      !isIndexInRanges(index, excludedRanges) &amp;&amp;
+      !isIndexInRanges(index + 1, excludedRanges)
+</code></pre>
+<p><strong>Reachable path.</strong> Attacker channel member posts ~256KB body of alternating <code>a</code>/|| lines; relay accepts (crates/buzz-relay/src/handlers/ingest.rs:1868-1869, cap=256KB) -&gt; victim views channel, desktop/src/features/messages/ui/MessageRow.tsx:357 renders <Markdown content={message.body}> (interactive defaults true, markdown.tsx:1355/1837) -&gt; desktop/src/shared/ui/markdown.tsx:1872 useMemo runs extractSupportedLinkPreviews(content) synchr …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Confirmed reachable quadratic algorithmic complexity. Both collectBlockSpoilerRanges (overlapsRange, linkPreview.ts:78/140) and collectInlineSpoilerRanges (isIndexInRanges, linkPreview.ts:70/168) do O(R) Array.some scans, and with the alternating <code>a</code>/|| input both the range count R and the number of || occurrences scale linearly with content length, yielding ~n^2 ~= 1e9 ops at a 256KB body. It runs synchronously on the render  …</p>
+</blockquote>
+<h3 id="f018-medium-mobilelibfeaturespairingpairing_providerdart103">F018<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>mobile/lib/features/pairing/pairing_provider.dart:103</code></h3>
+<p><strong>Category:</strong> authentication-bypass  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> Any input that does not start with <code>nostrpair://</code> silently falls back to the legacy pairing flow, which base64-decodes an attacker-supplied JSON blob and imports its <code>nsec</code> + <code>relayUrl</code> as the active identity with no SAS, no transcript-hash check, no signature check and no confirmation dialog — a protocol downgrade the attacker chooses. The modern NIP-AB path (<code>_pairNipAb</code>) requires a 6-digit SAS the user must visual …</p>
+<p><strong>How it fails.</strong> Attacker prints/posts a QR whose payload is base64url of {"relayUrl":"https://evil.example","pubkey":"<attacker>","nsec":"nsec1<attacker>"} captioned "scan to join our Buzz community". Victim taps Scan on the unauthenticated PairingPage (lib/app.dart:104 makes PairingPage the landing screen) or on Add Community. <code>_firstScannedValue</code> (pairing_qr_scanner.dart:82) returns the raw string, <code>pair()</code> routes it to <code>_pairLegacy</code>, and the app authenticates as the attacker-controlled identity against the attacker's relay. Eve …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if (trimmed.startsWith('nostrpair://')) {
+      return _pairNipAb(trimmed);
+    }
+    // Legacy buzz:// flow.
+    return _pairLegacy(trimmed);
+</code></pre>
+<p><strong>Reachable path.</strong> mobile/lib/features/pairing/pairing_page.dart:52 handleScannerResult -&gt; :54 pair(code) -&gt; mobile/lib/features/pairing/pairing_provider.dart:91 pair -&gt; :99 input not starting with nostrpair:// falls through to :103 _pairLegacy -&gt; :567/:625 _parseLegacyInput base64url-decodes attacker JSON (relayUrl/pubkey/nsec) -&gt; :569 _validateCredentials (only checks nsec present + relayUrl is https/non-private) -&gt; :576 authenticate …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The legacy path is reachable from the QR scanner and imports an attacker-supplied nsec+relay with zero verification — that part is accurately read (no SAS, no confirmation; relayUrl is validated for scheme/private-range only). But this is QR-phishing dependent on socially engineering the victim into scanning an attacker QR, and the reporter's impact is overstated: the imported key is freshly attacker-generated, so the victim A …</p>
+</blockquote>
+<h3 id="f019-medium-cratesbuzz-sdksrcnip_oars231">F019<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-sdk/src/nip_oa.rs:231</code></h3>
+<p><strong>Category:</strong> authz-bypass  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> verify_auth_tag only syntax-checks the NIP-OA <code>conditions</code> string and never evaluates its clauses, and it takes no event to evaluate them against — so the relay's membership paths, which are its main consumers, grant access on an attestation whose <code>created_at&lt;T</code> lifetime bound has already passed. docs/nips/NIP-OA.md states "Verifiers MUST evaluate every clause" and "Owners SHOULD bound authorization lifetime with a ` …</p>
+<p><strong>How it fails.</strong> An owner who is a relay member issues an agent an auth tag with conditions <code>created_at&lt;1700000000</code>, intending it to expire, then stops trusting the agent. The agent (or anyone who copies the tag off a public event — the tag is a reusable capability by design, NIP-OA.md line 16) connects to a closed relay and sends a kind:22242 AUTH event carrying that tag. handlers/auth.rs:78 extracts it, handlers/auth.rs:221 passes it to enforce_relay_membership, which reaches api/mod.rs:86 `verify_auth_tag(tag_json, &amp;agent_pubkey …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>SECP256K1
+        .verify_schnorr(&amp;sig, &amp;message, &amp;xonly)
+        .map_err(|e| SdkError::InvalidInput(format!(&quot;signature verification failed: {e}&quot;)))?;
+
+    Ok(owner_pubkey)
+</code></pre>
+<p><strong>Reachable path.</strong> crates/buzz-relay/src/handlers/auth.rs:78 extract_auth_tag_json -&gt; :217/:221 enforce_relay_membership -&gt; crates/buzz-relay/src/api/mod.rs:86 verify_auth_tag -&gt; crates/buzz-sdk/src/nip_oa.rs:214 validate_conditions (SYNTAX ONLY) then :231-233 verify_schnorr and :235 Ok(owner) with no clause evaluation and no event passed in -&gt; api/mod.rs:94 owner_is_member -&gt; :100 MembershipDecision::ViaOwner -&gt; agent authenticated to …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Confirmed the mechanical claim: verify_auth_tag only syntax-validates conditions and never evaluates created_at&lt; or kind= (I searched the relay/sdk; the only created_at&lt; evaluator is handlers/identity_archive.rs:336, a different feature). NIP-OA.md states verifiers MUST evaluate every clause, so an expired auth tag still grants membership-via-owner, and since the tag is a bearer credential carried in public events, a leaked/ex …</p>
+</blockquote>
+<h3 id="f021-medium-cratesbuzz-sdksrcnip_oars214">F021<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-sdk/src/nip_oa.rs:214</code></h3>
+<p><strong>Category:</strong> crypto-verification-incomplete  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> <code>verify_auth_tag</code> validates the NIP-OA <code>conditions</code> string's <em>syntax</em> but never <em>evaluates</em> its clauses against anything — it takes no event and has nothing to evaluate against — yet every relay caller treats its <code>Ok(owner)</code> return as an unconditional, unexpiring capability. docs/nips/NIP-OA.md:64 states "Verifiers MUST evaluate every clause", and NIP-OA.md:98 names <code>created_at&lt;...</code> as the mechanism owners SHOULD use …</p>
+<p><strong>How it fails.</strong> Owner O deliberately scopes a delegation narrowly: <code>conditions = "kind=1&amp;created_at&lt;1713957000"</code> (exactly the spec's own test vector at docs/nips/NIP-OA.md:119), intending "this agent may only post text notes, and only until April 2024". Agent A presents that tag as the <code>x-auth-tag</code> header or in its NIP-42 AUTH event. <code>verify_auth_tag</code> (this function) parses the four elements, calls <code>validate_conditions</code> — which only checks the string is well-formed decimal/clause syntax — verifies the Schnorr signature at line 231 …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let owner_pubkey = PublicKey::from_hex(owner_pubkey_hex)
+        .map_err(|e| SdkError::InvalidInput(format!(&quot;invalid owner pubkey: {e}&quot;)))?;
+
+    validate_conditions(conditions)?;
+</code></pre>
+<p><strong>Reachable path.</strong> Remote WS AUTH (agent-signed NIP-42 event carrying its own <code>auth</code> tag) -&gt; crates/buzz-relay/src/connection.rs:506 handle_auth -&gt; crates/buzz-relay/src/handlers/auth.rs:221 auth_tag_json passed to enforce_relay_membership -&gt; crates/buzz-relay/src/api/mod.rs:86 buzz_sdk::nip_oa::verify_auth_tag -&gt; crates/buzz-sdk/src/nip_oa.rs:214 validate_conditions (syntax only) -&gt; nip_oa.rs:235 Ok(owner). Default config (require_rel …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code claim is accurate and the path is reachable, but the headline impact is overstated. Confirmed facts: <code>verify_auth_tag</code> (crates/buzz-sdk/src/nip_oa.rs:179-236) calls only <code>validate_conditions</code> (line 214), which is pure syntax checking (nip_oa.rs:36); it takes no event and returns <code>Ok(owner_pubkey)</code> at line 235 after Schnorr verification only. A repo-wide grep shows clause <em>evaluation</em> exists in exactly two places, neit …</p>
+</blockquote>
+<h3 id="f026-medium-cratesbuzz-relaysrcapimodrs86">F026<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/api/mod.rs:86</code></h3>
+<p><strong>Category:</strong> auth-delegation-expiry-not-enforced  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> medium, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The relay's NIP-OA owner-delegation gate verifies only the Schnorr signature and the <em>syntax</em> of the attestation's <code>conditions</code> string; it never evaluates the clauses. <code>buzz_sdk::nip_oa::verify_auth_tag</code> calls <code>validate_conditions</code> (buzz-sdk/src/nip_oa.rs:214), which merely checks each clause parses as <code>kind=N</code> / <code>created_at&lt;N</code> / <code>created_at&gt;N</code>, and then returns the owner pubkey. No caller in the relay's membership p …</p>
+<p><strong>How it fails.</strong> An owner who is a relay member issues an agent a deliberately narrow, short-lived attestation, e.g. conditions = "kind=1&amp;created_at&lt;1700000000" (a wall-clock bound already in the past), intending the agent to be able to post text notes for one day only. The agent key reaches <code>check_relay_membership</code> at crates/buzz-relay/src/api/mod.rs:86 through any of five doors: WebSocket NIP-42 (crates/buzz-relay/src/handlers/auth.rs:217 -&gt; enforce_relay_membership, with the tag lifted off the signed AUTH event at handlers/auth. …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>match buzz_sdk::nip_oa::verify_auth_tag(tag_json, &amp;agent_pubkey) {
+</code></pre>
+<p><strong>Reachable path.</strong> Agent holding a narrow/expired attestation opens a WebSocket and sends NIP-42 AUTH -&gt; crates/buzz-relay/src/handlers/auth.rs:78 extract_auth_tag_json lifts the signed <code>auth</code> tag -&gt; handlers/auth.rs:217-223 enforce_relay_membership -&gt; crates/buzz-relay/src/api/mod.rs:130 check_relay_membership -&gt; api/mod.rs:86 buzz_sdk::nip_oa::verify_auth_tag -&gt; crates/buzz-sdk/src/nip_oa.rs:214 validate_conditions (syntax only) -&gt; n …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Code reading verified end to end. <code>verify_auth_tag</code> (crates/buzz-sdk/src/nip_oa.rs:179-236) calls <code>validate_conditions</code> at :214, and <code>validate_conditions</code>/<code>validate_clause</code>/<code>validate_canonical_decimal</code> (nip_oa.rs:36-107) only check that each clause parses as kind=N / created_at<N / created_at>N with canonical decimals — no clause is ever compared against anything. The function then returns the owner pubkey at :235. In `check_r …</p>
+</blockquote>
+<h3 id="f027-medium-cratesbuzz-relaysrchandlersauthrs231">F027<span class="sevtag sev-medium">medium</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/handlers/auth.rs:231</code></h3>
+<p><strong>Category:</strong> error-classification  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, medium  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> A transient database failure in the relay-membership gate is reported to the client as "restricted: not a relay member" — a permanent-rejection prefix — instead of the "error:" prefix the client's own retry contract requires, so agents treat a database blip as a permanent identity rejection and stop retrying.</p>
+<p><strong>How it fails.</strong> Postgres is briefly unavailable (failover, connection-pool exhaustion, deploy). An agent connects: handlers/auth.rs:43 handle_auth -&gt; NIP-42 verify succeeds -&gt; api/mod.rs:130 check_relay_membership returns Err(db error) -&gt; api/mod.rs:140-142 maps it to internal_error (HTTP 500, distinguishable from Denied's 403) -&gt; handlers/auth.rs:226 collapses BOTH arms into one branch and sends "restricted: not a relay member". The buzz-acp agent receives OK false with that message: relay.rs:3868 wraps it as RelayError::AuthFail …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>conn.send(RelayMessage::ok(
+                        &amp;event_id_hex,
+                        false,
+                        &quot;restricted: not a relay member&quot;,
+                    ));
+</code></pre>
+<p><strong>Reachable path.</strong> Postgres blip during agent startup -&gt; crates/buzz-relay/src/handlers/auth.rs:43 handle_auth -&gt; NIP-42 verify ok (:87-91) -&gt; :217 enforce_relay_membership -&gt; crates/buzz-relay/src/api/mod.rs:130 check_relay_membership -&gt; api/mod.rs:72-76 is_relay_member Err -&gt; api/mod.rs:140-143 internal_error (500) -&gt; handlers/auth.rs:226-235 single Err arm sends "restricted: not a relay member" -&gt; crates/buzz-acp/src/relay.rs:3868 R …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Every hop checks out. <code>enforce_relay_membership</code> (crates/buzz-relay/src/api/mod.rs:129-145) returns two distinguishable Errs — a 403 <code>relay_membership_required</code> for Denied at :133-139 and a 500 via <code>internal_error</code> for the DB error at :140-143 — but handlers/auth.rs:226-237 matches <code>Err(e)</code> with a single arm and sends the fixed string "restricted: not a relay member" (:231-235), discarding the status. The DB-error source is re …</p>
+</blockquote>
+<h3 id="f038-low-mobilelibfeaturespairingpairing_providerdart680">F038<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>mobile/lib/features/pairing/pairing_provider.dart:680</code></h3>
+<p><strong>Category:</strong> ssrf  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> <code>_isPrivateHost</code>, the SSRF guard used by the legacy <code>buzz://</code> pairing path (<code>_validateRelayUrl</code>, line 654, called from <code>_parseLegacyInput</code> line 644 and from <code>_processPayload</code> line 461), is far weaker than the project's own <code>validateInviteRelayUri</code>. It only splits on '.' and requires exactly 4 decimal-parsable parts, so it misses: any non-dotted-quad literal (decimal <code>2130706433</code>, hex <code>0x7f000001</code>, octal/leading-zero  …</p>
+<p><strong>How it fails.</strong> A user is handed a <code>buzz://&lt;base64url payload&gt;</code> pairing code (pasted into the pairing field or scanned as a QR — pairing_page.dart line 149 / line 54 both feed <code>pair()</code>). The payload decodes to {"relayUrl":"https://0177.0.0.1:8443","nsec":"..."} . <code>_validateRelayUrl</code> sees scheme https (OK in release), host is not the literal <code>localhost</code>/<code>127.0.0.1</code>/<code>::1</code>, and <code>_isPrivateHost</code> parses parts ['0177','0','0','1'] -&gt; first octet 177, not private -&gt; allowed. <code>_validateCredentials</code> then opens a WebSocket to `wss://0177.0. …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>static bool _isPrivateHost(String host) {
+    final parts = host.split('.');
+    if (parts.length != 4) return false;
+    final octets = parts.map(int.tryParse).toList();
+    if (octets.any((o) =&gt; o == null)) return false;
+</code></pre>
+<p><strong>Reachable path.</strong> attacker-supplied buzz:// code -&gt; mobile/lib/features/pairing/pairing_page.dart:148 (paste) or :52 (QR scan) -&gt; pairing_provider.dart:91 pair() -&gt; :103 _pairLegacy -&gt; :567 _parseLegacyInput -&gt; :633 base64url/JSON decode of {"relayUrl":"https://127.0.0.2:8443","nsec":"..."} -&gt; :644 _validateRelayUrl -&gt; :665 literal compare misses 127.0.0.2 -&gt; :673 _isPrivateHost -&gt; :686-693 first octet 127 matches no branch, returns f …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The guard is as quoted and the path is live. Entry: attacker-supplied pairing string reaches PairingNotifier.pair() from the paste field (mobile/lib/features/pairing/pairing_page.dart:148 onConnect) or the QR scanner (pairing_page.dart:52 handleScannerResult). pair() (pairing_provider.dart:91) routes anything not starting with 'nostrpair://' to _pairLegacy (:103) -&gt; _parseLegacyInput (:567) -&gt; base64url decode (:632-633) -&gt; _v …</p>
+</blockquote>
+<h3 id="f040-low-cratesbuzz-authsrcrate_limitrs188">F040<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-auth/src/rate_limit.rs:188</code></h3>
+<p><strong>Category:</strong> dead-security-control  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> The per-IP connection fence declared by this trait is never wired up. <code>check_ip_connection</code> has exactly one implementation (crates/buzz-pubsub/src/rate_limiter.rs:112) and one call site in the whole repository — a test stub at crates/buzz-relay/src/admission.rs:85. <code>LimitType::IpConnections</code> is likewise constructed nowhere outside its own declaration (rate_limit.rs:66 and :76 are the only two hits under crates/), and …</p>
+<p><strong>How it fails.</strong> A single unauthenticated IP opens WebSocket connections in a loop against the relay. <code>handle_active_connection</code> (connection.rs:141) acquires only the deployment-global <code>conn_semaphore</code> permit and, when it is exhausted, logs 'Connection limit reached' and drops the socket — for every client, not just the abuser. Because no per-IP counter is ever incremented, one host can consume the entire global connection budget and deny service to the whole deployment; combined with the unauthenticated admission bypass at connect …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>fn check_ip_connection(
+        &amp;self,
+        ip: &amp;IpAddr,
+        window_secs: u64,
+        limit: u64,
+</code></pre>
+<p><strong>Reachable path.</strong> remote TCP connect (no credentials) -&gt; crates/buzz-relay/src/router.rs:315 WebSocketUpgrade::from_request -&gt; router.rs:327 .on_upgrade(handle_connection) -&gt; crates/buzz-relay/src/connection.rs:118 handle_connection -&gt; connection.rs:136/141 handle_active_connection -&gt; connection.rs:149 state.conn_semaphore.try_acquire_owned() (global-only; no per-IP counter anywhere) -&gt; connection.rs:152 all subsequent clients rejecte …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Every factual claim checks out. A repo-wide grep for check_ip_connection returns the trait declaration (crates/buzz-auth/src/rate_limit.rs:188), the Redis impl (crates/buzz-pubsub/src/rate_limiter.rs:112), and one call — inside <code>#[cfg(test)] mod tests</code> at crates/buzz-relay/src/admission.rs:47/85, a StubLimiter method that exists only to satisfy the trait for unit tests. LimitType::IpConnections appears only at rate_limit.rs:66 …</p>
+</blockquote>
+<h3 id="f041-low-websrcfeaturesreposuse-repo-refsts51">F041<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>web/src/features/repos/use-repo-refs.ts:51</code></h3>
+<p><strong>Category:</strong> authorization-gap  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> fetchRepoRefs queries kind:30618 (repo refs) events by <code>#d</code> tag only, with no <code>authors</code> filter restricting to the relay's own pubkey — the code has a TODO acknowledging that any community member with ReposWrite permission can publish a spoofed kind:30618 event that will be blended into the displayed branches/tags/HEAD for someone else's repo.</p>
+<p><strong>How it fails.</strong> Any user holding ReposWrite (a role short of repo ownership) publishes a kind:30618 event with the target repo's <code>d</code> tag but attacker-chosen <code>refs/heads/*</code> values; since dedup() only keys on (pubkey, kind, d) and parseRefs() merges tags across all matching events without checking which pubkey should be authoritative, this can inject a bogus branch name or HEAD SHA into the repo browser UI other users see, e.g. steering them toward a malicious ref during 'Run' HTML preview or clone.</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>// TODO: Filter by `authors: [relayPubkey]` once the relay's own pubkey is
+  // exposed to the client. Without this, a user with ReposWrite permission
+  // could publish fake kind:30618 events with spoofed refs.
+  const events = await queryEvents(relayWsUrl(), {
+    kinds: [30618],
+    &quot;#d&quot;: [repoId],
+  });
+</code></pre>
+<p><strong>Reachable path.</strong> Community member with ReposWrite publishes kind:30618 with d=<victim repo> over WS -&gt; crates/buzz-relay/src/handlers/ingest.rs:303 (only scope check; no author/owner binding) -&gt; event stored, no 30618 side-effect handler (crates/buzz-relay/src/handlers/side_effects.rs:213) -&gt; victim opens repo page -&gt; web/src/features/repos/use-repo-refs.ts:55-58 queries by #d with no authors filter -&gt; web/src/features/repos/use-repo …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The mechanism is real but the payoff is display-only, so medium is too high. Confirmed parts: the relay's WebSocket ingest maps kind:30618 to nothing stronger than the ReposWrite scope (crates/buzz-relay/src/handlers/ingest.rs:303) and there is no side-effect handler for 30618 at all (crates/buzz-relay/src/handlers/side_effects.rs:213 handles only 30617), so any member holding ReposWrite can store a 30618 carrying another repo …</p>
+</blockquote>
+<h3 id="f046-low-desktopsrc-taurisrccommandsmessagesrs246">F046<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/src/commands/messages.rs:246</code></h3>
+<p><strong>Category:</strong> silent-truncation  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> <code>get_forum_thread</code> accepts <code>limit</code> and <code>cursor</code> and throws both away on its first line, never sets a <code>limit</code> on its reply filter (so the relay's default cap applies), and then reports <code>total_replies = replies.len()</code> — the count of whatever survived that invisible cap — while hard-coding <code>next_cursor: None</code>. The UI is handed a truncated reply set labelled as the complete one, with no way to page for the rest.</p>
+<p><strong>How it fails.</strong> A forum thread accumulates more replies than the relay's default query limit. A user opens it: the second filter at lines 253-257 carries <code>kinds</code>/<code>#e</code>/<code>#h</code> and no <code>limit</code>, so the relay returns its default slice. <code>total_replies</code> (line 271) counts only that slice, so the thread header reads e.g. '50 replies' when there are 400. <code>next_cursor</code> is <code>None</code>, so the frontend has nothing to page with, and the <code>limit</code>/<code>cursor</code> arguments it did pass were discarded at line 246. Replies are permanently invisible in the UI and th …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let _ = (limit, cursor);
+</code></pre>
+<p><strong>Reachable path.</strong> User opens a forum thread in a shipped build -&gt; ForumView.tsx:56 useForumThreadQuery -&gt; desktop/src/features/forum/hooks.ts:49 getForumThread(channelId, eventId, undefined, undefined) -&gt; desktop/src/shared/api/forum.ts:150 invokeTauri('get_forum_thread') -&gt; desktop/src-tauri/src/commands/messages.rs:246 discards limit/cursor -&gt; reply filter without limit at messages.rs:253-257 -&gt; relay DB default cap 100 at crates/bu …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Confirmed exactly as described, but it is a UX/correctness truncation with no security dimension, so severity drops to low. The command is registered (desktop/src-tauri/src/lib.rs:770) and called on every thread open. messages.rs:246 discards limit and cursor (<code>let _ = (limit, cursor);</code>); the reply filter at messages.rs:253-257 carries kinds/#e/#h and no limit; the relay's DB layer defaults an unlimited filter to 100 rows (cra …</p>
+</blockquote>
+<h3 id="f047-low-desktopsrc-taurisrccommandsmessagesrs659">F047<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/src/commands/messages.rs:659</code></h3>
+<p><strong>Category:</strong> idempotency  ·  <strong>Verifier vote:</strong> 3/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> The marker-scan paging loop backing <code>send_managed_agent_channel_message</code>'s duplicate suppression advances its cursor to <code>min(created_at) - 1</code>, which skips every event sharing that oldest second beyond the 500-row page boundary. It is also bounded at 10 pages (5000 events). Either miss makes <code>find_managed_agent_channel_message_by_marker</code> return <code>None</code> for a marker that does exist, and the caller then posts the message …</p>
+<p><strong>How it fails.</strong> An agent posts a marked announcement into a busy channel. Later the same flow re-runs (app restart, retry, config change). <code>send_managed_agent_channel_message</code> calls the marker scan at line 816; the relay returns a full 500-event page whose oldest 40 events all share one second. The loop sets <code>until = that_second - 1</code>, jumping over the ~30 events at that second that did not fit in the page — one of which carries the marker. The scan reports 'no existing marker', the guard at lines 815-836 does not short-circuit, an …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>until = events
+            .iter()
+            .map(|event| event.created_at.as_secs())
+            .min()
+            .map(|timestamp| timestamp.saturating_sub(1));
+</code></pre>
+<p><strong>Reachable path.</strong> User focuses the Welcome channel in a shipped build -&gt; useWelcomeKickoff effect (welcomeKickoff.ts:554-687) -&gt; sendManagedAgentChannelMessage (welcomeKickoff.ts:673) -&gt; desktop/src/shared/api/tauriManagedAgentMessages.ts:23 invoke('send_managed_agent_channel_message') -&gt; messages.rs:765 command (registered lib.rs:767) -&gt; marker guard messages.rs:815-822 -&gt; find_managed_agent_channel_message_by_marker messages.rs:622  …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code defect is real and the command is live, but the only shipped caller that uses markers is the Welcome-channel onboarding choreography, which sharply narrows the practical impact — low, not medium. Verified: find_managed_agent_channel_message_by_marker (messages.rs:622-670) advances its cursor with <code>until = min(created_at) - 1</code> (messages.rs:659-663), which skips any events sharing the oldest second that did not fit in t …</p>
+</blockquote>
+<h3 id="f004-low-desktopsrc-taurisrccommandsidentityrs618">F004<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/src/commands/identity.rs:618</code></h3>
+<p><strong>Category:</strong> recovery-mode-signing-gate-bypass  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> <code>sign_nostr_identity_binding</code> is the only signing command in identity.rs that reads <code>state.keys.lock()</code> directly instead of <code>state.signing_keys()</code>, so it bypasses the recovery-mode gate that refuses signing when <code>identity_lost</code> or <code>keyring_locked</code> is set. Every neighbouring signer in the same file (<code>sign_event</code> L115, <code>create_auth_event</code> L646, <code>build_observer_control_event</code> L170, <code>nip44_encrypt_to_self</code> L672, `get_nse …</p>
+<p><strong>How it fails.</strong> The user's OS keyring is wiped or unreadable at boot, so <code>resolve_identity</code> sets <code>identity_lost</code>/<code>keyring_locked</code> and <code>state.keys</code> holds a throwaway ephemeral keypair that will not survive the next launch (app_state.rs:306-322 is what normally blocks all signing in this state). While the recovery banner is up, the user clicks a <code>buzz://nostr-bind?challenge_id=...&amp;nonce=...&amp;verification_code=...&amp;origin=https://site.example&amp;expires_at=...</code> deep link (deep_link.rs:246-281, 369), consents in NostrBindConsentDialog, and …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let keys = state
+        .keys
+        .lock()
+        .map_err(|error| error.to_string())?
+        .clone();
+</code></pre>
+<p><strong>Reachable path.</strong> User is in recovery mode (app_state.rs:65-90 keyring_locked/identity_lost set at boot, state.keys holds an ephemeral keypair) -&gt; user opens buzz://nostr-bind?challenge_id=...&amp;nonce=...&amp;verification_code=...&amp;origin=https://site.example&amp;expires_at=... -&gt; desktop/src-tauri/src/deep_link.rs:369 dispatch -&gt; deep_link.rs:246-276 parse_nostr_bind_deep_link validates fields -&gt; deep_link.rs:372 app.emit("deep-link-nostr-bind" …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code-reading is correct and I could not find a compensating guard anywhere on the path. desktop/src-tauri/src/commands/identity.rs:618-622 locks state.keys directly, while every sibling signer in the same file routes through state.signing_keys() (sign_event L115, build_observer_control_event L170, get_nsec L192, create_backup_with_log_n L232, create_auth_event L646, nip44_encrypt_to_self L672, nip44_decrypt_from_self L692) …</p>
+</blockquote>
+<h3 id="f006-low-desktopsrc-taurisrccommandsprofilers80">F006<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/src/commands/profile.rs:80</code></h3>
+<p><strong>Category:</strong> data-loss  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> <code>update_profile</code> does a read-merge-write of the replaceable kind:0 profile but the merge only carries five fields forward. <code>build_profile</code> (events.rs:474-499) can only emit <code>display_name</code>, <code>name</code>, <code>picture</code>, <code>about</code>, <code>nip05</code>; every other key that was in the prior kind:0 content is silently dropped from the newly signed replacement event.</p>
+<p><strong>How it fails.</strong> A user has a kind:0 with <code>banner</code>, <code>website</code>, <code>lud16</code> (a Lightning address) set from any other Nostr client — buzz reads it fine because it only picks out five keys and ignores the rest. The user then edits their About text in buzz. <code>update_profile</code> reads the prior event (line 49-57), pulls only display_name/name/picture/about/nip05 out of <code>current</code> (lines 66-78), and calls <code>build_profile</code> with exactly those five. The relay replaces the old kind:0 (buzz-db/src/lib.rs replace_addressable_event soft-deletes the prior …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>let builder = events::build_profile(dn, name, picture, ab, nip05)?;
+</code></pre>
+<p><strong>Reachable path.</strong> User opens Settings -&gt; ProfileSettingsCard.tsx:136 (useUpdateProfileMutation) -&gt; desktop/src/shared/api/tauriProfiles.ts:82 invokeTauri('update_profile') -&gt; desktop/src-tauri/src/commands/profile.rs:49-57 (read prior kind:0) -&gt; profile.rs:66-78 (only 5 keys lifted) -&gt; profile.rs:80 events::build_profile -&gt; desktop/src-tauri/src/events.rs:474-499 (map built from 5 keys only) -&gt; relay/submit.rs:69-79 submit_event repla …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The code behavior is exactly as described and is reachable through ordinary UI use, but the blast radius claimed is wrong. <code>update_profile</code> (profile.rs:38-97) reads the prior kind:0 (L49-57), lifts only display_name/name/picture/about/nip05 out of <code>current</code> (L66-78), and calls <code>events::build_profile</code> (events.rs:474-499), whose serde_json::Map is constructed from those five keys only -- any other key present in the prior conten …</p>
+</blockquote>
+<h3 id="f017-low-mobilelibsharedrelayrelay_sessiondart462">F017<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>mobile/lib/shared/relay/relay_session.dart:462</code></h3>
+<p><strong>Category:</strong> data-loss  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> lastSeenCreatedAt is advanced when an event is merely buffered (before delivery), but _handleDisconnected clears _eventBuffer without rolling lastSeenCreatedAt back; the reconnect replay then uses since = lastSeenCreatedAt - 5s, so buffered-but-undelivered events older than that are permanently lost to the live subscription.</p>
+<p><strong>How it fails.</strong> Flaky network: after a reconnect, _replayLiveSubscriptions (line 416) delivers a burst covering the whole disconnect gap (possibly minutes of messages). _handleEvent buffers them and advances liveSub.lastSeenCreatedAt to the newest event's timestamp (lines 462-465) while they sit in _eventBuffer awaiting the 16ms flush timer. The connection drops again inside that window -&gt; _handleDisconnected runs _eventBuffer.clear() (line 387) so onEvent never fires for any of them, yet lastSeenCreatedAt still points at the newe …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>if (liveSub.lastSeenCreatedAt == null ||
+          event.createdAt &gt; liveSub.lastSeenCreatedAt!) {
+        liveSub.lastSeenCreatedAt = event.createdAt;
+      }
+</code></pre>
+<p><strong>Reachable path.</strong> mobile/lib/shared/relay/relay_session.dart:380 _handleConnected -&gt; :416 _replayLiveSubscriptions sends REQ (since=lastSeen-5s) -&gt; replay burst arrives at :445 _handleEvent, which advances liveSub.lastSeenCreatedAt at :462-464 BEFORE delivery and only buffers the event at :466 -&gt; :488 _handleEose does not flush on reconnect (readyCompleter is null after first subscribe) so events wait for the 16ms flush timer -&gt; a sec …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The logic error is real and correctly read: lastSeenCreatedAt is advanced at buffer time (line 462-464), not at delivery time (_flushEventBuffer at 604 is where onEvent actually fires), and _handleDisconnected clears _eventBuffer (387) without rolling back lastSeenCreatedAt. On the next replay only newest-5s is refetched, so a burst spanning &gt;5s that is dropped mid-buffer loses its older events from the live subscription. Howe …</p>
+</blockquote>
+<h3 id="f028-low-cratesbuzz-relaysrchandlersauthrs196">F028<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>crates/buzz-relay/src/handlers/auth.rs:196</code></h3>
+<p><strong>Category:</strong> error-classification  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The pubkey-allowlist gate maps a database lookup error to <code>allowed = false</code>, producing the same "auth-required: verification failed" message a bad Schnorr signature produces — so a transient DB error is indistinguishable from a forged event to both the client and the operator's metrics.</p>
+<p><strong>How it fails.</strong> With BUZZ pubkey allowlisting enabled and Postgres momentarily unavailable, an authorized user's or agent's AUTH reaches handlers/auth.rs:187, the is_pubkey_allowed call at :192 returns Err, the Err arm at :196-200 evaluates to <code>false</code>, and :202 denies. The connection is pinned to AuthState::Failed at :206 (which handle_auth's own early-return path at :58-66 makes permanent for the socket's life — every subsequent AUTH on that connection is refused), and the client is told "auth-required: verification failed" at :2 …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>Err(e) =&gt; {
+                        warn!(conn_id = %conn_id, pubkey = %pubkey.to_hex(), error = %e,
+                              &quot;allowlist DB lookup failed, denying (fail-closed)&quot;);
+                        false
+                    }
+</code></pre>
+<p><strong>Reachable path.</strong> Postgres blip with BUZZ_PUBKEY_ALLOWLIST=true -&gt; crates/buzz-relay/src/handlers/auth.rs:43 handle_auth -&gt; NIP-42 verify ok (:87-91) -&gt; ban gate clear (:119-131) -&gt; :187-194 is_pubkey_allowed returns Err -&gt; :196-200 Err arm yields false -&gt; :202 deny -&gt; :206 AuthState::Failed (permanent, enforced by :58-66) -&gt; :207-211 sends "auth-required: verification failed" -&gt; crates/buzz-acp/src/relay.rs:3868 AuthFailed -&gt; relay.r …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Accurate reading. handlers/auth.rs:190-201 collapses <code>Ok(v)</code> and <code>Err(e)</code> into a bool, with the Err arm evaluating to <code>false</code> after a warn; :202 then treats that identically to a genuine allowlist miss, :204-205 increments buzz_auth_failures_total with reason="allowlist_denied", :206 pins AuthState::Failed, and :207-211 sends "auth-required: verification failed" — byte-identical to the message the real signature-verification f …</p>
+</blockquote>
+<h3 id="f033-low-desktopsrc-tauritauriconfjson37">F033<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/tauri.conf.json:37</code></h3>
+<p><strong>Category:</strong> missing-hardening  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> high</p>
+<p><strong>Claim.</strong> The Tauri app config sets <code>app.security.csp</code> to <code>null</code>, which disables Tauri's Content-Security-Policy injection entirely for the webview that renders relay-supplied content (messages, profiles, media).</p>
+<p><strong>How it fails.</strong> Nostr event content (message bodies, profile metadata, embedded HTML/markdown rendering) is attacker-controlled since it comes from arbitrary relays/peers per the domain brief. If any renderer path fails to escape relay-supplied content (a known recurring Nostr-client bug class), the resulting XSS runs with zero CSP restriction on script-src/connect-src/img-src, making arbitrary script execution, fetch-based exfiltration to attacker origins, and IPC bridge abuse all unmitigated by a defense-in-depth layer that Taur …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>&quot;security&quot;: {
+      &quot;csp&quot;: null
+    }
+</code></pre>
+<p><strong>Reachable path.</strong> desktop/src-tauri/tauri.conf.json:38-40 sets csp:null (CSP injection disabled) -&gt; attacker relay content reaches webview at desktop/src/features/messages/ui/MessageRow.tsx:357 (<Markdown content={message.body}>). This removes a defense-in-depth layer, but no concrete script-execution sink is demonstrated.</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>The factual claim is accurate: csp is null, disabling Tauri's CSP injection for a webview that renders arbitrary relay-supplied content. However, this is a missing-hardening / defense-in-depth gap only. The finding provides NO demonstrated XSS sink — it is explicitly conditional ('if any renderer path fails to escape'). The markdown pipeline (react-markdown family) escapes HTML by default. Without a concrete reachable script-e …</p>
+</blockquote>
+<h3 id="f048-low-desktopsrc-taurisrccommandschannelsrs221">F048<span class="sevtag sev-low">low</span> <span style="color:var(--muted)">—</span> <code>desktop/src-tauri/src/commands/channels.rs:221</code></h3>
+<p><strong>Category:</strong> silent-failure  ·  <strong>Verifier vote:</strong> 2/3 confirmed  ·  <strong>Severities returned by confirming verifiers:</strong> low, low  ·  <strong>Reporter originally claimed:</strong> medium</p>
+<p><strong>Claim.</strong> <code>get_channels</code> swallows relay errors on both of its enrichment queries with <code>.unwrap_or_default()</code> (member counts at line 221, last-message timestamps at line 252). A transient relay failure on either query is indistinguishable from 'this data is genuinely empty': the command still returns <code>Ok</code> with every channel reporting zero members and no last-message timestamp.</p>
+<p><strong>How it fails.</strong> The relay returns a 5xx (or the HTTP call times out) on the batched kind:39002 query during a channel-list refresh. <code>query_relay(...).await.unwrap_or_default()</code> yields an empty Vec, <code>collect_members_by_channel</code> produces an empty map, and the <code>if let Some(info)</code> at line 225 never fires — so <code>member_count</code> stays at whatever <code>channel_info_from_event</code> defaulted it to (0) for every channel. The same failure on the per-channel last-message filters at line 252 leaves <code>last_message_at</code> as <code>None</code> everywhere. The user sees t …</p>
+<p><strong>Evidence (verified present in the file by Gate A):</strong></p>
+<pre><code>.await
+        .unwrap_or_default();
+
+        let membership = collect_members_by_channel(&amp;members_events);
+</code></pre>
+<p><strong>Reachable path.</strong> User opens/refreshes the channel list in a shipped build -&gt; frontend invokes get_channels (registered desktop/src-tauri/src/lib.rs:744) -&gt; channels.rs:79 runs primary queries successfully (channels.rs:88-92, 127-136, 147) -&gt; relay returns 5xx/timeout on the enrichment query -&gt; query_relay error (relay.rs:334-337) swallowed by unwrap_or_default at channels.rs:220-221 (member counts) and channels.rs:252 (last-message)  …</p>
+<p><strong>What the verifiers said:</strong></p>
+<blockquote>
+<p>Confirmed mechanically, downgraded to low: it is a transient display-degradation issue, not a security or data-integrity problem. Verified: get_channels (channels.rs:79, registered lib.rs:744) propagates errors from its primary queries with <code>?</code> (channels.rs:92, :136, :147), but both enrichment queries swallow failures — the batched kind:39002 member-count query at channels.rs:212-221 ends in <code>.await.unwrap_or_default()</code>, and t …</p>
+</blockquote>
+<hr />
+<h2 id="flagged-but-not-confirmed">Flagged but not confirmed</h2>
+<h3 id="refuted-during-verification-21">Refuted during verification (21)</h3>
+<p>These were reported by finding agents and then killed by 2-of-3 adversarial
+verifiers. They are listed rather than buried, because a refutation is a judgement
+and can itself be wrong.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Claimed</th>
+<th>Vote</th>
+<th>Claim</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>desktop/src-tauri/src/commands/identity.rs:191</code></td>
+<td>critical claimed</td>
+<td>0/3</td>
+<td>get_nsec is a Tauri command with no access control that returns the raw bech32-encoded secret key to any caller from the renderer/JS context.</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/pairing.rs:146</code></td>
+<td>critical claimed</td>
+<td>0/3</td>
+<td>confirm_pairing_sas is a Tauri command that unconditionally proceeds to send the pending payload (which embeds the user's nsec, built in start_pairing</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/personas/inbound.rs:304</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>The NIP-09 ownership check in <code>parse_deletion_coordinate</code> (L219: <code>if owner != event.pubkey.to_hex() { return None; }</code>) is self-referential and therefo</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayClosedRecovery.ts:141</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>A live subscription's reconnect watermark <code>lastSeenCreatedAt</code> is set from the raw, unvalidated <code>created_at</code> of every inbound relay EVENT, so one event</td>
+</tr>
+<tr>
+<td><code>web/src/shared/lib/nostr-client.ts:135</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>queryEvents() pushes every relay-supplied EVENT payload straight into the results array and returns it to callers with no signature or id verification</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/personas/inbound.rs:344</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td><code>reconcile_inbound_persona_event</code> verifies the inbound event's Schnorr signature but never checks that <code>event.pubkey</code> equals the local owner's pubkey.</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/workspace.rs:168</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td><code>apply_workspace</code> takes a <code>relay_url: String</code> straight from the renderer and stores it as the process-wide <code>relay_url_override</code> with no parsing, schem</td>
+</tr>
+<tr>
+<td><code>mobile/android/app/src/main/kotlin/xyz/block/buzz/mobile/MainActivity.kt:263</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>handleTranscodeVideoToMp4 invokes MethodChannel.Result (result.success / result.error) from a raw background Thread, violating Flutter's platform-thre</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/user.rs:300</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>A NIP-OA agent-&gt;owner delegation, once materialized, is permanent: <code>set_agent_owner</code> only writes when <code>agent_owner_pubkey IS NULL</code>, and no code path a</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/bridge.rs:2091</code></td>
+<td>high claimed</td>
+<td>1/3</td>
+<td><code>authorize_moderation_read</code> — the single gate in front of <code>GET /moderation/reports</code>, <code>/moderation/audit</code>, and <code>/moderation/restricted</code> (mounted public</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/router.rs:425</code></td>
+<td>high claimed</td>
+<td>1/3</td>
+<td>When <code>BUZZ_CORS_ORIGINS</code> is unset the relay installs <code>CorsLayer::permissive()</code> — <code>Access-Control-Allow-Origin: *</code> plus <code>Any</code> methods and <code>Any</code> headers</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/identity.rs:108</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>sign_event is an unrestricted signing oracle: it takes an attacker-controlled kind, content, tags, and created_at from the renderer and signs whatever</td>
+</tr>
+<tr>
+<td><code>crates/buzz-persona/src/resolve.rs:311</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>A persona pack's MCP server entries (from pack-level <code>.mcp.json</code> or per-persona frontmatter <code>mcp_servers:</code>) are parsed into <code>command</code>/<code>args</code>/<code>env</code> wit</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/useLoadMissingAncestors.ts:65</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>The ancestor-backfill dedupe set is capped by <em>evicting</em> its oldest entries, which destroys the very memory that prevents re-fetching. Once a channel</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/pairing.rs:111</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td>start_pairing builds a payload embedding the plaintext nsec entirely in response to a renderer-invoked command, before any peer device has been verifi</td>
+</tr>
+<tr>
+<td><code>crates/buzz-agent/src/mcp.rs:742</code></td>
+<td>high claimed</td>
+<td>0/3</td>
+<td><code>spawn_one</code> executes <code>Command::new(&amp;spec.command)</code> with args/env taken directly from the configured MCP server list (which, via buzz-persona, can orig</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:481</code></td>
+<td>medium claimed</td>
+<td>0/3</td>
+<td>check_moov_before_mdat advances the top-level atom cursor with an unchecked <code>offset += atom_size</code>, where atom_size can be the raw 64-bit extended size</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/hooks.ts:678</code></td>
+<td>medium claimed</td>
+<td>1/3</td>
+<td>useDeleteMessageMutation.onSuccess removes the deleted message only from the flattened channelMessagesKey cache, not from the window store — violating</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/profile.rs:111</code></td>
+<td>medium claimed</td>
+<td>0/3</td>
+<td><code>update_profile_at_relay</code> takes <code>relay_url</code> verbatim from the renderer and passes it through <code>relay_http_base_url</code> — which does no scheme, host, or al</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/workspace.rs:176</code></td>
+<td>medium claimed</td>
+<td>0/3</td>
+<td><code>apply_workspace</code> is a plain Tauri command that accepts an arbitrary <code>nsec: Option&lt;String&gt;</code> from the renderer and installs the parsed keypair as the p</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/messages.rs:231</code></td>
+<td>medium claimed</td>
+<td>0/3</td>
+<td><code>get_forum_posts</code> hands the frontend a bare <code>created_at</code> cursor, which it feeds back as <code>until</code> on the next call. <code>until</code> without <code>before_id</code> compiles</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The most instructive refutation is F002's near-miss.</strong> The <code>X-Pubkey</code> header
+finding was reported as <strong>critical</strong> with high confidence and a detailed
+impersonation scenario. It survived, but the three verifiers returned <strong>low, high,
+and medium</strong> — they did not agree on what the code does, only that something is
+there. The median put it at medium. The reason for the spread is real and useful:
+the insecure value is the <em>code</em> default (<code>unwrap_or(false)</code>), but every shipped
+deployment recipe sets it safely (<code>deploy/charts/buzz/values.yaml:108</code>,
+<code>deploy/compose/.env.example:16</code>), the relay logs a startup warning, and in that
+state it also falls back to a hardcoded, publicly known keypair — so a relay
+running this way has already surrendered its identity and is unlikely to be a
+production deployment that merely forgot a flag. <strong>Treat F002 as an insecure
+default worth closing, not as a live authentication bypass.</strong></p>
+<h3 id="triaged-out-before-verification-137">Triaged out before verification (137)</h3>
+<p>Verification capacity was 48 findings; 199 were reported and 137 ranked below the
+cut after dedup. <strong>These were never verified — they are neither confirmed nor
+refuted.</strong> Some are probably real.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Claimed severity</th>
+<th>Claim</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>desktop/src-tauri/src/commands/channels.rs:53</code></td>
+<td>medium</td>
+<td><code>query_relay_all</code> loops fetching 500-event pages until the relay returns a short page. There is no page-count cap, no total-event cap, and no check th</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/filter.rs:25</code></td>
+<td>medium</td>
+<td>reader_authorized_for_event() fails open for the two cleartext, relay-signed, globally-stored P_GATED kinds it does NOT name - member-added (44100) an</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/threading.ts:35</code></td>
+<td>medium</td>
+<td>getThreadReference picks the FIRST <code>e</code> tag marked "root" (<code>eventTags.find(...)</code>) but the LAST <code>e</code> tag marked "reply" (line 37, `[...eventTags].reverse</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/req.rs:1077</code></td>
+<td>medium</td>
+<td>The kindless-<code>ids</code> read exemption is only revoked for the two kinds in <code>RESULT_GATED_KINDS</code>, but <code>P_GATED_KINDS</code> (buzz-core/src/kind.rs:146) lists six</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/event.rs:307</code></td>
+<td>medium</td>
+<td>The Redis cross-pod live fan-out path applies only <code>filter_fanout_by_access</code>, which gates AUTHOR_ONLY_KINDS (line 139) and SHARED_GATED_KINDS (line 15</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/pairing/pairing_crypto.dart:142</code></td>
+<td>medium</td>
+<td><code>parseNostrpairUri</code> accepts relay URLs from a scanned QR code after checking only that the scheme is <code>ws</code> or <code>wss</code> — no host validation whatsoever. Th</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/channel_messages_provider.dart:88</code></td>
+<td>medium</td>
+<td>The open-channel live subscription filters with since = local wall-clock now with zero skew allowance, so any incoming message whose sender-signed cre</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/read_state/read_state_manager.dart:388</code></td>
+<td>medium</td>
+<td>_publish silently drops a scheduled publish when another publish is in flight (if (_isPublishing) return;) without rescheduling, and dispose() only fl</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/formatTimelineMessages.ts:291</code></td>
+<td>medium</td>
+<td>The custom-emoji URL for a reaction is lifted verbatim out of the reacting event's <code>["emoji", shortcode, url]</code> tag with no scheme or shape validation,</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/dm.rs:168</code></td>
+<td>medium</td>
+<td>create_dm uses a plain SELECT-then-INSERT for its idempotency check under READ COMMITTED, so when two requests open the same DM concurrently the loser</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/customEmoji.ts:124</code></td>
+<td>medium</td>
+<td>The community custom-emoji palette resolves shortcode collisions purely by comparing attacker-chosen <code>event.created_at</code> values with no upper bound, so</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/ui/markdown.tsx:1720</code></td>
+<td>medium</td>
+<td>The custom <code>emoji</code> element's <code>src</code> is a relay-supplied NIP-30 tag value that is rendered as an <code>&lt;img src&gt;</code> with no scheme allowlist, and — because it</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/lib/maskedLink.ts:17</code></td>
+<td>medium</td>
+<td>The anti-phishing masked-link check fails open: any href whose scheme is not http/https makes <code>isMaskedLink</code> return <code>false</code> ("not masked"), so the des</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/readOnlyRelayClient.ts:239</code></td>
+<td>medium</td>
+<td>History subscriptions accumulate every relay-supplied EVENT frame into an unbounded in-memory array; the <code>limit</code> the client puts in its REQ filter is</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/event.rs:764</code></td>
+<td>medium</td>
+<td>count_events_on silently ignores EventQuery::shared_gated_reader. The SELECT builder query_events_on applies the shared-gate visibility clause at even</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/req.rs:326</code></td>
+<td>medium</td>
+<td>When a historical-delivery DB query fails mid-REQ, the handler sends EOSE — the NIP-01 "end of stored events" success signal — and returns, silently t</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/req.rs:397</code></td>
+<td>medium</td>
+<td>A single transient full send buffer during historical delivery aborts the REQ without ever sending EOSE, while the connection stays open and the subsc</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/ingest.rs:2605</code></td>
+<td>medium</td>
+<td>For kind:9007 (NIP-29 create-group) the channel row is created in the DB at ingest.rs:2497 before imeta validation runs at ingest.rs:2605-2613. An ime</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/bridge.rs:833</code></td>
+<td>medium</td>
+<td>The HTTP NIP-98 event-submission path builds its IngestAuth with Scope::all_known() — which includes AdminChannels and AdminUsers — so the ingest scop</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayReconnectReplay.ts:171</code></td>
+<td>medium</td>
+<td>On reconnect the per-subscription replay window's since is derived from lastSeenCreatedAt (the max created_at seen on the live subscription); created_</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/storage.rs:232</code></td>
+<td>medium</td>
+<td>read_sidecar_mime collapses every get_sidecar failure — transient S3 5xx/timeout/connection reset and malformed sidecar JSON alike — into None via `.o</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:362</code></td>
+<td>medium</td>
+<td>The 3840x2160 resolution cap reads <code>track.width()</code>/<code>track.height()</code>, which in mp4-0.14.0 (src/track.rs:150-163) return the <code>avc1</code> VisualSampleEntry's</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/upload.rs:141</code></td>
+<td>medium</td>
+<td>The blob is PUT to S3 before metadata generation, and the comment justifies the resulting orphans as negligible because blobs are "content-addressed".</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:554</code></td>
+<td>medium</td>
+<td>The JPEG APP0 exemption is documented as accepting only canonical JFIF headers whose "lengths and identifiers are fixed", but the accepted length is p</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:200</code></td>
+<td>medium</td>
+<td>The generic-file path takes its canonical extension straight from infer's table when file_mime_to_ext has no mapping, and infer 0.19 emits exactly one</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/event.rs:802</code></td>
+<td>medium</td>
+<td>In <code>handle_ephemeral_event</code>'s kind:20001 presence branch, the 128-byte length cap is applied only on the bare-string branch (<code>else if raw.len() &gt; 128</code></td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/connection.rs:608</code></td>
+<td>medium</td>
+<td><code>enforce_ws_admission</code> reads the connection's auth state and returns <code>true</code> (admit, no counter incremented) for every connection that is not yet Authe</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/git/transport.rs:194</code></td>
+<td>medium</td>
+<td>The git HTTP routes are the only NIP-98-authenticated surface in the relay that never marks the token in the shared replay seen-set. Every other NIP-9</td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/acp.rs:1074</code></td>
+<td>medium</td>
+<td>Every outbound JSON-RPC request is serialized in full and written to a tracing event at debug level before it is sent. The <code>session/new</code> request built</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/side_effects.rs:266</code></td>
+<td>medium</td>
+<td>NIP-09 deletion authorization resolves the target event's author with <code>effective_message_author</code>, which — for any event signed by the relay's own key</td>
+</tr>
+<tr>
+<td><code>crates/buzz-auth/src/rate_limit.rs:100</code></td>
+<td>medium</td>
+<td>Three of the seven RateLimitConfig knobs — agent_standard_api_calls_per_min, agent_elevated_messages_per_min, agent_platform_messages_per_min — are pa</td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/lib.rs:1336</code></td>
+<td>medium</td>
+<td>A malformed BUZZ_AUTH_TAG is discarded silently by <code>.ok()</code> with no log line, so the agent connects with no NIP-OA owner attestation and fails membersh</td>
+</tr>
+<tr>
+<td><code>crates/buzz-auth/src/nip42.rs:26</code></td>
+<td>medium</td>
+<td>The NIP-42 URL normalizer collapses <code>localhost</code> and <code>::1</code> into <code>127.0.0.1</code>, while its NIP-98 sibling in the same crate deliberately does not and docum</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:352</code></td>
+<td>medium</td>
+<td>validate_video_file guards the divisor (timescale==0) before calling mp4::Mp4Track::duration(), but not the dividend. The mp4 crate computes `self.tra</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/openPopoverLink.ts:17</code></td>
+<td>medium</td>
+<td>Any href that is not a recognized <code>buzz://message?...</code> deep link (including arbitrary custom URI schemes, <code>file://</code>, or other <code>buzz://</code> sub-paths craf</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/filter.rs:23</code></td>
+<td>medium</td>
+<td>reader_authorized_for_event() — documented as closing the 'kindless ids:[…] lookup' read-authorization bypass for every relay delivery surface (WS his</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay-mesh/src/membership.rs:120</code></td>
+<td>medium</td>
+<td>Gossip records applied via apply_gossip_record (and the underlying GossipState::apply_delta in gossip.rs) are keyed only by an unauthenticated runtime</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayClientSession.ts:848</code></td>
+<td>medium</td>
+<td>Events arriving over the live WebSocket subscription (<code>EVENT</code> frames) are dispatched straight to UI subscribers (<code>handleEvent</code> -&gt; <code>eventBuffer</code> -&gt; `su</td>
+</tr>
+<tr>
+<td><code>crates/buzz-auth/src/lib.rs:134</code></td>
+<td>medium</td>
+<td>AuthService::verify_auth_event grants Scope::all_known() — which includes AdminChannels and AdminUsers — to every successfully NIP-42-authenticated co</td>
+</tr>
+<tr>
+<td><code>crates/buzz-auth/src/nip98_replay.rs:95</code></td>
+<td>medium</td>
+<td>The Nip98ReplayGuard::try_mark default method forwards ttl_secs to try_mark_in_scope completely unclamped; the floor (DEFAULT_REPLAY_TTL_SECS) and cei</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/agents/useAgentManagement.ts:143</code></td>
+<td>medium</td>
+<td>An agent-originated update request targets a persona to edit purely by case-insensitive display-name match across ALL locally editable personas, not b</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/native_websocket.rs:193</code></td>
+<td>medium</td>
+<td>The egress guard on the native-websocket send path (<code>send_message</code>) only inspects <code>WebSocketMessage::Text</code> and <code>WebSocketMessage::Binary</code> frames for t</td>
+</tr>
+<tr>
+<td><code>crates/buzz-ws-client/src/message.rs:77</code></td>
+<td>medium</td>
+<td>parse_relay_message deserializes a relay-supplied EVENT frame into a typed nostr::Event via serde_json and hands it straight to the caller (as RelayMe</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/useMediaUpload.ts:339</code></td>
+<td>medium</td>
+<td>fillSlot writes a descriptor at a stale slot index with no bounds check against the current slots array. When setPendingImeta replaces/shrinks the slo</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/personas/inbound.rs:194</code></td>
+<td>medium</td>
+<td><code>reconcile_inbound_persona_event</code> gates only on Schnorr signature validity, never on whether <code>event.pubkey</code> equals the local identity. A signature pro</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/notifications.rs:58</code></td>
+<td>medium</td>
+<td><code>show_native_notification</code> is an unauthenticated Tauri command that spawns one detached OS thread per invocation, and each thread blocks in `handle.wa</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/personas/snapshot/import.rs:545</code></td>
+<td>medium</td>
+<td><code>confirm_agent_snapshot_import</code>'s phase-3a store block has no rollback. It commits the AgentDefinition (<code>save_personas</code>, line 475), enqueues the kind:</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/profile.rs:61</code></td>
+<td>medium</td>
+<td><code>update_profile</code> does a read-merge-write of the user's kind:0: it takes the relay's response, parses <code>ev.content</code> as JSON, and folds <code>name</code>, <code>picture</code></td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/messages.rs:504</code></td>
+<td>medium</td>
+<td><code>resolve_thread_ref</code> fetches the parent event from the relay and walks its <code>e</code> tags to pick the thread root, with no <code>verify()</code> on the returned event</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/team_snapshot.rs:521</code></td>
+<td>medium</td>
+<td><code>confirm_team_snapshot_import</code> caps the snapshot file at 25 MiB JSON / 50 MiB PNG (team_snapshot.rs:29-30, enforced in `decode_team_snapshot_from_byte</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/formatTimelineMessages.ts:245</code></td>
+<td>medium</td>
+<td>The edit-overlay map is built with no check that the kind:40003 event's signer is the author (or the agent-owner) of the message it targets: the loop</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/message_content.dart:52</code></td>
+<td>medium</td>
+<td>When a tapped markdown link points at a relay media URL, <code>openDownloadedFileProvider</code> writes the response body to a temp file whose name — and therefo</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/unread_badge/should_notify_for_event.dart:19</code></td>
+<td>medium</td>
+<td><code>shouldNotifyForEvent</code> evaluates the sender-controlled <code>broadcast</code> tag and <code>p</code> tags BEFORE it consults the user's mute sets. <code>mutedChannelIds</code> is only</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/relay/relay_session.dart:452</code></td>
+<td>medium</td>
+<td><code>fetchHistory</code> sends a REQ carrying a <code>limit</code> (NostrFilter.limit, default 100, serialized at nostr_models.dart line 239) but the client never enforces</td>
+</tr>
+<tr>
+<td><code>mobile/android/app/src/main/kotlin/xyz/block/buzz/mobile/MainActivity.kt:235</code></td>
+<td>medium</td>
+<td>The MediaMuxer remux copies track formats via addTrack(format) but never calls muxer.setOrientationHint() with the source's rotation, and MediaMuxer d</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/community/community_storage.dart:22</code></td>
+<td>medium</td>
+<td>The user's Nostr private key (nsec) is persisted through <code>const FlutterSecureStorage()</code> with no platform options at all. flutter_secure_storage 10.x d</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/lib/remarkCustomEmoji.ts:145</code></td>
+<td>medium</td>
+<td>Custom emoji are emitted as a non-HTML hast element (<code>hName: "emoji"</code>) with the attacker-supplied URL set directly as <code>hProperties.src</code>. react-markdow</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/thread.rs:489</code></td>
+<td>medium</td>
+<td>get_thread_replies_on silently skips rows that fail event reconstruction, but unlike get_channel_window it has no limit+1 has_more probe — clients der</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/filter.rs:19</code></td>
+<td>medium</td>
+<td>The doc contract on reader_authorized_for_event asserts it guards live fan-out in event.rs, but the live-delivery chokepoint never calls it, and the f</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/channel.rs:758</code></td>
+<td>medium</td>
+<td>get_accessible_channel_ids returns every open channel in the community with no LIMIT and no cap, unlike its sibling get_accessible_channels which caps</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/admin/auth.rs:13</code></td>
+<td>medium</td>
+<td>The deployment-admin plane — the one surface whose DB layer (crates/buzz-db/src/admin_moderation.rs, whose own module doc says it is "the only moderat</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/ingest.rs:2121</code></td>
+<td>medium</td>
+<td><code>get_channel</code> failures are collapsed to <code>None</code> with <code>.ok()</code>, and the archived-channel gate at ingest.rs:2320-2326 only rejects when the row is `Some(.</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/auth.rs:105</code></td>
+<td>medium</td>
+<td>Blossom kind:24242 tokens have no one-time-use / seen-event-id guard anywhere in the verification path. verify_blossom_auth_event_for_verb bounds fres</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/media.rs:496</code></td>
+<td>medium</td>
+<td>Media reads are unauthenticated by default: require_media_get_auth is parsed with .unwrap_or(false) (crates/buzz-relay/src/config.rs:742-749) and, whe</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/imeta.rs:242</code></td>
+<td>medium</td>
+<td><code>verify_imeta_blobs</code> loops over every <code>imeta</code> tag on an ingested event and issues at least two object-store round trips per tag — <code>get_sidecar</code> (line</td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/acp.rs:1043</code></td>
+<td>medium</td>
+<td><code>write_ndjson</code> mirrors every outbound JSON-RPC frame verbatim onto the observer bus as an <code>acp_write</code> event, with no redaction of any field. Because t</td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/relay.rs:3561</code></td>
+<td>medium</td>
+<td>Inbound relay EVENT frames are deserialized into <code>nostr::Event</code> and forwarded to the harness with no id or signature verification — `parse_relay_messa</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/auth.rs:278</code></td>
+<td>medium</td>
+<td>The connection is marked Authenticated and registered in the pubkey registry only after several further database round-trips following the ban check,</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/ui/markdown.tsx:1334</code></td>
+<td>medium</td>
+<td>Markdown links parsed from relay-delivered message content are opened via <code>openUrl(href)</code> (Tauri's shell/OS opener) from the right-click "Open link" m</td>
+</tr>
+<tr>
+<td><code>crates/buzz-dev-mcp/src/paths.rs:4</code></td>
+<td>medium</td>
+<td><code>resolve_path</code> (used by <code>read_file</code>, <code>str_replace</code>, and <code>view_image</code>) explicitly performs no containment check against the workspace root — any absolu</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/channels/useUnreadChannels.ts:422</code></td>
+<td>medium</td>
+<td>A relay event's <code>created_at</code> is taken raw as the channel's "latest observed" timestamp and is later folded into the published NIP-RS read marker with</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/dateFormatters.ts:42</code></td>
+<td>medium</td>
+<td><code>formatTime</code> feeds an unvalidated <code>created_at</code> into <code>Intl.DateTimeFormat.prototype.format</code>, which throws <code>RangeError: Invalid time value</code> for any Date</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/event.rs:33</code></td>
+<td>low</td>
+<td><code>StoredEvent::is_verified()</code> has zero call sites in the entire workspace (verified by grep across .rs, .ts and .dart). The <code>verified</code> field it exposes</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/git/transport.rs:168</code></td>
+<td>low</td>
+<td>For git HTTP routes, the HTTP method passed as expected_method into buzz_auth::nip98::verify_nip98_event is extracted from the signed event's own meth</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/channels/useUnreadChannels.ts:806</code></td>
+<td>low</td>
+<td>The catch-up effect's cleanup unconditionally releases the caughtUpChannelsRef claims for every channel in toFetch, including channels whose catch-up</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/useFetchOlderMessages.ts:70</code></td>
+<td>low</td>
+<td>The shouldContinue cancellation guard passed to pageOlderMessagesUntilRowFloor is a tautology: channelId is derived from channel?.id in the same rende</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/useLoadMissingAncestors.ts:92</code></td>
+<td>low</td>
+<td>useLoadMissingAncestors has no call sites anywhere in desktop/src (verified by grep), and its implementation is doubly broken if revived: it merges fe</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/profile.rs:370</code></td>
+<td>low</td>
+<td><code>get_presence</code> resolves the subject of a kind:20001 presence event from its <code>p</code> tag when present, falling back to the event author only if no <code>p</code> tag</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/filter.rs:35</code></td>
+<td>low</td>
+<td><code>filter_match_one</code> evaluates <code>kinds</code>, <code>authors</code>, <code>since</code>, <code>until</code>, <code>ids</code> and <code>generic_tags</code>, but never reads <code>Filter::search</code> (present in nostr 0.44.6</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/relay/relay_socket.dart:171</code></td>
+<td>low</td>
+<td>Relay frames are consumed with unchecked casts (data[0] as String here; data[1] as String / data[2] as bool in _handleOk; data[2] as Map and per-eleme</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/relay/relay_socket.dart:87</code></td>
+<td>low</td>
+<td>A stream error during NIP-42 auth triggers _onDisconnected twice for the same connection generation: once from the onError handler and once from conne</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/pairing/pairing_provider.dart:148</code></td>
+<td>low</td>
+<td><code>_cleanup()</code> tears down the socket and the consent flags but never clears the session's key material: <code>_ephemeralPrivkey</code>, <code>_ephemeralPubkey</code>, `_sessi</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/invites/invite_join_provider.dart:77</code></td>
+<td>low</td>
+<td><code>InviteJoinNotifier.prepare</code> switches the active community with zero user confirmation when the invite's relay origin matches one the user already has</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/dm.rs:264</code></td>
+<td>low</td>
+<td>list_dms_for_user paginates on a timestamp-only cursor with a strict <code>updated_at &lt; $3</code> comparison and no id tiebreak, so any DM whose updated_at exact</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/kind.rs:202</code></td>
+<td>low</td>
+<td>SHARED_GATED_KINDS omits KIND_TEAM (30176) and KIND_MANAGED_AGENT (30177), and neither kind appears in AUTHOR_ONLY_KINDS or P_GATED_KINDS, so any auth</td>
+</tr>
+<tr>
+<td><code>crates/buzz-sdk/src/builders.rs:192</code></td>
+<td>low</td>
+<td>mention_tags caps the number of mentions and lowercases them but never validates that each entry is a 64-character hex pubkey, so build_message (line</td>
+</tr>
+<tr>
+<td><code>crates/buzz-sdk/src/builders.rs:570</code></td>
+<td>low</td>
+<td>build_add_member and build_remove_member validate the target pubkey with check_hex_len(target_pubkey, 64, ...), which is a MINIMUM-length check (build</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/storage.rs:141</code></td>
+<td>low</td>
+<td>The <code>if response.status_code == 404</code> branch in get_stream is unreachable. buzz-media enables rust-s3's <code>fail-on-err</code> feature (Cargo.toml:24), and unde</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/bucket_index.rs:295</code></td>
+<td>low</td>
+<td>Orphan accounting sums only blob_variant_bytes and never thumb_bytes, so an orphaned image's thumbnail bytes land in no gauge at all — not orphan_blob</td>
+</tr>
+<tr>
+<td><code>crates/buzz-auth/src/access.rs:60</code></td>
+<td>low</td>
+<td>The entire <code>access</code> module — require_scope, check_read_access, check_write_access, and the ChannelAccessChecker trait — has no production caller anywh</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayClientSession.ts:890</code></td>
+<td>low</td>
+<td>The NIP-42 AUTH handshake can be completed by the relay without the client ever sending an AUTH event: <code>authRequest.pendingEventId</code> is initialised to</td>
+</tr>
+<tr>
+<td><code>crates/buzz-sdk/src/builders.rs:1613</code></td>
+<td>low</td>
+<td>build_moderation_ban (and similarly build_moderation_timeout / build_moderation_resolve_report) accepts an operator-supplied <code>reason</code> string and write</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/agents/ui/SecretRevealDialog.tsx:56</code></td>
+<td>low</td>
+<td>When a managed agent is created, its nsec private key is rendered in plaintext directly in the DOM with no mask/reveal gate, unlike the equivalent Pri</td>
+</tr>
+<tr>
+<td><code>deploy/compose/compose.yml:5</code></td>
+<td>low</td>
+<td>The production single-node/VPS deployment bundle (deploy/compose/, name: buzz-prod) defaults the relay container to the floating, mutable <code>:main</code> tag</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/channels/useLiveChannelUpdates.ts:377</code></td>
+<td>low</td>
+<td>syncSubs re-bumps dmSubscriptionStartedAtRef to the local wall clock on EVERY effect run with a non-empty target set — including runs where the DM cha</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/channels/threadActivityStorage.ts:67</code></td>
+<td>low</td>
+<td>readActivityFromStorage validates only that each persisted item is an object with a string id; the other ThreadActivityItem fields (tags, createdAt, c</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/pairing.rs:537</code></td>
+<td>low</td>
+<td>The WebSocket endpoint for the nsec-carrying pairing session is taken from the main relay's own NIP-11 document field <code>pairing_relay_url</code> and accepted</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/event.rs:470</code></td>
+<td>low</td>
+<td>The local fan-out path re-implements the owner check instead of calling <code>buzz_core::filter::reader_authorized_for_event</code>, and the copy is weaker in tw</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/relay/media_image.dart:107</code></td>
+<td>low</td>
+<td><code>MediaImageProvider._loadAsync</code> fetches arbitrary attacker-supplied URLs with <code>client.get(uri, ...)</code> and materializes the entire response into memory</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/channels_provider.dart:142</code></td>
+<td>low</td>
+<td>The kind:39002 membership pagination advances with until = min(created_at) - 1, which skips any remaining membership events sharing the boundary secon</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/crypto/nip44.dart:123</code></td>
+<td>low</td>
+<td><code>_unpad</code> validates only that the declared length fits inside the buffer (<code>2 + len &gt; padded.length</code>); it never checks that the buffer is exactly the ca</td>
+</tr>
+<tr>
+<td><code>mobile/lib/features/channels/message_content.dart:51</code></td>
+<td>low</td>
+<td>When a message link points at relay-hosted media, the app downloads the bytes and hands the file to the OS via <code>OpenFilex.open</code>, naming it from the ma</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/dm.rs:107</code></td>
+<td>low</td>
+<td>create_dm validates the 2-9 participant count BEFORE compute_participant_hash deduplicates, so a caller passing the same pubkey twice ([x, x]) passes</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/thread.rs:522</code></td>
+<td>low</td>
+<td>get_thread_summary selects one thread_metadata row per event_id with LIMIT 1 and no ORDER BY, even though the table's primary key (community_id, event</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/workflow.rs:899</code></td>
+<td>low</td>
+<td>update_workflow_run re-stamps completed_at with NOW() on every call whose status is terminal, without the <code>IS NULL</code> guard that the adjacent started_at</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/pairing/qr.rs:148</code></td>
+<td>low</td>
+<td>decode_qr parses the pairing URI's protocol version with <code>.ok()</code>, silently discarding a parse failure and falling back to version 1, so a URI that dec</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayClosedRecovery.ts:84</code></td>
+<td>low</td>
+<td>A relay-controlled CLOSED message string decides whether a live subscription is retried or permanently deleted, so a single crafted CLOSED frame silen</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/lib.rs:156</code></td>
+<td>low</td>
+<td>insert_mentions builds one multi-row INSERT with six bind parameters per valid <code>p</code> tag and applies no cap on the number of tags, even though the SDK c</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/lib.rs:3415</code></td>
+<td>low</td>
+<td><code>Db::get_api_token_by_hash</code>, documented one line above as the lookup for an "active (non-revoked) API token", filters on <code>revoked_at IS NULL</code> only and</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/connection.rs:428</code></td>
+<td>low</td>
+<td>The "frame too large" NOTICE is queued on the data channel and then the recv loop breaks, which triggers <code>cancel.cancel()</code>; the send loop's biased can</td>
+</tr>
+<tr>
+<td><code>desktop/src/shared/api/relayReconnectReplay.ts:116</code></td>
+<td>low</td>
+<td>The reconnect history-paging loop advances pageUntil by at most one second when a full 500-event page shares the oldest created_at, so if more than 50</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/validation.rs:644</code></td>
+<td>low</td>
+<td>The PNG chunk allowlist is gated on <code>ancillary</code>, computed as <code>kind[0] &amp; 0x20 != 0</code> (line 629). Any chunk whose first byte is uppercase is a <em>critical</em></td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/router.rs:139</code></td>
+<td>low</td>
+<td><code>crates/buzz-relay/src/api/git/policy.rs:24</code> states as a security invariant that the internal git push-policy endpoint "binds to 127.0.0.1 only (enfor</td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/relay.rs:379</code></td>
+<td>low</td>
+<td>If NIP-98 signing fails, <code>unwrap_or_default()</code> substitutes an empty string for the Authorization header, so the request is sent unauthenticated and th</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/messages/lib/customEmojiNode.ts:186</code></td>
+<td>low</td>
+<td><code>renderHTML</code> takes <code>node.attrs.src</code> (ultimately derived from another member's NIP-30 kind:30030 <code>emoji</code> tag URL, resolved via <code>resolveUrl</code>) and passes</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/observer.rs:84</code></td>
+<td>low</td>
+<td>decrypt_observer_payload() decrypts NIP-44 content keyed off event.pubkey without ever calling event.verify()/verify_signature(), unlike buzz-core's o</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/event.rs:368</code></td>
+<td>low</td>
+<td>query_events_on clamps <code>limit</code> to DEFAULT_MAX_PAGE_LIMIT (or the caller's max_limit) but leaves <code>offset</code> completely unbounded, even though offset is p</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/config.rs:49</code></td>
+<td>low</td>
+<td>MediaConfig derives Debug while holding s3_secret_key (and s3_access_key) as plain String fields, so any future <code>{:?}</code>/<code>tracing::debug!</code>/panic-message</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/agents/lib/personaCatalogRelay.ts:172</code></td>
+<td>low</td>
+<td>The persona catalog projection accepts an attacker-controlled <code>system_prompt</code> (and <code>runtime</code>/<code>provider</code>/<code>model</code>) of unbounded length/content from any</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/media_proxy.rs:38</code></td>
+<td>low</td>
+<td>The local media-proxy origin check only rejects requests when the Origin header is present and mismatched; a request with no Origin header at all is l</td>
+</tr>
+<tr>
+<td><code>crates/buzz-audit/src/service.rs:185</code></td>
+<td>low</td>
+<td>verify_chain only checks that hashes are internally consistent within the requested [from_seq, to_seq] window (expected_prev starts at None and is onl</td>
+</tr>
+<tr>
+<td><code>desktop/src-tauri/src/commands/social.rs:214</code></td>
+<td>low</td>
+<td><code>get_note_reactions</code> folds NIP-09 deletions without checking who authored them: the kind:5 filter carries <code>#e</code> and no <code>authors</code>, and `deleted_event_id</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/observer.rs:94</code></td>
+<td>low</td>
+<td>decrypt_observer_payload() (and decrypt_agent_turn_metric wrapping it, agent_turn_metric.rs:189) NIP-44-decrypts keyed on the attacker-controllable ev</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/kind.rs:831</code></td>
+<td>low</td>
+<td>The module header asserts 'All constants are <code>u32</code> — NIP-01 specifies kind as an unsigned integer, and u32 covers the full range without truncation' (</td>
+</tr>
+<tr>
+<td><code>mobile/android/app/src/main/AndroidManifest.xml:16</code></td>
+<td>low</td>
+<td>The <code>&lt;application&gt;</code> element declares no <code>android:allowBackup="false"</code>, no <code>android:dataExtractionRules</code> and no <code>android:fullBackupContent</code>. Android's</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/community/community_provider.dart:43</code></td>
+<td>low</td>
+<td>addCommunity builds its optimistic list from state.value ?? [] without awaiting the initial build, so if it runs while the community list is still loa</td>
+</tr>
+<tr>
+<td><code>mobile/lib/shared/mentions/agent_identity_provider.dart:249</code></td>
+<td>low</td>
+<td>Channel bot/agent identity is taken from an unauthenticated kind:39002 event. <code>NostrFilters.channelMembers</code> (nostr_filters.dart:22-28) filters only on</td>
+</tr>
+<tr>
+<td><code>desktop/src/features/profile/ui/NostrBindConsentDialog.tsx:137</code></td>
+<td>low</td>
+<td>The signed Nostr identity-binding response is returned by opening an attacker-controlled <code>callbackUrl</code> from the <code>buzz://</code> deep link via the OS opener,</td>
+</tr>
+<tr>
+<td><code>crates/buzz-db/src/feed.rs:92</code></td>
+<td>low</td>
+<td>All three feed query builders clamp limit only from above (limit.min(FEED_MAX_LIMIT)) with no floor, so a zero or negative i64 limit is bound directly</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/filter.rs:83</code></td>
+<td>low</td>
+<td>The #h fallback treats an event's explicit h tags as authoritative for channel matching, but ingest deliberately ignores h tags on global-only kinds a</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/git_perms.rs:239</code></td>
+<td>low</td>
+<td>UpdateKind::classify hardcodes the 40-character SHA-1 zero OID, so in a SHA-256 repository a ref deletion (64-character zero new_oid) is classified No</td>
+</tr>
+<tr>
+<td><code>crates/buzz-sdk/src/builders.rs:256</code></td>
+<td>low</td>
+<td><code>build_agent_observer_frame</code>'s guard that the payload is encrypted is a length-range test, not a ciphertext test: <code>content_looks_like_nip44</code> (crates/b</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/bridge.rs:69</code></td>
+<td>low</td>
+<td>The primary bridge endpoints /events, /query and /count authenticate via verify_bridge_auth, which calls verify_bridge_auth_with_options with require_</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/upload.rs:120</code></td>
+<td>low</td>
+<td>The idempotent short-circuit builds the returned BlobDescriptor from the freshly re-sniffed <code>ext</code>/<code>mime</code> rather than from the sidecar it just read (`m</td>
+</tr>
+<tr>
+<td><code>crates/buzz-media/src/upload.rs:342</code></td>
+<td>low</td>
+<td>The streaming video pipeline creates a NamedTempFile (upload.rs:302), immediately discards the securely-created handle in favour of its path (upload.r</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/req.rs:181</code></td>
+<td>low</td>
+<td>The WebSocket REQ handler runs the three sensitive-kind filter gates — <code>p_gated_filters_authorized</code>, <code>engram_filters_authorized</code>, `author_only_filters</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/handlers/event.rs:681</code></td>
+<td>low</td>
+<td>Both WebSocket scope gates in this file are written as <code>!scopes.is_empty() &amp;&amp; !scopes.contains(...)</code>, so an AuthContext carrying an empty scope vector</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="flagged-by-tooling-exploitability-unconfirmed">Flagged by tooling, exploitability unconfirmed</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Finding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cargo audit</code></td>
+<td>RUSTSEC-2026-0194 / -0195 — <code>quick-xml</code> quadratic parse and unbounded namespace allocation, both 7.5 high, both DoS. <strong>Two versions (0.38.4 and 0.39.4) are in the tree simultaneously</strong>, so a single bump will not clear it. Present in the Tauri workspace too.</td>
+</tr>
+<tr>
+<td><code>cargo audit</code></td>
+<td>Unsound: <code>event-listener 5.4.1</code> (RUSTSEC-2026-0221), <code>glib 0.18.5</code> (RUSTSEC-2024-0429, Tauri workspace only). Unmaintained: <code>instant</code>, <code>paste</code>, <code>unic-ucd-version</code>. Yanked: <code>async-utility 0.3.1</code>, <code>spin 0.9.8</code>, <code>spin 0.10.0</code>.</td>
+</tr>
+<tr>
+<td><code>pnpm audit --prod</code></td>
+<td>GHSA-6v5v-wf23-fmfq — <code>markdown-it ≤ 14.1.1</code> quadratic DoS, reached via <code>desktop &gt; tiptap-markdown &gt; markdown-it</code>. This is the <strong>message renderer parsing attacker-authored content</strong>, so reachability is plausible. Fixed in 14.1.2.</td>
+</tr>
+<tr>
+<td><code>semgrep</code></td>
+<td><code>detected-private-key</code> in <code>desktop/src-tauri/src/commands/agent_discovery/install_report_redaction_tests.rs:306</code>; <code>detected-telegram-bot-api-key</code> in <code>docs/nips/NIP-MP.fixtures.json:1250</code>. Both look like test fixtures — <strong>confirm they are not live credentials.</strong></td>
+</tr>
+<tr>
+<td><code>semgrep</code></td>
+<td>8 <code>detect-non-literal-regexp</code> hits where user-controlled input is compiled into a regex (<code>mentionPattern.ts:36,43</code>, <code>customEmojiNode.ts:101</code>, <code>hasMention.ts:145</code>, <code>mentionHighlightExtension.ts:109,124</code>, <code>remarkCustomEmoji.ts:44</code>) — a ReDoS surface nobody traced.</td>
+</tr>
+<tr>
+<td><code>cargo clippy</code> (strict)</td>
+<td><strong>795 hits never triaged</strong>: 368 arithmetic-with-side-effects, 204 "indexing may panic", 67 truncating casts, 57 "slicing may panic", 22 <code>unwrap</code>. Used only as corroboration; only 11 findings landed near one.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="coverage-gaps-what-this-audit-did-not-examine">Coverage gaps — what this audit did not examine</h2>
+<p>Produced by three completeness critics whose only job was to find what the audit
+missed. This is the section to read if you are deciding where to look next.</p>
+<h3 id="the-gap-we-consider-most-serious">The gap we consider most serious</h3>
+<p><strong>No lens looked for indirect prompt injection or agent confused-deputy</strong> — the
+vulnerability class most specific to this product. The three depth lenses were
+hostile input, cryptography/identity, and correctness. None asked what happens
+when relay-delivered message text reaches an LLM prompt and then a shell command.
+For a Nostr client that runs managed coding agents, this was designed out of the
+audit before it began.</p>
+<h3 id="an-error-in-our-own-static-analysis-coverage-found-by-the-critics">An error in our own static-analysis coverage, found by the critics</h3>
+<p>We reported the workspace as clippy-clean. That was too broad. The root
+<code>Cargo.toml:32</code> declares <code>exclude = ["desktop/src-tauri"]</code> and the Tauri backend
+is its own workspace, so <strong>354 Rust files were never linted</strong> — including every
+<code>unsafe</code> block in the repository. Re-running inside <code>desktop/src-tauri/</code>:
+<code>cargo audit</code> worked and is reported above; <code>cargo clippy</code> <strong>cannot build</strong> (a
+missing prebuilt <code>buzz-acp</code> sidecar and a missing CMake toolchain for
+<code>audiopus_sys</code>), and <code>cargo check</code> fails on the same <code>build.rs</code>. That code has no
+lint coverage at all.</p>
+<h3 id="large-subsystems-that-were-barely-read">Large subsystems that were barely read</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Subsystem</th>
+<th>Size</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>desktop/src-tauri/src/managed_agents/</code></td>
+<td>~37,000 lines</td>
+<td>"Essentially unexamined" per its own auditor — <strong>and it is where the <code>unsafe</code> code lives</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp</code></td>
+<td>36,136 lines</td>
+<td>~19,000 lines never opened; every auth auditor independently skipped <code>acp.rs</code> (4,495 lines)</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/api/git/</code></td>
+<td>9,858 lines</td>
+<td>~70% unread — <code>cas_publish.rs</code> (1,884), <code>store.rs</code> (1,214) never opened</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/audio/</code></td>
+<td>5,836 lines</td>
+<td>Only ~1 file read — <strong>yet it produced F009, a high finding</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>A high-severity finding emerging from a barely-read subsystem is a warning about
+what else is in there, not a sign that it was covered.</p>
+<h3 id="slices-that-returned-suspiciously-little-for-their-size">Slices that returned suspiciously little for their size</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>Files read</th>
+<th>Findings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mobile</td>
+<td>13</td>
+<td>1</td>
+</tr>
+<tr>
+<td>gateway-mesh (buzz-push-gateway, buzz-pubsub, buzz-relay-mesh, buzz-pair-relay)</td>
+<td>23</td>
+<td>1</td>
+</tr>
+<tr>
+<td>media (crates/buzz-media)</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr>
+<td>desktop-rest</td>
+<td>30</td>
+<td>1</td>
+</tr>
+<tr>
+<td>supply-chain</td>
+<td>24</td>
+<td>1</td>
+</tr>
+<tr>
+<td>desktop-messages</td>
+<td>19</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="full-gap-list">Full gap list</h3>
+<p>The three critics overlapped heavily; near-duplicates are merged below
+(50 raw gap statements collapsed to 49 distinct ones).</p>
+<p><strong>[high]</strong> No lens looked for indirect prompt injection or agent tool-authorization. The three lenses were hostile input / crypto-identity / correctness; none asked "what happens when untrusted relay text becomes an LLM prompt that drives tool calls." This is the platform's defining feature and its trust boundary was never modelled. Concretely: crat</p>
+<p><em>Follow-up:</em> Run a fourth lens ("agent trust boundary") over the path: crates/buzz-acp/src/lib.rs (author gate + event-&gt;prompt), pool.rs (session/new, apply_permission_mode at pool.rs:999-1107), queue.rs (turn scheduling), crates/buzz-agent/src/llm.rs (</p>
+<p><strong>[high]</strong> crates/buzz-acp is 36,136 lines and roughly 19,000 of them were never opened by any pass. Every auth-slice auditor justified skipping acp.rs (4495), pool.rs (6864), queue.rs (4759), usage.rs (1514), setup_mode.rs (1135) and pool_lifecycle.rs (312) on the grounds that grep showed no <code>buzz_auth</code> call — but that argument only rules out authn</p>
+<p><em>Follow-up:</em> Read crates/buzz-acp/src/pool.rs, queue.rs and acp.rs end to end with a hostile-input lens, focusing on the ACP JSON-RPC transport (acp.rs:430-540, 1025-1090), session rotation/reuse across authors, and any unbounded <code>unbounded_channel</code>/`Ve</p>
+<p><strong>[high]</strong> desktop/src-tauri/src/managed_agents/ is 52 files and 19,452 lines and was described by the tauri-core auditor as "essentially unexamined." The three deep tauri-commands passes only touched backend.rs, storage.rs, personas.rs and persona_events.rs. Never opened: readiness.rs (1743), discovery.rs (1643), custom_harnesses.rs (1231), runtime</p>
+<p><em>Follow-up:</em> Dedicated pass over custom_harnesses.rs, discovery.rs, runtime.rs and agent_snapshot.rs tracing a hostile persona/team snapshot from personas/inbound.rs into harness resolution and process spawn; check for path traversal in harness install </p>
+<p><strong>[high]</strong> The relay's audio/huddle subsystem is 5,836 lines across six files (handler.rs, join.rs 1600+, room.rs 790, mesh.rs, wire.rs 168, mod.rs) and only ~200 lines of handler.rs were ever read (lines 150-300 and 1153-1215). The audit's single HIGH relay finding — crates/buzz-relay/src/audio/handler.rs:244, missing community-ban gate — sits insi</p>
+<p><em>Follow-up:</em> Read crates/buzz-relay/src/audio/{join,room,mesh,wire}.rs in full and enumerate every point where a pubkey gains room membership; check each against handlers/auth.rs:96-100's stated invariant that a ban must block at connection auth. Then r</p>
+<p><strong>[high]</strong> crates/buzz-relay/src/api/git/ is 9,858 lines of git smart-HTTP server and most of it was never opened: cas_publish.rs (1884), store.rs (1214), hydrate.rs (901), manifest.rs (570), manifest_event.rs (395), and ~2,200 of transport.rs's 2,819 lines. Only mod.rs (67), hook.rs (207), binding.rs (128), pack_cache.rs (686) and the first 300-400</p>
+<p><em>Follow-up:</em> Hostile-input pass over api/git/cas_publish.rs, store.rs and hydrate.rs plus the unread body of transport.rs: trace an attacker-controlled push from the HTTP body to the object store, checking ref-name sanitisation, object size/count caps, </p>
+<p><strong>[high]</strong> No static analysis produced ground truth for TypeScript or Dart, the two languages carrying the audit's HIGH findings. mobile/analysis_options.yaml exists but <code>dart analyze</code> / <code>flutter analyze</code> was never run; biome.json exists at the repo root but <code>biome check</code> and <code>tsc --noEmit</code> were never run; the only JS-side tool that ran was `pnpm au</p>
+<p><em>Follow-up:</em> Run <code>flutter analyze</code> in mobile/, <code>pnpm biome check</code> and <code>pnpm tsc --noEmit</code> across desktop/web/admin-web, and triage the output against the reported findings. Separately, write two throwaway tests that actually construct a two-e-tag kind:4</p>
+<p><strong>[high]</strong> Two media auditors reached opposite conclusions on the same HIGH finding and nobody adjudicated. crates/buzz-media/src/validation.rs:270 (<code>imagesize::blob_size</code> gate, MAX_PIXELS 25M) was reported as a GIF decompression bomb because the logical screen descriptor is measured while thumbnail.rs:26 <code>image::load_from_memory</code> allocates from the</p>
+<p><em>Follow-up:</em> Construct the fixture: a GIF declaring a 1x1 logical screen and a 65535x2048 image descriptor. Feed it to <code>validate_image_bytes</code> then <code>generate_image_metadata_sync</code> under a memory-capped test and record actual peak allocation. Resolve the f</p>
+<p><strong>[high]</strong> No lens looked for prompt-injection-to-code-execution: the path where relay-delivered message text becomes an LLM prompt and then a shell command. crates/buzz-agent/src/llm.rs (6,556 lines, prompt/body assembly) and crates/buzz-agent/src/agent.rs (1,048 lines, the tool-dispatch loop <code>execute_calls</code>/<code>invoke_tool_inner</code>) were explicitly 'NO</p>
+<p><em>Follow-up:</em> Run a dedicated prompt-injection lens over crates/buzz-agent/src/{agent.rs,llm.rs,mcp.rs,hints.rs,handoff.rs}, crates/buzz-dev-mcp/src/shell.rs, and crates/buzz-acp/src/{queue.rs,lib.rs}. Trace one concrete chain end to end: attacker posts </p>
+<p><strong>[high]</strong> The huddle-audio subsystem (crates/buzz-relay/src/audio/, 5,836 lines) is effectively unaudited, yet it produced the audit's only [high]-severity server-side finding. Coverage notes show only audio/handler.rs lines ~150-300 and 1153-1215 were ever opened; audio/join.rs (3,036 lines), audio/room.rs (790), audio/mesh.rs (393) and audio/wire</p>
+<p><em>Follow-up:</em> Assign audio/ its own slice with hostile-input and correctness lenses. Start with audio/join.rs's join/offer/answer handlers and audio/room.rs's participant table: check per-message authorization after the initial handshake, whether room st</p>
+<p><strong>[high]</strong> Four confirmed findings sit in files no agent ever read end to end, so the surrounding code is unverified and the findings' 'no other caller does this' claims are unproven: crates/buzz-relay/src/api/bridge.rs (3,769 lines; finding at :118, and the auth Lens-C note says lines 1394-3770 were never opened line-by-line), crates/buzz-relay/src</p>
+<p><em>Follow-up:</em> Commission four exhaustive single-file reads (bridge.rs, ingest.rs, audio/handler.rs, req.rs) whose sole deliverable is a call-site table: for bridge.rs every route and the require_auth_token value it passes; for ingest.rs every .expect()/.</p>
+<p><strong>[high]</strong> The desktop agent-execution backend was never audited by anyone. desktop/src-tauri/src/managed_agents/ (52 entries, including backend.rs, process_lifecycle.rs, agent_env.rs, env_vars.rs, git_bash.rs, custom_harnesses.rs, spawn_hash/, nest/) is described by the tauri-core note as 'essentially unexamined'; desktop/src-tauri/src/mesh_llm/ (5</p>
+<p><em>Follow-up:</em> Three follow-up passes: (1) managed_agents/{backend.rs,process_lifecycle.rs,agent_env.rs,env_vars.rs,git_bash.rs,custom_harnesses.rs} for command construction, env/secret passthrough and spawn-hash bypass; (2) mesh_llm/{coordinator.rs,recov</p>
+<p><strong>[high]</strong> No fuzzing or differential testing exists or was run: there is no fuzz/ directory and no cargo-fuzz target anywhere in the workspace (proptest appears only as a transitive dependency in Cargo.lock). Every binary-parser conclusion in the audit — crates/buzz-media/src/validation.rs's JPEG/PNG/WebP/GIF/MP4 walkers, crates/buzz-relay/src/prot</p>
+<p><em>Follow-up:</em> Add a cargo-fuzz target that feeds the same buffer to buzz_media::validation::validate_* and to the decoder that actually allocates (image::load_from_memory, mp4::Mp4Reader), and asserts the validator's reported dimensions/duration bound th</p>
+<p><strong>[high]</strong> 795 clippy hits from indexing_slicing, arithmetic_side_effects, cast_possible_truncation and unwrap_used were generated and then never triaged — the audit reports the count and moves on. No lens systematically asked 'which of these are reachable from an unauthenticated or attacker-controlled input?'</p>
+<p><em>Follow-up:</em> Re-run clippy with those four lints, emit JSON, and filter to hits inside crates/buzz-relay/src/handlers/, api/, audio/, tunnel/ and crates/buzz-media/src/ — i.e. code downstream of a network read. Triage that reduced set by hand for reacha</p>
+<p><strong>[high]</strong> Dependency and lint scanning never touched the desktop app. <code>Cargo.toml:31</code> declares <code>exclude = ["desktop/src-tauri"]</code>, so <code>cargo audit</code>, <code>cargo clippy --workspace</code>, and CI's <code>cargo-deny check</code> (ci.yml:875, no --manifest-path) all ran against the root workspace only. <code>desktop/src-tauri/Cargo.lock</code> is a separate lockfile with 1,201 package</p>
+<p><em>Follow-up:</em> Run <code>cargo audit --file desktop/src-tauri/Cargo.lock</code>, <code>cargo deny --manifest-path desktop/src-tauri/Cargo.toml check</code>, and <code>cargo clippy --manifest-path desktop/src-tauri/Cargo.toml --all-targets -- -D warnings</code> (plus the indexing_slicing/</p>
+<p><strong>[high]</strong> <code>desktop/src-tauri/src/managed_agents/</code> — 77 files, 37,268 lines — is essentially unexamined, and it is where the repo's unsafe Rust actually lives. The tauri-core auditor said so explicitly ("managed_agents/ in particular … is essentially unexamined"); no other pass covered it. It contains 41 of the repo's 86 <code>unsafe</code> sites (runtime/swee</p>
+<p><em>Follow-up:</em> Dedicated pass over desktop/src-tauri/src/managed_agents/runtime/{sweep,process,instance_reaper,orphan_sweep}.rs and process_lifecycle.rs auditing every <code>unsafe</code> block for PID reuse, handle lifetime, and UID checks; audit the 10 Command::ne</p>
+<p><strong>[high]</strong> <code>crates/buzz-acp</code> (36,136 lines, the single largest crate) fell into a slice seam and was never read. It appears in exactly one slice — "auth" — where all three passes independently declined it on the same reasoning: grep showed no <code>buzz_auth</code> call, so acp.rs (4,495), pool.rs (6,864), lib.rs (6,676), queue.rs (4,759), config.rs (2,931), u</p>
+<p><em>Follow-up:</em> Run a dedicated 3-lens pass on buzz-acp/src/{lib,pool,queue,acp,config}.rs and buzz-agent/src/{agent,llm}.rs, scoped to: how a relay EVENT becomes a turn (lib.rs author gate and respond-to logic), subprocess spawn/env/stdio handling in acp.</p>
+<p><strong>[high]</strong> No lens looked for prompt-injection / agent confused-deputy — the vulnerability class specific to this product. The three lenses were hostile input, crypto and identity, and correctness; none asks "can attacker-controlled text reaching an LLM cause the agent to act with its owner's authority?" The project itself names this threat: crates/</p>
+<p><em>Follow-up:</em> Add an explicit fourth lens and run it end-to-end on one path: untrusted channel message -&gt; buzz-acp/src/lib.rs turn construction -&gt; buzz-agent/src/llm.rs prompt assembly -&gt; tool dispatch in agent.rs -&gt; buzz-dev-mcp shell.rs/str_replace.rs.</p>
+<p><strong>[high]</strong> The project's own adversarial test suites were never run and never read. <code>crates/buzz-test-client/tests/conformance_multitenant.rs</code> (23 <code>#[ignore]</code> cases — the runtime multi-tenant isolation suite), <code>nip42_host_binding_live.rs</code> (7), and <code>regression_relay_admin_ban_gate.rs</code> (2) are all <code>#[ignore]</code>'d per TESTING.md and require a live relay.</p>
+<p><em>Follow-up:</em> Stand up the local relay per TESTING.md and run <code>cargo test -p buzz-test-client -- --ignored</code>, plus <code>cargo test -p buzz-conformance</code>, and triage every failure. Then extend regression_relay_admin_ban_gate.rs with a case that authenticates a </p>
+<p><strong>[high]</strong> The huddle-audio subsystem holding the audit's only HIGH relay finding was barely read. <code>crates/buzz-relay/src/audio/</code> is 5,836 lines; only handler.rs (1,430 lines) was opened, and only ~350 of those (the auth prelude at 150-300 and ensure_membership at 1153-1215). <code>audio/join.rs</code> — 3,036 lines, the actual join/room-membership machinery —</p>
+<p><em>Follow-up:</em> Read crates/buzz-relay/src/audio/join.rs and room.rs in full to establish whether the ban gap at handler.rs:244 is isolated, and whether room membership/eviction re-checks moderation state after a ban lands mid-call. Then a first pass over </p>
+<p><strong>[high]</strong> 2,161 lines of formal specification — the project's own strongest statement of what its security properties are — were never opened, and neither was the crate that checks them. <code>docs/spec/MultiTenantRelay.tla</code> (1,142 lines) names 12 invariants (Inv_NonInterference, Inv_LabelPropagation, Inv_ReadConfinement, Inv_ResolutionFence, Inv_HostBi</p>
+<p><em>Follow-up:</em> Enumerate every HTTP and WS entry point that resolves a tenant (api/bridge.rs, api/media.rs, api/git/transport.rs, api/invites.rs, api/operator.rs, api/admin/mod.rs, audio/handler.rs) and check which arm an EmitGuard — expect only ingest.rs</p>
+<p><strong>[medium]</strong> Eight of the seventeen slices got a breadth pass only and were never revisited by any of the three depth lenses: gateway-mesh, agent-surface, tauri-core, tooling-identity, web, desktop-agents, desktop-rest, supply-chain. The yield reflects it — desktop-rest returned 1 finding from ~604 files (30 read), gateway-mesh returned 1 from four cr</p>
+<p><em>Follow-up:</em> Run at least one depth lens on gateway-mesh (correctness: topic refcounting in buzz-pubsub/src/lib.rs:120-300 and cache_invalidation.rs, plus buzz-push-gateway/src/postgres.rs and config.rs) and one on desktop-rest (hostile input). Treat an</p>
+<p><strong>[medium]</strong> The mobile app's native halves are almost entirely unread, and no auditor was assigned Kotlin or Swift. Never opened: mobile/ios/Runner/NativeAttachmentPopover.swift (1089 lines), NativeAttachmentPopoverCoordinator.swift (371), AppDelegate.swift (317, one lens read it), InlinePhotoPicker.swift (248), MediaSanitizer.swift (199), and mobile</p>
+<p><em>Follow-up:</em> Read the six native files end to end with a hostile-input lens: what does MediaSanitizer strip and what survives, can InlinePhotoPicker/NativeAttachmentPopover be driven to read a path outside the picked file, and does MainActivity.kt valid</p>
+<p><strong>[medium]</strong> The relay's privilege and provisioning paths were read only as far as their auth preludes. crates/buzz-relay/src/api/invites.rs (1789 lines) — only mint/claim prelude and <code>authenticate</code>; api/operator.rs (1252) — only <code>authorize_operator_request</code>; handlers/command_executor.rs (1370) — only approval grant/deny and <code>check_approver_spec</code>; han</p>
+<p><em>Follow-up:</em> Correctness pass over api/invites.rs's full mint/claim lifecycle (single-use enforcement, expiry, community binding), api/operator.rs's post-auth handlers, and handlers/community_provisioning.rs — specifically whether an invite can be redee</p>
+<p><strong>[medium]</strong> Denial of service and resource exhaustion was never a lens; the three DoS-shaped findings that survived (api/media.rs:96 unbounded DashMap, handlers/req.rs:239 leaked subscription + Redis topic refcount, desktop/src/shared/lib/linkPreview.ts:168 quadratic prescan) were all incidental catches during other work. No systematic sweep of unbou</p>
+<p><em>Follow-up:</em> Mechanical sweep: grep crates/buzz-relay and crates/buzz-pubsub for <code>DashMap</code>, <code>HashMap</code>, <code>Vec::push</code> and <code>unbounded_channel</code> in long-lived state, and for each ask whether the key is attacker-mintable and whether an eviction path exists. St</p>
+<p><strong>[medium]</strong> 24 of the 26 files in migrations/ were never opened. Only 0001, 0006, 0010, 0021 and 0025 were read directly; everything else was inferred from the excerpts quoted inside crates/buzz-db/src/migration.rs's assertions — i.e. the schema was audited through the application's own description of it.</p>
+<p><em>Follow-up:</em> Read all 26 files under migrations/ directly and enumerate every UNIQUE index, PRIMARY KEY and FOREIGN KEY, flagging any on a per-community table that does not include community_id. 158 KB total — an hour of work that closes the isolation q</p>
+<p><strong>[medium]</strong> The confirmed admin-API finding (crates/buzz-relay/src/api/admin/auth.rs:6, Host-header-only authorization on moderation reports and product feedback) is correct as read — I confirmed auth.rs compares only <code>HOST</code> against <code>config.admin.host</code> plus an Origin check — but its severity depends entirely on deployment facts nobody verified. route</p>
+<p><em>Follow-up:</em> Read crates/buzz-relay/src/router.rs in full (how admin routes are merged and on which listener) plus deploy/compose/*.yml and deploy/charts/buzz/templates/{ingress,deployment}.yaml, and re-rate the finding with the actual exposure. Also ch</p>
+<p><strong>[medium]</strong> The NIP-OA condition-evaluation defect was reported twice as two findings (crates/buzz-sdk/src/nip_oa.rs:214 and :231) from two different auditors, and both cite buzz-cli/src/commands/users.rs:196's <code>auth_conditions_apply</code> as the correct reference implementation — but the tooling-identity auditor explicitly listed buzz-cli/src/commands/us</p>
+<p><em>Follow-up:</em> Read buzz-cli/src/commands/users.rs around line 196 and crates/buzz-relay/src/handlers/identity_archive.rs:328 (<code>enforce_request_auth_time_bounds</code>) and crates/git-sign-nostr/src/lib.rs:596 (<code>enforce_conditions</code>), compare the three independe</p>
+<p><strong>[medium]</strong> Rust static analysis produced signal that nobody triaged. <code>cargo clippy</code> was reported clean on default lints, but enabling indexing_slicing / arithmetic_side_effects / cast_possible_truncation / unwrap_used produced 795 hits that were never looked at. <code>cargo audit</code> found 4 quick-xml DoS advisories with no reachability analysis. deny.toml </p>
+<p><em>Follow-up:</em> Re-run clippy with those four lints, filter to non-#[cfg(test)] code under crates/buzz-relay/src/handlers, crates/buzz-media/src, crates/buzz-core/src and crates/buzz-db/src, and triage every unwrap_used/indexing_slicing hit that sits downs</p>
+<p><strong>[medium]</strong> Denial-of-service and resource exhaustion was never a lens; the two DoS findings that landed (crates/buzz-relay/src/api/media.rs:96 unbounded DashMap rate-limiter, handlers/req.rs:239 subscription/Redis-topic leak) were both incidental byproducts of reading for something else. Nobody swept crates/buzz-relay/src/state.rs's map declarations</p>
+<p><em>Follow-up:</em> Enumerate every DashMap/HashMap/Vec field in crates/buzz-relay/src/state.rs and crates/buzz-relay/src/connection.rs and tabulate: key type, who can insert, and what evicts. Flag every row whose key includes an attacker-choosable pubkey or c</p>
+<p><strong>[medium]</strong> Native mobile code is a fifth language nobody was assigned. ~2,100 lines of Kotlin/Swift were never opened by any of the three mobile passes, each of which explicitly lists them under 'never opened': mobile/ios/Runner/NativeAttachmentPopover.swift (1,089 lines), NativeAttachmentPopoverCoordinator.swift (371), InlinePhotoPicker.swift (248)</p>
+<p><em>Follow-up:</em> Run one pass over mobile/ios/Runner/<em>.swift and mobile/android/.../kotlin/</em><em>/</em>.kt as a named slice. Focus on AndroidMediaSanitizer.kt and MediaSanitizer.swift (does re-encoding actually strip metadata and cap dimensions, or does it pass thr</p>
+<p><strong>[medium]</strong> Dart got zero ground truth from tooling. The static analysis that ran was cargo audit, cargo clippy, pnpm audit --prod and semgrep — and the audit itself records that semgrep's Dart rule coverage is zero. <code>dart analyze</code> / <code>flutter analyze</code> was never run despite mobile/analysis_options.yaml existing (flutter_lints + custom_lint), and no de</p>
+<p><em>Follow-up:</em> Run <code>dart analyze --fatal-infos</code> in mobile/ and triage the output; add a supply-chain check over mobile/pubspec.lock (pub.dev advisories / OSV) since the audit never checked Dart dependencies at all; and re-verify the two [high] mobile find</p>
+<p><strong>[medium]</strong> The Tauri IPC attack surface was never enumerated as a whole. desktop/src-tauri/capabilities/default.json grants the main webview <code>updater:allow-check/download/install</code>, <code>process:allow-restart</code>, <code>opener:default</code> and <code>dialog:default</code>, and desktop/src-tauri/tauri.conf.json sets <code>app.security.csp</code> to null (confirmed: the only security key is</p>
+<p><em>Follow-up:</em> Produce one table: every #[tauri::command] in desktop/src-tauri/src/commands/ (97 files), whether it is exposed to the main window by capabilities/default.json, and what it can reach (signing keys, subprocess spawn, filesystem, network). Th</p>
+<p><strong>[medium]</strong> Update-channel and release-artifact integrity was not audited as a class. The supply-chain slice checked CI for injection (pull_request_target, unpinned actions, fork-PR secret exposure) and passed everything, but explicitly skipped 'the mobile/desktop release shell scripts beyond a line-count/spot read' and skimmed the 41KB Justfile. scr</p>
+<p><em>Follow-up:</em> Audit .github/workflows/{desktop-release-candidate,release,signed-macos-canary,linux-canary,windows-canary}.yml together with scripts/verify-desktop-release-*.sh, verify-release-ref.sh and test-signed-canary-contract.sh as one trust chain. </p>
+<p><strong>[medium]</strong> No secret-scanning ran anywhere, and the places secrets usually leak were excluded from scope. There is no gitleaks/trufflehog/detect-secrets step in .github/workflows/ or lefthook.yml (only cargo-deny at ci.yml:875), and the audit explicitly excluded desktop/tests (149 files), mobile/test (97), benchmarks/ (40) and examples/ (10). No len</p>
+<p><em>Follow-up:</em> Run gitleaks (or trufflehog) over the full repo and its git history, including the four excluded directories, and add it to lefthook.yml as a pre-commit gate. Separately grep the Rust tree for tracing/log macros whose arguments include a ty</p>
+<p><strong>[medium]</strong> Privacy and metadata leakage was not a lens. Nobody asked what an honest-but-curious relay operator, or the push gateway, learns about users. crates/buzz-push-gateway/ (4,092 lines) received exactly one breadth pass (23 files, 1 finding) and no depth lens, so nothing examined what apns.rs actually puts in a notification payload; crates/bu</p>
+<p><em>Follow-up:</em> Run one privacy lens across crates/buzz-push-gateway/src/{apns.rs,grant.rs,model.rs}, crates/buzz-db/src/dm.rs plus migrations/0001's participant_hash index, and crates/buzz-relay/src/handlers/push_lease.rs. Deliverable is a table of what e</p>
+<p><strong>[medium]</strong> Deployment and runtime misconfiguration was not a class anyone swept. The supply-chain slice read deploy/compose/*.yml and exactly one Helm template (deploy/charts/buzz/templates/secret-chart.yaml), explicitly skipping deployment.yaml, ingress.yaml and the rest of the 16 templates. deployment.yaml delegates its pod and container securityC</p>
+<p><em>Follow-up:</em> Read deploy/charts/buzz/values.yaml against templates/{deployment,ingress,httproute,quickstart-minio,quickstart-minio-init,serviceaccount}.yaml and record the effective defaults for runAsNonRoot, allowPrivilegeEscalation, capabilities.drop,</p>
+<p><strong>[medium]</strong> Four large slices got a single breadth pass and nothing else, and their returns are implausibly low for their size and risk: desktop-rest (604 files, 30 read, 1 finding), desktop-agents (322 files, 24 read, 2 findings), tauri-core (183 files, 14 read, 3 findings), and tooling-identity (buzz-cli's ~20 unread command modules, plus buzz-audi</p>
+<p><em>Follow-up:</em> Run at least a Lens-B (crypto/identity) pass over desktop-rest's onboarding and backup path, and a Lens-C (correctness) pass over desktop-agents' observerRelayStore.ts / agentManagement.ts (agent-originated management requests that create p</p>
+<p><strong>[medium]</strong> Mobile secrets at rest were never assessed, in either the code or the policy. <code>mobile/lib/shared/community/community_storage.dart:22</code> constructs <code>const FlutterSecureStorage()</code> with no IOSOptions and no AndroidOptions (flutter_secure_storage ^10.0.0, pubspec.yaml:20), and that store holds the nsec — the file's own migration constants inclu</p>
+<p><em>Follow-up:</em> Read mobile/lib/shared/community/community_storage.dart with mobile/ios/Runner/Info.plist and android/app/build.gradle.kts, determine the effective keychain accessibility class and Android backing store for flutter_secure_storage 10.x defau</p>
+<p><strong>[medium]</strong> Client-side binary parsers outside Rust got roughly zero attention, while their Rust twin got four passes. crates/buzz-media/validation.rs was read in full by one breadth and three deep passes (including reading the third-party image/gif/png/mp4 decoder sources), and produced the HIGH GIF logical-screen-vs-frame bomb. The same job on the </p>
+<p><em>Follow-up:</em> Run the hostile-input lens over mobile/lib/shared/relay/animated_image_sanitizer.dart and mp4_fast_start.dart with the same bounds-and-differential method used on validation.rs, then read AndroidMediaSanitizer.kt, MediaSanitizer.swift and N</p>
+<p><strong>[medium]</strong> Whole languages and file types got no mechanical ground truth, so those conclusions rest on model reading alone. Dart (50,766 lines in mobile/lib): semgrep's Dart rule coverage is zero by the audit's own admission, and the audit never ran <code>flutter analyze</code> even though CI does (ci.yml:857) and mobile/analysis_options.yaml configures flutte</p>
+<p><em>Follow-up:</em> Run <code>cd mobile &amp;&amp; flutter analyze</code> and record what the audit's manual pass missed; run <code>dart pub outdated</code> / an OSV scan on the 39 mobile deps; run shellcheck across scripts/, script/, bin/ and deploy/; and read all 26 migrations/*.sql dire</p>
+<p><strong>[medium]</strong> The git-on-object-storage subsystem is ~10,000 lines with a 871-line spec, and both were left almost untouched. crates/buzz-relay/src/api/git/ totals 9,858 lines; across all relay passes only mod.rs, hook.rs, policy.rs (partial) and transport.rs (partial) were read — cas_publish.rs, hydrate.rs, store.rs, pack_cache.rs, manifest.rs, manife</p>
+<p><em>Follow-up:</em> Verify every git subprocess spawn in desktop/src-tauri/src/commands/project_git*.rs, project_terminal.rs and crates/buzz-dev-mcp/src/shim.rs routes through the hardened env builder, and check whether shim.rs:304's PATH-resolved `git-sign-no</p>
+<p><strong>[medium]</strong> Four slices returned findings out of all proportion to their size, and none of them received a deep-dive lens. desktop-rest: 604 files, 30 read, 1 finding. desktop-agents: 322 files, 24 read, 2 findings. tauri-core: 183 files, 14 read, 3 findings — and its own note concedes managed_agents/, huddle/ (10,573 lines), mesh_llm/ (5,993), migra</p>
+<p><em>Follow-up:</em> Schedule depth passes for the four slices, prioritising by unexamined-lines-per-finding: tauri-core's managed_agents/ and huddle/ first (covered above), then buzz-push-gateway end to end (app_attest.rs, grant.rs, authority.rs, postgres.rs, </p>
+<p><strong>[medium]</strong> Fifteen NIP specs carry "Security Considerations" sections that were never diffed against the implementation — and the one time this method was applied it produced three confirmed findings. docs/nips/ holds NIP-AA (Agent Authentication), AE, AM (Agent Turn Metrics), AO (Agent Observability), AP (Agent Personas), CW (Channel Window), DV, E</p>
+<p><em>Follow-up:</em> For each of NIP-PL, NIP-RS, NIP-IA, NIP-AA and NIP-AO, extract every MUST/MUST NOT from its Security Considerations section into a checklist and grep for the enforcing code, exactly as was done for NIP-OA. Start with NIP-PL against crates/b</p>
+<p><strong>[medium]</strong> Secret leakage through logs, telemetry and the audit chain was never checked, and the one crate that would prove SECURITY.md's tamper-evidence claim was read only in part. crates/buzz-relay/src/telemetry.rs (580 lines) and metrics.rs (207) were listed as never opened by every relay pass; grep finds no redact/skip_serializing/SecretString/</p>
+<p><em>Follow-up:</em> Grep every crate for <code>{:?}</code> / <code>#[derive(Debug)]</code> on types carrying SecretKey, nsec, conversation keys, bearer tokens or S3 credentials, and check each logging call site; read crates/buzz-relay/src/telemetry.rs and metrics.rs specifically fo</p>
+<p><strong>[medium]</strong> Two confirmed findings rest on files no agent read in full, so their scope and their fix are both unverified. (1) crates/buzz-relay/src/audio/handler.rs:244 (HIGH, ban gate absent from huddle-audio auth) — 1,430 lines, of which only lines ~150-300 and 1153-1215 were read, with the surrounding join/room logic in join.rs (3,036 lines) never</p>
+<p><em>Follow-up:</em> Before patching, read audio/handler.rs and audio/join.rs in full, req.rs lines 1338-2084 in full, and crates/buzz-pubsub/src/lib.rs in full. For the NIP-OA fix, first enumerate every call site of buzz_sdk::nip_oa::verify_auth_tag across the</p>
+<p><strong>[low]</strong> The shell/YAML surface got one breadth pass focused narrowly on GitHub Actions injection, leaving the release and update trust chain unaudited. scripts/ has 52 entries; the supply-chain pass read about five. Never opened: desktop_release.py, prepare-desktop-release.sh, verify-desktop-release-*.sh (read), publish-mobile-release-candidate.s</p>
+<p><em>Follow-up:</em> Read desktop/src-tauri/src/commands/updater.rs and the <code>plugins.updater</code> block of tauri.conf.json (endpoint scheme, pubkey present, dangerousInsecureTransportProtocol), then bundle-sidecars.sh, prepare-desktop-release.sh and desktop_release</p>
+<p><strong>[low]</strong> No lens swept for secret material reaching logs, crash reports, or telemetry. crates/buzz-relay/src/telemetry.rs and metrics.rs were never opened by any relay pass; desktop/src-tauri/src/commands/agent_logs.rs and the agent_discovery install_report family were never read — notably install_report_redaction_tests.rs is 480 lines, which mean</p>
+<p><em>Follow-up:</em> Targeted sweep: read desktop/src-tauri/src/commands/agent_discovery/install_report.rs and install_capture.rs against their redaction tests, read crates/buzz-relay/src/telemetry.rs, and grep the whole workspace for <code>Debug</code> derives on config/</p>
+<p><strong>[low]</strong> desktop/src/testing/e2eBridge.ts is 12,213 lines and was never read; the desktop-rest auditor only confirmed it is guarded by <code>import.meta.env.DEV</code>/<code>MODE==='e2e'</code> plus a <code>window.__BUZZ_E2E__</code> flag. Nobody checked the Vite build config to confirm the module is actually tree-shaken out of production bundles, nor enumerated what the bridge e</p>
+<p><em>Follow-up:</em> Check desktop/vite.config.* for the <code>define</code>/<code>import.meta.env.MODE</code> handling and confirm by grepping a production build output for a distinctive e2eBridge symbol. If it survives, enumerate the bridge's exported command surface — particularl</p>
+<p><strong>[low]</strong> Nothing verified that any finding actually reproduces. Every one of the 27 confirmed findings is a static read; the audit ran no build, no test suite, and no exploit. Several findings are explicitly hedged on this — the desktop kind:40003 e-tag differential says 'I did NOT run the exploit end to end, so the relay accepts it step rests on </p>
+<p><em>Follow-up:</em> Write three throwaway reproductions before the advisory ships: (1) publish a two-e-tag kind:40003 against a local relay and confirm ingest.rs accepts it, then confirm desktop and mobile render the forged edit; (2) POST a crafted GIF (1x1 lo</p>
+<hr />
+<h2 id="what-was-never-in-scope">What was never in scope</h2>
+<p>531 of 3,435 tracked files, deliberately: <code>desktop/tests</code> (149) and <code>mobile/test</code>
+(97), which were read by the critics as evidence of the project's own threat model
+but not audited for vulnerabilities; <code>desktop/src-tauri</code> non-source (74: icons,
+resources); <code>benchmarks/</code> (40); <code>docs/</code> (41); <code>examples/</code> (10); assets (15);
+agent-config files.</p>
+<p>Additionally, and not by design: <strong>no Kotlin or Swift auditor was ever assigned.</strong>
+~2,100 lines of native mobile code were never opened by any pass. <strong>No secret
+scanning ran</strong> anywhere — there is no gitleaks/trufflehog step in this audit or in
+the project's CI. <strong>No fuzzing exists or was run</strong>: there is no <code>fuzz/</code> directory
+or <code>cargo-fuzz</code> target in the workspace. The project's own adversarial conformance
+suites (<code>crates/buzz-test-client/tests/</code>, including 23 <code>#[ignore]</code>d cases) were
+never run or read. 2,161 lines of formal specification in <code>docs/formal/</code> — the
+project's strongest statement of its own security properties — were never opened.</p>
+<hr />
+<h2 id="cost-caps-and-what-they-cut">Cost, caps, and what they cut</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agents run</td>
+<td>44 sweep + 39 verification + 6 canary + 1 backtest + 2 planting = <strong>92</strong></td>
+</tr>
+<tr>
+<td>Agent errors</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Subagent tokens</td>
+<td>~10.1M across the workflows</td>
+</tr>
+<tr>
+<td>Hard cap</td>
+<td>800,000 output tokens — <strong>not reached</strong></td>
+</tr>
+<tr>
+<td>What the caps cut</td>
+<td>Verification capacity of 48 findings meant <strong>137 findings were never verified</strong>. This was a triage decision, not a budget stop.</td>
+</tr>
+<tr>
+<td>What failure cut</td>
+<td><strong>Gate B</strong>: 0 of 27 findings received cross-model verification.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="if-you-act-on-one-thing">If you act on one thing</h2>
+<p>Fix the <strong>F014/F015 parser differential</strong> — desktop and mobile both resolve an
+edit's target by the last <code>e</code> tag while the relay uses a different rule — because
+it is the one confirmed finding where two independent implementations and a server
+disagree about the meaning of the same event, and disagreement about <em>which event
+an edit applies to</em> is an authorship-integrity problem rather than a crash.</p>
+<p>Then look at <code>desktop/src-tauri/src/managed_agents/</code>. Not because we found
+something there — <strong>because we found nothing there, and we now know that means
+nothing.</strong> It is ~37,000 lines, it holds the repository's <code>unsafe</code> code, it has no
+lint coverage, no semgrep rules that apply, and no agent read it properly. It is
+the largest unlit area in this report.</p>
+<hr>
+<p class="backlink"><a href="../">← buzz-tutorial</a> ·
+<a href="buzz-audit-advisory.md">markdown source</a> ·
+<a href="graph/graph.html">knowledge graph</a></p>
+</div>
+</body>
+</html>
