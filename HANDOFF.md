@@ -234,9 +234,30 @@ Then, unblocked work in rough priority:
   recommendation. Desktop and mobile both resolve a `kind:40003` edit's target by
   the *last* `e` tag while the relay uses the *first*; fixing one platform alone
   leaves the differential. Details in `audit/advisory.html`.
-- **A second audit for indirect prompt injection / agent confused-deputy.** No
-  lens in the first audit looked for it, and it is the vulnerability class most
-  specific to a Nostr client that runs managed coding agents.
+- ~~**A second audit for indirect prompt injection / agent confused-deputy.**~~
+  **Partly done 1 Aug 2026** — `audit/managed-agents-deep-dive.md`, 11 findings
+  over `managed_agents/` (the ~37,000 Rust lines with no lint coverage that the
+  main run never read). Two lenses: prompt injection/confused deputy, and
+  unsafe/process control. The load-bearing lines of the three top findings were
+  re-read by hand, not taken on the reporting agents' word.
+
+  **Headline: on Windows the entire orphan/reap subsystem is no-ops.**
+  `process_is_running` and `process_has_buzz_marker` are hardcoded `false` on
+  non-unix (`runtime/process.rs:63-66`, `:202-205`), so every sweep is inert and
+  `taskkill_tree` can never run on the after-restart path its own doc comment
+  says it exists for. `runtime/stop.rs:98,107` then discards the PID it failed to
+  kill. Orphans hold `BUZZ_PRIVATE_KEY` — the agent nsec — and a live relay
+  connection. The Job Object covers the normal case, which is what keeps this off
+  Critical. Also: the persona catalog fetches every pubkey's shared persona with
+  no `authors` filter and passes `respond_to: "anyone"` through verbatim, so one
+  click can mint an agent that any npub may command.
+
+  **Still open in this lens:** whether team-pack import
+  (`team_snapshot.rs:593-613`, which carries `definition_respond_to`) has an
+  untrusted-network source — if it does, the persona finding loses its user-click
+  bound. Plus ~20 unread `unsafe` blocks in `runtime/instance_reaper.rs` and
+  `runtime/sweep.rs`. **Not yet rendered to HTML** — needs a `DOCS` row in
+  `audit/data/md2html.py`.
 - **Fold the two headline findings back into the older docs.** Neither
   `what-is-nostr.html` nor `how-buzz-works.html` mentions the media download
   default or the absent RLS backstop, and both discuss the areas concerned.

@@ -11,6 +11,7 @@ full. Details in the advisory.
 | File | What |
 |---|---|
 | [`buzz-audit-advisory.md`](buzz-audit-advisory.md) | **The deliverable.** Confirmed findings ranked by value per unit of remediation risk, plus refuted/triaged lists, coverage gaps, and calibration numbers. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/advisory.html) |
+| [`managed-agents-deep-dive.md`](managed-agents-deep-dive.md) | **Follow-up audit, 1 Aug 2026.** Covers `desktop/src-tauri/src/managed_agents/` — 77 Rust files the main run never read, excluded from the cargo workspace so clippy has never analysed them. 11 findings (2 high, 4 medium, 5 low) across a prompt-injection/confused-deputy lens and an unsafe/process-control lens. Reads ~45% of the directory's `unsafe` blocks |
 | [`AUDIT-PLAN.md`](AUDIT-PLAN.md) | Original spec (historical — the run deviated where Phase 0 said to) |
 | [`audit-phase0-log.md`](audit-phase0-log.md) | Phase 0 record: tooling, graph build, slice list, two mid-run corrections. Also as a [live web page](https://az9713.github.io/buzz-tutorial/audit/phase0-log.html) |
 | [`AUDIT-HANDOFF.md`](AUDIT-HANDOFF.md) | Session handoff: headline results, what failed, harness notes |
