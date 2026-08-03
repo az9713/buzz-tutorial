@@ -14,6 +14,14 @@ this file deliberately does not name — it is a public repo):
 Last session: 1 August 2026 (third session that day — the `managed_agents`
 security deep dive).
 
+**2 August 2026 session was a detour, not project work** — Simon asked
+questions about running Buzz Desktop as an end user (Windows/Hermit build
+questions, then the Builderlab hosted-communities layer: relay discovery,
+archive/unarchive/transfer, no in-app delete, feedback routing). No commits,
+nothing in this repo touched. Durable facts from that research are saved to
+memory (`buzz-hosted-communities`) rather than here, since none of it is
+project deliverable state. **Next task below is unchanged from 1 Aug.**
+
 ## Current state (as of latest push)
 
 Commit `da1c20f` on `main`; local and remote hashes match; working tree clean.
